@@ -3,11 +3,13 @@
 namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
+use Algoritma\ShopwareTestUtils\Traits\FunctionalAssertions;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
 
 abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
 {
     use SalesChannelFunctionalTestBehaviour;
+    use FunctionalAssertions;
 
     /**
      * @param array<string, mixed> $options
