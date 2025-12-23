@@ -82,25 +82,24 @@ class DatabaseHelpersTest extends TestCase
             ->willReturn($columns);
 
         // We expect a sequence of calls for snapshotting and then restoring
-        // Snapshot: CREATE temp, INSERT INTO temp
+        // Snapshot: CREATE temp AS SELECT ...
         // Restore: SET FK 0, TRUNCATE, INSERT INTO original, SET FK 1
 
-        $matcher = $this->exactly(6);
+        $matcher = $this->exactly(5);
         $this->connection->expects($matcher)
             ->method('executeStatement')
             ->willReturnCallback(function (string $sql) use ($matcher, $table): int {
                 match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertStringStartsWith('CREATE TABLE `temp_snapshot_', $sql),
-                    2 => $this->assertTrue(
-                        str_contains($sql, 'INSERT INTO `temp_snapshot_')
-                        && str_contains($sql, "(`id`, `name`) SELECT `id`, `name` FROM `{$table}`")
+                    1 => $this->assertTrue(
+                        str_starts_with($sql, 'CREATE TABLE `temp_snapshot_')
+                        && str_contains($sql, "AS SELECT `id`, `name` FROM `{$table}`")
                     ),
-                    3 => $this->assertEquals('SET FOREIGN_KEY_CHECKS = 0', $sql),
-                    4 => $this->assertEquals("TRUNCATE TABLE `{$table}`", $sql),
-                    5 => $this->assertTrue(
+                    2 => $this->assertEquals('SET FOREIGN_KEY_CHECKS = 0', $sql),
+                    3 => $this->assertEquals("TRUNCATE TABLE `{$table}`", $sql),
+                    4 => $this->assertTrue(
                         str_contains($sql, "INSERT INTO `{$table}` (`id`, `name`) SELECT `id`, `name` FROM `temp_snapshot_")
                     ),
-                    6 => $this->assertEquals('SET FOREIGN_KEY_CHECKS = 1', $sql),
+                    5 => $this->assertEquals('SET FOREIGN_KEY_CHECKS = 1', $sql),
                     default => $this->fail('Unexpected invocation count: ' . $matcher->numberOfInvocations()),
                 };
 
@@ -129,7 +128,7 @@ class DatabaseHelpersTest extends TestCase
         $this->connection->expects($this->atLeastOnce())
             ->method('executeStatement')
             ->with($this->callback(function ($sql): bool {
-                if (str_starts_with($sql, 'INSERT INTO')) {
+                if (str_starts_with($sql, 'CREATE TABLE')) {
                     // Verify that the generated SQL only contains the columns we returned
                     // and specifically does NOT contain a hypothetical generated column if we were to assume one
                     return str_contains($sql, '`id`, `price`, `quantity`')
@@ -162,16 +161,14 @@ class DatabaseHelpersTest extends TestCase
         $this->connection->method('fetchOne')
             ->willReturn('test_db');
 
-        // Expect creation and population of temp tables for each table
-        $matcher = $this->exactly(4); // 2 tables * 2 statements (CREATE + INSERT)
+        // Expect creation of temp tables for each table (1 statement per table)
+        $matcher = $this->exactly(2);
         $this->connection->expects($matcher)
             ->method('executeStatement')
             ->willReturnCallback(function (string $sql) use ($matcher): int {
                 match ($matcher->numberOfInvocations()) {
                     1 => $this->assertStringStartsWith('CREATE TABLE `ts_', $sql),
-                    2 => $this->assertStringContainsString('INSERT INTO `ts_', $sql),
-                    3 => $this->assertStringStartsWith('CREATE TABLE `ts_', $sql),
-                    4 => $this->assertStringContainsString('INSERT INTO `ts_', $sql),
+                    2 => $this->assertStringStartsWith('CREATE TABLE `ts_', $sql),
                     default => $this->fail('Unexpected invocation count: ' . $matcher->numberOfInvocations()),
                 };
 

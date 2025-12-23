@@ -43,8 +43,7 @@ trait DatabaseHelpers
         $columns = $this->getInsertableColumns($table);
         $columnList = implode('`, `', $columns);
 
-        $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
-        $connection->executeStatement("INSERT INTO `{$tempTable}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$table}`");
+        $connection->executeStatement("CREATE TABLE `{$tempTable}` AS SELECT `{$columnList}` FROM `{$table}`");
 
         $this->databaseSnapshots[$snapshotId] = [
             'table' => $table,
@@ -120,8 +119,7 @@ trait DatabaseHelpers
             $columns = $this->getInsertableColumns((string) $table);
             $columnList = implode('`, `', $columns);
 
-            $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
-            $connection->executeStatement("INSERT INTO `{$tempTable}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$table}`");
+            $connection->executeStatement("CREATE TABLE `{$tempTable}` AS SELECT `{$columnList}` FROM `{$table}`");
 
             $this->databaseSnapshots[$snapshotId][] = [
                 'table' => $table,
