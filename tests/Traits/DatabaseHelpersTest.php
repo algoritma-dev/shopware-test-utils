@@ -83,9 +83,9 @@ class DatabaseHelpersTest extends TestCase
 
         // We expect a sequence of calls for snapshotting and then restoring
         // Snapshot: CREATE temp AS SELECT ...
-        // Restore: SET FK 0, TRUNCATE, INSERT INTO original, SET FK 1
+        // Restore: SET FK 0, TRUNCATE, INSERT INTO original, SET FK 1, DROP temp
 
-        $matcher = $this->exactly(5);
+        $matcher = $this->exactly(6);
         $this->connection->expects($matcher)
             ->method('executeStatement')
             ->willReturnCallback(function (string $sql) use ($matcher, $table): int {
@@ -100,6 +100,7 @@ class DatabaseHelpersTest extends TestCase
                         str_contains($sql, "INSERT INTO `{$table}` (`id`, `name`) SELECT `id`, `name` FROM `temp_snapshot_")
                     ),
                     5 => $this->assertEquals('SET FOREIGN_KEY_CHECKS = 1', $sql),
+                    6 => $this->assertTrue(str_starts_with($sql, 'DROP TABLE IF EXISTS `temp_snapshot_')),
                     default => $this->fail('Unexpected invocation count: ' . $matcher->numberOfInvocations()),
                 };
 

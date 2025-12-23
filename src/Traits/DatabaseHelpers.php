@@ -73,6 +73,9 @@ trait DatabaseHelpers
         $connection->executeStatement("TRUNCATE TABLE `{$snapshot['table']}`");
         $connection->executeStatement("INSERT INTO `{$snapshot['table']}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$snapshot['tempTable']}`");
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+
+        $connection->executeStatement("DROP TABLE IF EXISTS `{$snapshot['tempTable']}`");
+        unset($this->databaseSnapshots[$snapshotId]);
     }
 
     /**
@@ -149,9 +152,11 @@ trait DatabaseHelpers
 
             $connection->executeStatement("TRUNCATE TABLE `{$snapshot['table']}`");
             $connection->executeStatement("INSERT INTO `{$snapshot['table']}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$snapshot['tempTable']}`");
+            $connection->executeStatement("DROP TABLE IF EXISTS `{$snapshot['tempTable']}`");
         }
 
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+        unset($this->databaseSnapshots[$snapshotId]);
     }
 
     /**
