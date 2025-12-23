@@ -135,6 +135,39 @@ trait DatabaseHelpers
     }
 
     /**
+     * Creates a snapshot of specific tables.
+     *
+     * @param array<string> $tables
+     */
+    protected function snapshotSpecificTables(array $tables): string
+    {
+        $connection = $this->getConnection();
+        $snapshotId = uniqid('', true);
+
+        foreach ($tables as $table) {
+            $tempTable = "ts_{$snapshotId}_{$table}";
+
+            // Handle extremely long table names by hashing if necessary
+            if (strlen($tempTable) > 64) {
+                $tempTable = "ts_{$snapshotId}_" . md5((string) $table);
+            }
+
+            $columns = $this->getInsertableColumns((string) $table);
+            $columnList = implode('`, `', $columns);
+
+            $connection->executeStatement("CREATE TABLE `{$tempTable}` AS SELECT `{$columnList}` FROM `{$table}`");
+
+            $this->databaseSnapshots[$snapshotId][] = [
+                'table' => $table,
+                'tempTable' => $tempTable,
+                'columns' => $columns,
+            ];
+        }
+
+        return $snapshotId;
+    }
+
+    /**
      * Restores full database from snapshot.
      */
     protected function restoreDatabaseSnapshot(string $snapshotId): void

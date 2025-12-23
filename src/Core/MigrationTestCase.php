@@ -19,17 +19,43 @@ abstract class MigrationTestCase extends TestCase
     use ShopwareAssertions;
     use DatabaseHelpers;
 
+    /**
+     * @var array<string> List of tables to snapshot. If empty, full database snapshot is taken.
+     *                    Optimization: Specify only the tables affected by the migration to speed up tests.
+     */
+    protected array $tablesToSnapshot = [];
+
+    /**
+     * @var bool If true, uses transactions for rollback instead of snapshots.
+     *           Optimization: Use this for DML migrations (data changes only).
+     *           WARNING: Do not use for DDL (schema changes) as they cause implicit commit in MySQL.
+     */
+    protected bool $useTransactionRollback = false;
+
     private ?string $dbSnapshotId = null;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->dbSnapshotId = $this->snapshotDatabase();
+
+        if ($this->useTransactionRollback) {
+            $this->beginTransaction();
+
+            return;
+        }
+
+        if ($this->tablesToSnapshot !== []) {
+            $this->dbSnapshotId = $this->snapshotSpecificTables($this->tablesToSnapshot);
+        } else {
+            $this->dbSnapshotId = $this->snapshotDatabase();
+        }
     }
 
     protected function tearDown(): void
     {
-        if ($this->dbSnapshotId) {
+        if ($this->useTransactionRollback) {
+            $this->rollbackTransaction();
+        } elseif ($this->dbSnapshotId) {
             $this->restoreDatabaseSnapshot($this->dbSnapshotId);
         }
         parent::tearDown();

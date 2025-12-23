@@ -1,14 +1,18 @@
 <?php
 
-namespace Shopware\Commercial\Tests\Fixture\Data;
+namespace Algoritma\ShopwareTestUtils\Tests\Fixture\Data;
 
-use Algoritma\ShopwareTestUtils\Factory\LanguageFactory;
 use Algoritma\ShopwareTestUtils\Fixture\Data\ItalianLanguageFixture;
 use Algoritma\ShopwareTestUtils\Fixture\ReferenceRepository;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\IdSearchResult;
+use Shopware\Core\System\Language\LanguageEntity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ItalianLanguageFixtureTest extends TestCase
@@ -30,54 +34,58 @@ class ItalianLanguageFixtureTest extends TestCase
     public function testLoadAddsLanguageToReferences(): void
     {
         $localeRepoMock = $this->createMock(EntityRepository::class);
-        $contextMock = $this->createMock(Context::class);
-        $languageFactoryMock = $this->createMock(LanguageFactory::class);
-        $languageMock = $this->createMock(LanguageEntity::class);
+        $languageRepoMock = $this->createMock(EntityRepository::class);
+
+        $contextServiceMock = new class() {
+            public function getContext(): Context
+            {
+                return Context::createCLIContext();
+            }
+        };
 
         $this->containerMock
-            ->expects($this->exactly(2))
             ->method('get')
-            ->willReturnMap([
-                ['locale.repository', $localeRepoMock],
-                ['context', $contextMock],
-            ]);
+            ->willReturnCallback(fn (string $id) => match ($id) {
+                'locale.repository' => $localeRepoMock,
+                'language.repository' => $languageRepoMock,
+                'context' => $contextServiceMock,
+                default => null,
+            });
+
+        $localeIdMock = $this->createMock(IdSearchResult::class);
+        $localeIdMock->method('firstId')->willReturn('locale-id');
 
         $localeRepoMock->expects($this->once())
             ->method('searchIds')
             ->with($this->callback(function (Criteria $criteria): bool {
                 $filters = $criteria->getFilters();
 
-                return count($filters) === 1 && $filters[0] instanceof EqualsFilter && $filters[0]->getField() === 'code' && $filters[0]->getValue() === 'it-IT';
-            }), $contextMock)
-            ->willReturn(new class() {
-                public function firstId(): string
-                {
-                    return 'locale-id';
-                }
-            });
+                return count($filters) === 1
+                    && $filters[0] instanceof EqualsFilter
+                    && $filters[0]->getField() === 'code'
+                    && $filters[0]->getValue() === 'it-IT';
+            }))
+            ->willReturn($localeIdMock);
 
-        $languageFactoryMock
-            ->expects($this->once())
-            ->method('withName')
-            ->with('Italiano');
-        $languageFactoryMock
-            ->expects($this->once())
-            ->method('withLocale')
-            ->with('locale-id');
-        $languageFactoryMock
-            ->expects($this->once())
+        $languageRepoMock->expects($this->once())
             ->method('create')
-            ->willReturn($languageMock);
+            ->with(
+                $this->callback(fn (array $data): bool => isset($data[0]['name'], $data[0]['localeId']) && $data[0]['name'] === 'Italiano' && $data[0]['localeId'] === 'locale-id')
+            );
 
-        $this->containerMock
-            ->expects($this->once())
-            ->method('get')
-            ->with(LanguageFactory::class)
-            ->willReturn($languageFactoryMock);
+        $languageRepoMock->method('search')->willReturnCallback(function (): MockObject {
+            $result = $this->createMock(EntitySearchResult::class);
+            $entity = new LanguageEntity();
+            $entity->setId('new-lang-id');
+            $entity->setName('Italiano');
+            $result->method('first')->willReturn($entity);
+
+            return $result;
+        });
 
         $this->fixture->load($this->references);
 
         $this->assertTrue($this->references->has('italian-language'));
-        $this->assertSame($languageMock, $this->references->get('italian-language'));
+        $this->assertInstanceOf(LanguageEntity::class, $this->references->get('italian-language'));
     }
 }
