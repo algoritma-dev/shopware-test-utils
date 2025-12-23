@@ -3,17 +3,20 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use PHPUnit\Framework\Assert;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 
 trait CacheHelpers
 {
+    use KernelTestBehaviour;
+    
     /**
      * Clears all cache pools.
      */
     protected function clearCache(): void
     {
-        $cacheDirectory = $this->getContainer()->getParameter('kernel.cache_dir');
+        $cacheDirectory = self::getContainer()->getParameter('kernel.cache_dir');
 
         if (is_dir($cacheDirectory)) {
             $this->recursiveRemoveDirectory($cacheDirectory);
@@ -25,7 +28,7 @@ trait CacheHelpers
      */
     protected function clearSpecificCache(string $poolName): void
     {
-        $pool = $this->getContainer()->get($poolName);
+        $pool = self::getContainer()->get($poolName);
 
         if ($pool instanceof AdapterInterface) {
             $pool->clear();
@@ -37,8 +40,8 @@ trait CacheHelpers
      */
     protected function warmUpCache(): void
     {
-        $warmer = $this->getContainer()->get('cache_warmer');
-        $warmer->warmUp($this->getContainer()->getParameter('kernel.cache_dir'));
+        $warmer = self::getContainer()->get('cache_warmer');
+        $warmer->warmUp(self::getContainer()->getParameter('kernel.cache_dir'));
     }
 
     /**
@@ -46,7 +49,7 @@ trait CacheHelpers
      */
     protected function assertCached(string $key, string $poolName = 'cache.app'): void
     {
-        $pool = $this->getContainer()->get($poolName);
+        $pool = self::getContainer()->get($poolName);
 
         if (! $pool instanceof AdapterInterface) {
             Assert::fail("Cache pool {$poolName} is not an instance of AdapterInterface");
@@ -61,7 +64,7 @@ trait CacheHelpers
      */
     protected function assertNotCached(string $key, string $poolName = 'cache.app'): void
     {
-        $pool = $this->getContainer()->get($poolName);
+        $pool = self::getContainer()->get($poolName);
 
         if (! $pool instanceof AdapterInterface) {
             Assert::fail("Cache pool {$poolName} is not an instance of AdapterInterface");
@@ -76,7 +79,7 @@ trait CacheHelpers
      */
     protected function getCachedValue(string $key, string $poolName = 'cache.app')
     {
-        $pool = $this->getContainer()->get($poolName);
+        $pool = self::getContainer()->get($poolName);
 
         if (! $pool instanceof AdapterInterface) {
             throw new \RuntimeException("Cache pool {$poolName} is not an instance of AdapterInterface");
@@ -92,7 +95,7 @@ trait CacheHelpers
      */
     protected function setCachedValue(string $key, $value, int $ttl = 3600, string $poolName = 'cache.app'): void
     {
-        $pool = $this->getContainer()->get($poolName);
+        $pool = self::getContainer()->get($poolName);
 
         if (! $pool instanceof AdapterInterface) {
             throw new \RuntimeException("Cache pool {$poolName} is not an instance of AdapterInterface");
@@ -109,7 +112,7 @@ trait CacheHelpers
      */
     protected function invalidateCacheByTag(string $tag, string $poolName = 'cache.app'): void
     {
-        $pool = $this->getContainer()->get($poolName);
+        $pool = self::getContainer()->get($poolName);
 
         if ($pool instanceof TagAwareAdapterInterface) {
             $pool->invalidateTags([$tag]);
