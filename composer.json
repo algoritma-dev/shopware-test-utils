@@ -10,8 +10,7 @@
     },
     "require": {
         "php": ">=8.2",
-        "shopware/core": "^6.7",
-        "store.shopware.com/swagcommercial": "^7.5"
+        "shopware/core": "^6.7"
     },
     "license": "MIT",
     "autoload": {
