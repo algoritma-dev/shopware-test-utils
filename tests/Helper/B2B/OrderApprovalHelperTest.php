@@ -25,12 +25,12 @@ class OrderApprovalHelperTest extends TestCase
 
     public function testRequestPendingOrder(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $route = $this->createMock(PendingOrderRequestedRoute::class);
-        $response = $this->createMock(PendingOrderRequestedResponse::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $route = $this->createStub(PendingOrderRequestedRoute::class);
+        $response = $this->createStub(PendingOrderRequestedResponse::class);
         $pendingOrder = new PendingOrderEntity();
-        $context = $this->createMock(SalesChannelContext::class);
-        $customer = $this->createMock(CustomerEntity::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $customer = $this->createStub(CustomerEntity::class);
 
         $container->method('get')->willReturn($route);
         $route->method('request')->willReturn($response);

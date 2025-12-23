@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
 use Algoritma\ShopwareTestUtils\Traits\QueueHelpers;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Messenger\TraceableMessageBus;
@@ -12,14 +13,14 @@ class QueueHelpersTest extends TestCase
 {
     use QueueHelpers;
 
-    private MockObject $container;
+    private Stub $container;
 
-    private MockObject $bus;
+    private Stub $bus;
 
     protected function setUp(): void
     {
-        $this->container = $this->createMock(ContainerInterface::class);
-        $this->bus = $this->createMock(TraceableMessageBus::class);
+        $this->container = $this->createStub(ContainerInterface::class);
+        $this->bus = $this->createStub(TraceableMessageBus::class);
 
         $this->container->method('get')->willReturn($this->bus);
     }

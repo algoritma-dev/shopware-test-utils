@@ -20,9 +20,9 @@ class CustomerFeatureToggleHelperTest extends TestCase
 
     public function testEnableFeature(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $features = new CustomerSpecificFeaturesEntity();
         $features->setId('features-id');
 
@@ -38,9 +38,9 @@ class CustomerFeatureToggleHelperTest extends TestCase
 
     public function testIsFeatureEnabled(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $features = new CustomerSpecificFeaturesEntity();
         $features->setId('features-id');
         $features->setFeatures(['QUICK_ORDER' => true]);

@@ -14,9 +14,9 @@ class MediaFactoryTest extends TestCase
 {
     public function testCreateMedia(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $media = new MediaEntity();
 
         $container->method('get')->willReturn($repository);
@@ -31,7 +31,7 @@ class MediaFactoryTest extends TestCase
 
     public function testWithTitle(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new MediaFactory($container);
 
         $factory->withTitle('Test Media');

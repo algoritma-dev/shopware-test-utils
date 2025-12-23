@@ -13,6 +13,7 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
@@ -32,17 +33,17 @@ class ShopwareAssertionsTest extends TestCase
     use ShopwareAssertions;
     use KernelTestBehaviour;
 
-    private static MockObject $container;
+    private static Stub $container;
 
     protected function setUp(): void
     {
-        self::$container = $this->createMock(ContainerInterface::class);
+        self::$container = $this->createStub(ContainerInterface::class);
     }
 
     public function testAssertEntityExists(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
 
         self::$container->method('get')->willReturn($repository);
         $repository->method('search')->willReturn($searchResult);
@@ -53,8 +54,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertCustomerHasRole(): void
     {
-        $customer = $this->createMock(CustomerEntity::class);
-        $group = $this->createMock(CustomerGroupEntity::class);
+        $customer = $this->createStub(CustomerEntity::class);
+        $group = $this->createStub(CustomerGroupEntity::class);
 
         $customer->method('getGroup')->willReturn($group);
         $group->method('getName')->willReturn('admin');
@@ -64,8 +65,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertCartContainsProduct(): void
     {
-        $cart = $this->createMock(Cart::class);
-        $lineItem = $this->createMock(LineItem::class);
+        $cart = $this->createStub(Cart::class);
+        $lineItem = $this->createStub(LineItem::class);
         $collection = new LineItemCollection([$lineItem]);
 
         $cart->method('getLineItems')->willReturn($collection);
@@ -76,16 +77,16 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertDatabaseHas(): void
     {
-        $connection = $this->createMock(Connection::class);
-        $qb = $this->createMock(QueryBuilder::class);
-        $result = $this->createMock(Result::class);
+        $connection = $this->createStub(Connection::class);
+        $qb = $this->createStub(QueryBuilder::class);
+        $result = $this->createStub(Result::class);
 
         self::$container->method('get')->willReturn($connection);
         $connection->method('createQueryBuilder')->willReturn($qb);
         $qb->method('select')->willReturnSelf();
         $qb->method('from')->willReturnSelf();
         $qb->method('andWhere')->willReturnSelf();
-        $qb->method('expr')->willReturn($this->createMock(ExpressionBuilder::class));
+        $qb->method('expr')->willReturn($this->createStub(ExpressionBuilder::class));
         $qb->method('executeQuery')->willReturn($result);
         $result->method('fetchOne')->willReturn(1);
 
@@ -94,8 +95,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertTableExists(): void
     {
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(AbstractSchemaManager::class);
+        $connection = $this->createStub(Connection::class);
+        $schemaManager = $this->createStub(AbstractSchemaManager::class);
 
         self::$container->method('get')->willReturn($connection);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
@@ -106,8 +107,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertColumnExists(): void
     {
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(AbstractSchemaManager::class);
+        $connection = $this->createStub(Connection::class);
+        $schemaManager = $this->createStub(AbstractSchemaManager::class);
 
         self::$container->method('get')->willReturn($connection);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
@@ -118,8 +119,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertIndexExists(): void
     {
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(AbstractSchemaManager::class);
+        $connection = $this->createStub(Connection::class);
+        $schemaManager = $this->createStub(AbstractSchemaManager::class);
 
         self::$container->method('get')->willReturn($connection);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
@@ -130,9 +131,9 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertForeignKeyExists(): void
     {
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(AbstractSchemaManager::class);
-        $fk = $this->createMock(ForeignKeyConstraint::class);
+        $connection = $this->createStub(Connection::class);
+        $schemaManager = $this->createStub(AbstractSchemaManager::class);
+        $fk = $this->createStub(ForeignKeyConstraint::class);
 
         self::$container->method('get')->willReturn($connection);
         $connection->method('createSchemaManager')->willReturn($schemaManager);
@@ -144,7 +145,7 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertRowCount(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         self::$container->method('get')->willReturn($connection);
         $connection->method('fetchOne')->willReturn(5);
 
@@ -153,8 +154,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertEntityNotExists(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
 
         self::$container->method('get')->willReturn($repository);
         $repository->method('search')->willReturn($searchResult);
@@ -165,8 +166,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertEntityCount(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
 
         self::$container->method('get')->willReturn($repository);
         $repository->method('search')->willReturn($searchResult);
@@ -177,8 +178,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertCartTotal(): void
     {
-        $cart = $this->createMock(Cart::class);
-        $price = $this->createMock(CartPrice::class);
+        $cart = $this->createStub(Cart::class);
+        $price = $this->createStub(CartPrice::class);
 
         $cart->method('getPrice')->willReturn($price);
         $price->method('getTotalPrice')->willReturn(100.0);
@@ -188,7 +189,7 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertProductInStock(): void
     {
-        $product = $this->createMock(ProductEntity::class);
+        $product = $this->createStub(ProductEntity::class);
         $product->method('getStock')->willReturn(10);
 
         $this->assertProductInStock($product, 5);
@@ -196,7 +197,7 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertProductActive(): void
     {
-        $product = $this->createMock(ProductEntity::class);
+        $product = $this->createStub(ProductEntity::class);
         $product->method('getActive')->willReturn(true);
 
         $this->assertProductActive($product);
@@ -204,8 +205,8 @@ class ShopwareAssertionsTest extends TestCase
 
     public function testAssertCustomerLoggedIn(): void
     {
-        $context = $this->createMock(SalesChannelContext::class);
-        $customer = $this->createMock(CustomerEntity::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $customer = $this->createStub(CustomerEntity::class);
 
         $context->method('getCustomer')->willReturn($customer);
 

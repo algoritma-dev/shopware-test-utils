@@ -23,13 +23,13 @@ class OrganizationContextHelperTest extends TestCase
 
     public function testCreateForOrganization(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $organization = new OrganizationEntity();
-        $scFactory = $this->createMock(SalesChannelContextFactory::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $connection = $this->createMock(Connection::class);
+        $scFactory = $this->createStub(SalesChannelContextFactory::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $connection = $this->createStub(Connection::class);
 
         $organization->id = 'org-id';
         $organization->setUniqueIdentifier('org-id');
@@ -54,9 +54,9 @@ class OrganizationContextHelperTest extends TestCase
 
     public function testGetCustomerOrganizations(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $organization = new OrganizationEntity();
 
         $container->method('get')->willReturn($repository);

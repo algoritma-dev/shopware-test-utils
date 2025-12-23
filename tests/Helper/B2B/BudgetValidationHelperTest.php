@@ -22,12 +22,12 @@ class BudgetValidationHelperTest extends TestCase
 
     public function testExceedsBudget(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
-        $cart = $this->createMock(Cart::class);
-        $price = $this->createMock(CartPrice::class);
+        $cart = $this->createStub(Cart::class);
+        $price = $this->createStub(CartPrice::class);
 
         $budget->setAmount(100.0);
         $budget->setUsedAmount(50.0);
@@ -47,9 +47,9 @@ class BudgetValidationHelperTest extends TestCase
 
     public function testSimulateBudgetUsage(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
 
         $budget->setUsedAmount(50.0);

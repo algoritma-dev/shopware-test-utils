@@ -13,9 +13,9 @@ class CartFactoryTest extends TestCase
 {
     public function testCreateCart(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $cartService = $this->createMock(CartService::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $cartService = $this->createStub(CartService::class);
         $cart = new Cart('test-token', 'test-token');
 
         $container->method('get')->willReturn($cartService);
@@ -29,9 +29,9 @@ class CartFactoryTest extends TestCase
 
     public function testWithProduct(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $cartService = $this->createMock(CartService::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $cartService = $this->createStub(CartService::class);
         $cart = new Cart('test-token', 'test-token');
 
         $container->method('get')->willReturn($cartService);

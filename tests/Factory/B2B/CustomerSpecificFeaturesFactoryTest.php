@@ -20,9 +20,9 @@ class CustomerSpecificFeaturesFactoryTest extends TestCase
 
     public function testCreateFeatures(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $features = new CustomerSpecificFeaturesEntity();
 
         $container->method('get')->willReturn($repository);

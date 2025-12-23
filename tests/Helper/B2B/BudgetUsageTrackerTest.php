@@ -20,9 +20,9 @@ class BudgetUsageTrackerTest extends TestCase
 
     public function testTrackUsage(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
 
         $budget->setUsedAmount(50.0);
@@ -41,9 +41,9 @@ class BudgetUsageTrackerTest extends TestCase
 
     public function testFillToPercentage(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
 
         $budget->setAmount(100.0);

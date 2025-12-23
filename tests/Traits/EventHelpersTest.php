@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
 use Algoritma\ShopwareTestUtils\Traits\EventHelpers;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -13,13 +14,13 @@ class EventHelpersTest extends TestCase
 {
     use EventHelpers;
 
-    private MockObject $container;
+    private Stub $container;
 
     private MockObject $dispatcher;
 
     protected function setUp(): void
     {
-        $this->container = $this->createMock(ContainerInterface::class);
+        $this->container = $this->createStub(ContainerInterface::class);
         $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
 
         $this->container->method('get')->willReturn($this->dispatcher);

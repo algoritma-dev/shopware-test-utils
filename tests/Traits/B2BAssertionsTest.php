@@ -29,7 +29,7 @@ class B2BAssertionsTest extends TestCase
         if (!class_exists(BudgetEntity::class)) {
             $this->markTestSkipped('Shopware Commercial B2B extension is not installed.');
         }
-        $this->container = $this->createMock(ContainerInterface::class);
+        $this->container = $this->createStub(ContainerInterface::class);
     }
 
     protected function getContainer(): ContainerInterface
@@ -39,8 +39,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertQuoteInState(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
         $state = new StateMachineStateEntity();
         
@@ -56,8 +56,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertBudgetExceeded(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
         
         $budget->setAmount(100.0);
@@ -76,8 +76,8 @@ class B2BAssertionsTest extends TestCase
             $this->markTestSkipped('PermissionEntity not found');
         }
 
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $employee = new EmployeeEntity();
         $role = new RoleEntity();
 
@@ -93,8 +93,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertOrderNeedsApproval(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $pendingOrder = new PendingOrderEntity();
 
         $this->container->method('get')->willReturn($repository);
@@ -106,8 +106,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertPendingOrderCreated(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $pendingOrder = new PendingOrderEntity();
 
         $this->container->method('get')->willReturn($repository);
@@ -119,8 +119,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertPendingOrderInState(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $pendingOrder = new PendingOrderEntity();
         $state = new StateMachineStateEntity();
 
@@ -136,8 +136,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertQuoteHasComments(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         
         $this->container->method('get')->willReturn($repository);
         $repository->method('search')->willReturn($searchResult);
@@ -148,8 +148,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertBudgetNotificationTriggered(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
         
         $budget->setNotify(true);
@@ -166,8 +166,8 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertEmployeeHasRole(): void
     {
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $employee = new EmployeeEntity();
         
         $employee->setRoleId('role-id');
@@ -185,8 +185,8 @@ class B2BAssertionsTest extends TestCase
             $this->markTestSkipped('QuoteLineItemCollection not found');
         }
 
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
         $quote->setId('quote-id');
         $state = new StateMachineStateEntity();

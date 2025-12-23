@@ -13,10 +13,10 @@ class B2BContextFactoryTest extends TestCase
 {
     public function testCreateContext(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $scFactory = $this->createMock(ShopwareSalesChannelContextFactory::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $connection = $this->createMock(Connection::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $scFactory = $this->createStub(ShopwareSalesChannelContextFactory::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $connection = $this->createStub(Connection::class);
 
         $container->method('get')->willReturnMap([
             [ShopwareSalesChannelContextFactory::class, 1, $scFactory],
@@ -34,7 +34,7 @@ class B2BContextFactoryTest extends TestCase
 
     public function testWithEmployee(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new B2BContextFactory($container);
 
         $factory->withEmployee('employee-id');

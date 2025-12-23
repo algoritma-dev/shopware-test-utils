@@ -13,9 +13,9 @@ class SubscriptionIntervalFactoryTest extends TestCase
 {
     public function testCreateSubscriptionInterval(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $interval = new SubscriptionIntervalEntity();
 
         $container->method('get')->willReturn($repository);

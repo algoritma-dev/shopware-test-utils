@@ -20,9 +20,9 @@ class SharedListPermissionHelperTest extends TestCase
 
     public function testCanAccess(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $shoppingList = new ShoppingListEntity();
 
         $shoppingList->setEmployeeId('employee-id');
@@ -39,7 +39,7 @@ class SharedListPermissionHelperTest extends TestCase
 
     public function testShareWith(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
 
         $container->method('get')->willReturn($repository);

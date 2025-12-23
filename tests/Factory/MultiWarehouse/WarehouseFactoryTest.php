@@ -14,9 +14,9 @@ class WarehouseFactoryTest extends TestCase
 {
     public function testCreateWarehouse(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $warehouse = new WarehouseEntity();
 
         $container->method('get')->willReturn($repository);
@@ -31,7 +31,7 @@ class WarehouseFactoryTest extends TestCase
 
     public function testWithName(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new WarehouseFactory($container);
 
         $factory->withName('Test Warehouse');

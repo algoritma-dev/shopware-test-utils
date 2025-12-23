@@ -19,14 +19,14 @@ class QuoteRequestHelperTest extends TestCase
 {
     public function testRequestQuote(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $cart = $this->createMock(Cart::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $customer = $this->createMock(CustomerEntity::class);
-        $currency = $this->createMock(CurrencyEntity::class);
-        $price = $this->createMock(CartPrice::class);
-        $lineItem = $this->createMock(LineItem::class);
+        $cart = $this->createStub(Cart::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $customer = $this->createStub(CustomerEntity::class);
+        $currency = $this->createStub(CurrencyEntity::class);
+        $price = $this->createStub(CartPrice::class);
+        $lineItem = $this->createStub(LineItem::class);
 
         $container->method('get')->willReturn($repository);
         $repository->expects($this->once())->method('create');

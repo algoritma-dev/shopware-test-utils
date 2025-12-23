@@ -13,10 +13,10 @@ class CartHelperTest extends TestCase
 {
     public function testRemoveLineItem(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $cartService = $this->createMock(CartService::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $cartService = $this->createStub(CartService::class);
         $cart = new Cart('token', 'token');
-        $context = $this->createMock(SalesChannelContext::class);
+        $context = $this->createStub(SalesChannelContext::class);
 
         $container->method('get')->willReturn($cartService);
         $cartService->method('remove')->willReturn($cart);
@@ -29,10 +29,10 @@ class CartHelperTest extends TestCase
 
     public function testRecalculate(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $cartService = $this->createMock(CartService::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $cartService = $this->createStub(CartService::class);
         $cart = new Cart('token', 'token');
-        $context = $this->createMock(SalesChannelContext::class);
+        $context = $this->createStub(SalesChannelContext::class);
 
         $container->method('get')->willReturn($cartService);
         $cartService->method('recalculate')->willReturn($cart);

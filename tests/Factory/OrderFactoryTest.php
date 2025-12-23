@@ -16,12 +16,12 @@ class OrderFactoryTest extends TestCase
 {
     public function testCreateOrder(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
         $order = new OrderEntity();
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
 
         $container->method('get')->willReturnMap([
             ['order.repository', 1, $repository],
@@ -46,10 +46,10 @@ class OrderFactoryTest extends TestCase
 
     public function testWithCustomer(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
-        $connection = $this->createMock(Connection::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
+        $connection = $this->createStub(Connection::class);
 
         $container->method('get')->willReturnMap([
             ['salutation.repository', 1, $repository],

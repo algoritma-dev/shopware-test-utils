@@ -21,9 +21,9 @@ class BudgetRenewHelperTest extends TestCase
 
     public function testRenewBudget(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
 
         $container->method('get')->willReturn($repository);
@@ -40,9 +40,9 @@ class BudgetRenewHelperTest extends TestCase
 
     public function testShouldRenew(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
         $budget->setRenewsType(BudgetEnum::RENEWS_TYPE_MONTHLY);
         $budget->setLastRenews(new \DateTime('-2 months'));

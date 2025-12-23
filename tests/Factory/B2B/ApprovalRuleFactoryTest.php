@@ -14,9 +14,9 @@ class ApprovalRuleFactoryTest extends TestCase
 {
     public function testCreateApprovalRule(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $rule = new ApprovalRuleEntity();
 
         $container->method('get')->willReturn($repository);
@@ -31,7 +31,7 @@ class ApprovalRuleFactoryTest extends TestCase
 
     public function testWithName(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new ApprovalRuleFactory($container);
 
         $factory->withName('Test Rule');

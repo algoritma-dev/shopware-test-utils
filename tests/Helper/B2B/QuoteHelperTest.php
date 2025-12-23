@@ -21,10 +21,10 @@ class QuoteHelperTest extends TestCase
 
     public function testConvertQuoteToCart(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $converter = $this->createMock(QuoteToCartConverter::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $converter = $this->createStub(QuoteToCartConverter::class);
         $quote = new QuoteEntity();
-        $context = $this->createMock(SalesChannelContext::class);
+        $context = $this->createStub(SalesChannelContext::class);
         $cart = new Cart('token', 'token');
 
         $container->method('get')->willReturn($converter);

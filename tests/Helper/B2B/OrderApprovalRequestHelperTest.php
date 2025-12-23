@@ -28,17 +28,17 @@ class OrderApprovalRequestHelperTest extends TestCase
 
     public function testRequestApproval(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $pendingOrder = new PendingOrderEntity();
-        $cart = $this->createMock(Cart::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $customer = $this->createMock(CustomerEntity::class);
-        $currency = $this->createMock(CurrencyEntity::class);
-        $price = $this->createMock(CartPrice::class);
-        $connection = $this->createMock(Connection::class);
-        $cartService = $this->createMock(CartService::class);
+        $cart = $this->createStub(Cart::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $customer = $this->createStub(CustomerEntity::class);
+        $currency = $this->createStub(CurrencyEntity::class);
+        $price = $this->createStub(CartPrice::class);
+        $connection = $this->createStub(Connection::class);
+        $cartService = $this->createStub(CartService::class);
 
         $pendingOrder->setId('pending-id');
         $customer->setId('customer-id');

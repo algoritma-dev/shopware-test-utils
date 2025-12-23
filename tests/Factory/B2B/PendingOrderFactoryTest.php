@@ -32,12 +32,12 @@ class PendingOrderFactoryTest extends TestCase
 
     public function testCreatePendingOrder(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $pendingOrder = new PendingOrderEntity();
-        $connection = $this->createMock(Connection::class);
-        $cartService = $this->createMock(CartService::class);
+        $connection = $this->createStub(Connection::class);
+        $cartService = $this->createStub(CartService::class);
 
         $container->method('get')->willReturnMap([
             ['b2b_components_pending_order.repository', 1, $repository],
@@ -95,10 +95,10 @@ class PendingOrderFactoryTest extends TestCase
 
     public function testWithCart(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $cartService = $this->createMock(CartService::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $cartService = $this->createStub(CartService::class);
         $cart = new Cart('token', 'token');
-        $context = $this->createMock(SalesChannelContext::class);
+        $context = $this->createStub(SalesChannelContext::class);
         $currency = new CurrencyEntity();
         $price = new CartPrice(10, 10, 10, new CalculatedTaxCollection(), new TaxRuleCollection(), 'gross');
 
@@ -117,14 +117,14 @@ class PendingOrderFactoryTest extends TestCase
 
     public function testFromCart(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $pendingOrder = new PendingOrderEntity();
-        $connection = $this->createMock(Connection::class);
-        $cartService = $this->createMock(CartService::class);
+        $connection = $this->createStub(Connection::class);
+        $cartService = $this->createStub(CartService::class);
         $cart = new Cart('token', 'token');
-        $context = $this->createMock(SalesChannelContext::class);
+        $context = $this->createStub(SalesChannelContext::class);
         $customer = new CustomerEntity();
         $currency = new CurrencyEntity();
         $price = new CartPrice(10, 10, 10, new CalculatedTaxCollection(), new TaxRuleCollection(), 'gross');

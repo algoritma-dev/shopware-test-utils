@@ -14,7 +14,7 @@ class ContextFactoryTest extends TestCase
 {
     public function testCreateDefaultContext(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new ContextFactory($container);
 
         $result = $factory->createDefaultContext();
@@ -24,10 +24,10 @@ class ContextFactoryTest extends TestCase
 
     public function testCreateSalesChannelContext(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $scFactory = $this->createMock(SalesChannelContextFactory::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $connection = $this->createMock(Connection::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $scFactory = $this->createStub(SalesChannelContextFactory::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $connection = $this->createStub(Connection::class);
 
         $container->method('get')->willReturnMap([
             [SalesChannelContextFactory::class, 1, $scFactory],

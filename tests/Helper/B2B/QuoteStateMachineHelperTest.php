@@ -22,10 +22,10 @@ class QuoteStateMachineHelperTest extends TestCase
 
     public function testTransition(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $registry = $this->createMock(StateMachineRegistry::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
         $state = new StateMachineStateEntity();
 
@@ -50,10 +50,10 @@ class QuoteStateMachineHelperTest extends TestCase
 
     public function testRequestQuote(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $registry = $this->createMock(StateMachineRegistry::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $registry = $this->createStub(StateMachineRegistry::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
 
         $container->method('get')->willReturnMap([

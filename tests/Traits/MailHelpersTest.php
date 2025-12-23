@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
 use Algoritma\ShopwareTestUtils\Traits\MailHelpers;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -14,13 +15,13 @@ class MailHelpersTest extends TestCase
 {
     use MailHelpers;
 
-    private static MockObject $container;
+    private static Stub $container;
 
     private MockObject $dispatcher;
 
     protected function setUp(): void
     {
-        self::$container = $this->createMock(ContainerInterface::class);
+        self::$container = $this->createStub(ContainerInterface::class);
         $this->dispatcher = $this->createMock(EventDispatcherInterface::class);
 
         self::$container->method('get')->willReturn($this->dispatcher);

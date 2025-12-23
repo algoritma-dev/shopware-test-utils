@@ -14,9 +14,9 @@ class ProductFactoryTest extends TestCase
 {
     public function testCreateProduct(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $product = new ProductEntity();
 
         $container->method('get')->willReturn($repository);
@@ -31,7 +31,7 @@ class ProductFactoryTest extends TestCase
 
     public function testWithName(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new ProductFactory($container);
 
         $factory->withName('Test Product');
@@ -43,7 +43,7 @@ class ProductFactoryTest extends TestCase
 
     public function testWithPrice(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new ProductFactory($container);
 
         $factory->withPrice(100.0, 80.0);

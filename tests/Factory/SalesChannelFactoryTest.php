@@ -15,10 +15,10 @@ class SalesChannelFactoryTest extends TestCase
 {
     public function testCreateSalesChannel(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
         $salesChannel = new SalesChannelEntity();
 
         $container->method('get')->willReturn($repository);
@@ -37,9 +37,9 @@ class SalesChannelFactoryTest extends TestCase
 
     public function testWithName(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
 
         $container->method('get')->willReturn($repository);
         $repository->method('searchIds')->willReturn($idSearchResult);

@@ -14,9 +14,9 @@ class OrderReturnFactoryTest extends TestCase
 {
     public function testCreateOrderReturn(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $return = new OrderReturnEntity();
 
         $container->method('get')->willReturn($repository);
@@ -31,7 +31,7 @@ class OrderReturnFactoryTest extends TestCase
 
     public function testWithOrder(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new OrderReturnFactory($container);
 
         $factory->withOrder('order-id');

@@ -23,13 +23,13 @@ class EmployeeLoginHelperTest extends TestCase
 
     public function testLogin(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $employee = new EmployeeEntity();
-        $scFactory = $this->createMock(SalesChannelContextFactory::class);
-        $context = $this->createMock(SalesChannelContext::class);
-        $connection = $this->createMock(Connection::class);
+        $scFactory = $this->createStub(SalesChannelContextFactory::class);
+        $context = $this->createStub(SalesChannelContext::class);
+        $connection = $this->createStub(Connection::class);
 
         $employee->setId('employee-id');
         $employee->setBusinessPartnerCustomerId('customer-id');

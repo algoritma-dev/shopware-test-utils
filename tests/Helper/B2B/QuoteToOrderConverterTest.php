@@ -33,12 +33,12 @@ class QuoteToOrderConverterTest extends TestCase
 
     public function testConvertToOrder(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $cartService = $this->createMock(CartService::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $cartService = $this->createStub(CartService::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
-        $context = $this->createMock(SalesChannelContext::class);
+        $context = $this->createStub(SalesChannelContext::class);
         $cart = new Cart('token', 'token');
         new OrderEntity();
 

@@ -15,10 +15,10 @@ class PaymentMethodFactoryTest extends TestCase
 {
     public function testCreatePaymentMethod(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
         $paymentMethod = new PaymentMethodEntity();
 
         $container->method('get')->willReturnMap([
@@ -40,9 +40,9 @@ class PaymentMethodFactoryTest extends TestCase
 
     public function testWithName(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
 
         $container->method('get')->willReturn($repository);
         $repository->method('searchIds')->willReturn($idSearchResult);

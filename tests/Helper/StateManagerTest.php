@@ -12,7 +12,7 @@ class StateManagerTest extends TestCase
 {
     public function testTransitionOrderState(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $registry = $this->createMock(StateMachineRegistry::class);
 
         $container->method('get')->willReturn($registry);
@@ -25,7 +25,7 @@ class StateManagerTest extends TestCase
 
     public function testTransitionPaymentState(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $registry = $this->createMock(StateMachineRegistry::class);
 
         $container->method('get')->willReturn($registry);

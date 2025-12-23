@@ -14,9 +14,9 @@ class TaxFactoryTest extends TestCase
 {
     public function testCreateTax(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $tax = new TaxEntity();
 
         $container->method('get')->willReturn($repository);
@@ -31,7 +31,7 @@ class TaxFactoryTest extends TestCase
 
     public function testWithRate(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new TaxFactory($container);
 
         $factory->withRate(19.0);

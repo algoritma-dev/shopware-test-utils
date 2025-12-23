@@ -16,12 +16,12 @@ class CustomerFactoryTest extends TestCase
 {
     public function testCreateCustomer(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
         $customer = new CustomerEntity();
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
 
         $container->method('get')->willReturnMap([
             ['customer.repository', 1, $repository],
@@ -47,9 +47,9 @@ class CustomerFactoryTest extends TestCase
 
     public function testWithEmail(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $idSearchResult = $this->createMock(IdSearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $idSearchResult = $this->createStub(IdSearchResult::class);
 
         $container->method('get')->willReturn($repository);
         $repository->method('searchIds')->willReturn($idSearchResult);

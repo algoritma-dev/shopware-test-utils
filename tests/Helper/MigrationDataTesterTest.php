@@ -13,7 +13,7 @@ class MigrationDataTesterTest extends TestCase
 {
     public function testDataIntegrity(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $connection->method('fetchAllAssociative')->willReturn([['id' => 1, 'name' => 'test']]);
         $connection->method('fetchOne')->willReturn(1);
 
@@ -25,7 +25,7 @@ class MigrationDataTesterTest extends TestCase
 
     public function testChunkedMigration(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $tester = new MigrationDataTester($connection);
 
         $processed = 0;
@@ -39,7 +39,7 @@ class MigrationDataTesterTest extends TestCase
 
     public function testVerifyDataTransformation(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $connection->method('fetchAllAssociative')->willReturn([['id' => 1]]);
 
         $tester = new MigrationDataTester($connection);
@@ -50,7 +50,7 @@ class MigrationDataTesterTest extends TestCase
 
     public function testAssertRowCountsMatch(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $connection->method('fetchOne')->willReturn(10);
 
         $tester = new MigrationDataTester($connection);
@@ -61,7 +61,7 @@ class MigrationDataTesterTest extends TestCase
 
     public function testAssertNoDataLoss(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $connection->method('fetchFirstColumn')->willReturn([1, 2, 3]);
 
         $tester = new MigrationDataTester($connection);
@@ -72,9 +72,9 @@ class MigrationDataTesterTest extends TestCase
 
     public function testDataTypeConversion(): void
     {
-        $connection = $this->createMock(Connection::class);
-        $schemaManager = $this->createMock(AbstractSchemaManager::class);
-        $column = $this->createMock(Column::class);
+        $connection = $this->createStub(Connection::class);
+        $schemaManager = $this->createStub(AbstractSchemaManager::class);
+        $column = $this->createStub(Column::class);
 
         $connection->method('createSchemaManager')->willReturn($schemaManager);
         $schemaManager->method('listTableColumns')->willReturn(['col' => $column]);
@@ -88,7 +88,7 @@ class MigrationDataTesterTest extends TestCase
 
     public function testValidateRelationalIntegrity(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $connection->method('fetchAllAssociative')->willReturn([]);
 
         $tester = new MigrationDataTester($connection);
@@ -99,7 +99,7 @@ class MigrationDataTesterTest extends TestCase
 
     public function testBenchmarkMigration(): void
     {
-        $connection = $this->createMock(Connection::class);
+        $connection = $this->createStub(Connection::class);
         $tester = new MigrationDataTester($connection);
 
         $result = $tester->benchmarkMigration(fn (): null => null, 100);

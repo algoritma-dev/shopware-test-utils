@@ -14,9 +14,9 @@ class RolePermissionFactoryTest extends TestCase
 {
     public function testCreateRole(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $role = new RoleEntity();
 
         $container->method('get')->willReturnMap([
@@ -36,7 +36,7 @@ class RolePermissionFactoryTest extends TestCase
 
     public function testWithPermissions(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new RolePermissionFactory($container);
 
         $factory->withPermissions(['perm1', 'perm2']);
@@ -46,9 +46,9 @@ class RolePermissionFactoryTest extends TestCase
 
     public function testCreateAdmin(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $role = new RoleEntity();
 
         $container->method('get')->willReturnMap([

@@ -12,7 +12,7 @@ class QuoteCommentHelperTest extends TestCase
 {
     public function testAddComment(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
 
         $container->method('get')->willReturn($repository);
@@ -26,9 +26,9 @@ class QuoteCommentHelperTest extends TestCase
 
     public function testGetComments(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
 
         $container->method('get')->willReturn($repository);
         $repository->method('search')->willReturn($searchResult);
@@ -42,7 +42,7 @@ class QuoteCommentHelperTest extends TestCase
 
     public function testDeleteComment(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
 
         $container->method('get')->willReturn($repository);

@@ -13,8 +13,8 @@ class MediaHelperTest extends TestCase
 {
     public function testAssignToProduct(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $mediaRepo = $this->createMock(EntityRepository::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $mediaRepo = $this->createStub(EntityRepository::class);
         $productRepo = $this->createMock(EntityRepository::class);
 
         $container->method('get')->willReturnMap([
@@ -30,7 +30,7 @@ class MediaHelperTest extends TestCase
 
     public function testDelete(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $mediaRepo = $this->createMock(EntityRepository::class);
 
         $container->method('get')->willReturn($mediaRepo);
@@ -42,9 +42,9 @@ class MediaHelperTest extends TestCase
 
     public function testGet(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $mediaRepo = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $mediaRepo = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $media = new MediaEntity();
 
         $container->method('get')->willReturn($mediaRepo);

@@ -12,7 +12,7 @@ class StorefrontRequestHelperTest extends TestCase
     public function testLogin(): void
     {
         $browser = $this->createMock(KernelBrowser::class);
-        $response = $this->createMock(Response::class);
+        $response = $this->createStub(Response::class);
 
         $browser->expects($this->once())->method('request')->with(
             'POST',
@@ -30,7 +30,7 @@ class StorefrontRequestHelperTest extends TestCase
     public function testAddToCart(): void
     {
         $browser = $this->createMock(KernelBrowser::class);
-        $response = $this->createMock(Response::class);
+        $response = $this->createStub(Response::class);
 
         $browser->expects($this->once())->method('request')->with(
             'POST',

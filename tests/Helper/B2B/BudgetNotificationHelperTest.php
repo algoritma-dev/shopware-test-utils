@@ -20,9 +20,9 @@ class BudgetNotificationHelperTest extends TestCase
 
     public function testShouldNotify(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
         $budget->setNotify(true);
         $budget->setSent(false);
@@ -42,9 +42,9 @@ class BudgetNotificationHelperTest extends TestCase
 
     public function testMarkAsSent(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
 
         $container->method('get')->willReturn($repository);

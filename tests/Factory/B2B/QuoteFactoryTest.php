@@ -14,9 +14,9 @@ class QuoteFactoryTest extends TestCase
 {
     public function testCreateQuote(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
-        $repository = $this->createMock(EntityRepository::class);
-        $searchResult = $this->createMock(EntitySearchResult::class);
+        $container = $this->createStub(ContainerInterface::class);
+        $repository = $this->createStub(EntityRepository::class);
+        $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
 
         $container->method('get')->willReturn($repository);
@@ -31,7 +31,7 @@ class QuoteFactoryTest extends TestCase
 
     public function testWithCustomer(): void
     {
-        $container = $this->createMock(ContainerInterface::class);
+        $container = $this->createStub(ContainerInterface::class);
         $factory = new QuoteFactory($container);
 
         $factory->withCustomer('customer-id');
