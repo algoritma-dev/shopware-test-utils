@@ -424,6 +424,15 @@ trait ShopwareAssertions
     {
         $connection = self::getContainer()->get(Connection::class);
 
+        $languageExists = $connection->fetchOne(
+            'SELECT 1 FROM language l INNER JOIN locale loc ON l.locale_id = loc.id WHERE loc.code = :locale',
+            ['locale' => $locale]
+        );
+
+        if (! $languageExists) {
+            Assert::fail(sprintf('Language for locale "%s" does not exist in the database.', $locale));
+        }
+
         $sql = <<<'SQL'
                 SELECT trans.subject
                 FROM mail_template_translation trans
@@ -447,6 +456,16 @@ trait ShopwareAssertions
     protected function assertMailTemplateContentContains(string $typeTechnicalName, string $locale, string $expectedContentPart, bool $html = true): void
     {
         $connection = self::getContainer()->get(Connection::class);
+
+        $languageExists = $connection->fetchOne(
+            'SELECT 1 FROM language l INNER JOIN locale loc ON l.locale_id = loc.id WHERE loc.code = :locale',
+            ['locale' => $locale]
+        );
+
+        if (! $languageExists) {
+            Assert::fail(sprintf('Language for locale "%s" does not exist in the database.', $locale));
+        }
+
         $column = $html ? 'content_html' : 'content_plain';
 
         $sql = <<<SQL
