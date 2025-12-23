@@ -22,11 +22,11 @@ This library provides a structured, clean, and maintainable approach to writing 
 
 ### Core Philosophy
 
-> **"Factory CREATES, Helper ACTS, Trait SHARES"**
+> **"Factory CREATES, Helper ACTS, Trait ASSERTS"**
 
 - **Factories** → Create and configure entities (Products, Orders, Customers, etc.)
-- **Helpers** → Execute actions on existing entities (place order, cancel, transition states)
-- **Traits** → Provide reusable behaviors (time travel, event capture, cache management)
+- **Helpers** → Execute actions on existing entities (place order, cancel, transition states, configuration, time travel)
+- **Traits** → Provide test assertions (database checks, event verification, mail assertions)
 
 ---
 
@@ -137,7 +137,7 @@ $product = (new ProductFactory($container))
 
 ### 🔧 Helpers (Execute Actions)
 
-Helpers perform operations on existing entities.
+Helpers perform operations on existing entities. Use the `HelperAccessor` trait for easy access in tests.
 
 | Helper | Description |
 |--------|-------------|
@@ -148,59 +148,82 @@ Helpers perform operations on existing entities.
 | `CheckoutRunner` | Execute complete checkout flows |
 | `StorefrontRequestHelper` | Simulate storefront HTTP requests |
 | `MigrationDataTester` | Test data integrity in migrations |
+| `ConfigHelper` | Manage system configuration and feature flags |
+| `TimeHelper` | Time travel and date manipulation |
+| `ProductHelper` | Create and manage products |
+| `CustomerHelper` | Create and manage customers |
+| `SalesChannelHelper` | Create and manage sales channels |
+| `MailHelper` | Send and verify emails |
 
 **Example:**
 
 ```php
-$orderHelper = new OrderHelper($container);
-$orderHelper->markOrderAsPaid($orderId);
-$orderHelper->markOrderAsShipped($orderId);
-$orderHelper->cancelOrder($orderId);
+use Algoritma\ShopwareTestUtils\Traits\HelperAccessor;
+
+class MyTest extends AbstractIntegrationTestCase
+{
+    use HelperAccessor;
+
+    public function testOrderFlow(): void
+    {
+        // Access helpers easily via trait methods
+        $this->orderHelper()->markOrderAsPaid($orderId);
+        $this->orderHelper()->markOrderAsShipped($orderId);
+
+        // Set configuration
+        $this->configHelper()->set('core.cart.maxQuantity', 100);
+
+        // Time travel
+        $this->timeHelper()->travelForward('30 days');
+    }
+}
 ```
 
-### ✨ Traits (Reusable Behaviors)
+### ✨ Traits (Assertion Helpers)
 
-Traits provide reusable methods that can be mixed into test cases.
+Traits provide assertion methods for test verification. **Note:** Actions have been moved to Helper classes.
 
 | Trait | Description |
 |-------|-------------|
-| `DatabaseHelpers` | Truncate tables, seed data, snapshots, transactions |
-| `CacheHelpers` | Clear cache, invalidate tags |
-| `TimeHelpers` | Freeze time, travel to specific dates |
-| `ConfigHelpers` | Get/set system configuration |
-| `LogHelpers` | Capture and assert log entries |
-| `MailHelpers` | Capture and assert sent emails |
-| `EventHelpers` | Capture and assert dispatched events |
-| `QueueHelpers` | Run queue workers, assert jobs |
-| `MigrationHelpers` | Assert migration behavior |
-| `B2BAssertions` | B2B-specific assertions (requires commercial plugin) |
+| `HelperAccessor` | **Provides easy access to all Helper classes** |
+| `DatabaseHelpers` | Database assertions (table exists, row count, etc.) |
+| `CacheHelpers` | Cache assertions (key exists, cache cleared) |
+| `TimeHelpers` | Time-related assertions (date in future/past, timestamp validity) |
+| `LogHelpers` | Log assertions (error logged, warning count, log contains) |
+| `MailHelpers` | Mail assertions (email sent, recipient correct) |
+| `EventHelpers` | Event assertions (event dispatched, payload validation) |
+| `QueueHelpers` | Queue assertions (job queued, queue empty) |
+| `MigrationHelpers` | Migration assertions (idempotency, schema changes) |
 
 **Example:**
 
 ```php
+use Algoritma\ShopwareTestUtils\Traits\HelperAccessor;
 use Algoritma\ShopwareTestUtils\Traits\TimeHelpers;
 use Algoritma\ShopwareTestUtils\Traits\MailHelpers;
 
 class SubscriptionTest extends AbstractIntegrationTestCase
 {
-    use TimeHelpers;
-    use MailHelpers;
+    use HelperAccessor;  // Access to all helpers
+    use TimeHelpers;     // Time assertions
+    use MailHelpers;     // Mail assertions
 
     public function testSubscriptionRenewal(): void
     {
-        // Freeze time to test time-dependent logic
-        $this->freezeTime(new \DateTime('2025-01-01 00:00:00'));
+        // Use TimeHelper for actions
+        $this->timeHelper()->freezeTime(new \DateTime('2025-01-01 00:00:00'));
 
         // ... create subscription ...
 
         // Travel forward 30 days
-        $this->travelTo(new \DateTime('2025-01-31 00:00:00'));
+        $this->timeHelper()->travelForward('30 days');
 
         // Run renewal process
         $this->runScheduledTask(RenewalTask::class);
 
-        // Assert renewal email was sent
-        $this->assertMailSent('subscription_renewal');
+        // Use MailHelpers trait for assertions
+        $this->assertMailSent(1);
+        $this->assertMailWasSent();
     }
 }
 ```

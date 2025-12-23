@@ -2,7 +2,7 @@
 
 ## 📐 Separation of Responsibilities Principles
 
-This test suite strictly follows the **Single Responsibility Principle (SRP)** and the **Factory/Builder/Helper** pattern:
+This test suite strictly follows the **Single Responsibility Principle (SRP)** and the **Factory/Helper/Trait** pattern:
 
 ### **Factory** = Creates entities/objects
 - **Responsibility**: Build and configure new entity instances
@@ -22,26 +22,63 @@ $product = (new ProductFactory($container))
 
 ---
 
-### **Helper** = Executes actions on existing entities
-- **Responsibility**: Operations, transformations, actions on already created entities
-- **Does NOT create** entities (use Factory for that)
-- **Naming**: `*Helper` (e.g. `OrderHelper`, `MediaHelper`, `CartHelper`)
-- **Action examples**: delete, update, assign, transition, cancel
+### **Helper** = Executes actions/operations
+- **Responsibility**: Operations, transformations, actions (on entities, system config, time, etc.)
+- **Can create** simple data structures or perform actions on entities
+- **Naming**: `*Helper` (e.g. `OrderHelper`, `ConfigHelper`, `TimeHelper`)
+- **Action examples**: cancel order, set config, time travel, send email
+- **Access**: Use `HelperAccessor` trait for convenient access
 
 **Example:**
 ```php
-$orderHelper = new OrderHelper($container);
-$orderHelper->cancelOrder($orderId);
-$orderHelper->markOrderAsPaid($orderId);
-$orderHelper->markOrderAsShipped($orderId);
+use Algoritma\ShopwareTestUtils\Traits\HelperAccessor;
+
+class MyTest extends AbstractIntegrationTestCase
+{
+    use HelperAccessor;
+
+    public function test(): void
+    {
+        // Actions on entities
+        $this->orderHelper()->cancelOrder($orderId);
+
+        // Configuration management
+        $this->configHelper()->set('core.cart.maxQuantity', 100);
+
+        // Time manipulation
+        $this->timeHelper()->travelForward('30 days');
+    }
+}
 ```
 
 ---
 
-### **Builder** = Specific pattern for complex constructions
-- **Usage**: Only when step-by-step construction with mutable state is needed
-- **Note**: In this suite, `CartFactory` uses the Builder pattern internally
-- **Difference**: Builder has mutable state, Factory is immutable
+### **Trait** = Assertions and test utilities
+- **Responsibility**: Provide assertion methods for test verification
+- **Does NOT perform** actions (actions are in Helpers)
+- **Naming**: `*Helpers` or `*Assertions` (e.g. `DatabaseHelpers`, `TimeHelpers`)
+- **Examples**: assertDatabaseHas, assertMailSent, assertDateInFuture
+
+**Example:**
+```php
+use Algoritma\ShopwareTestUtils\Traits\DatabaseHelpers;
+use Algoritma\ShopwareTestUtils\Traits\TimeHelpers;
+
+class MyTest extends AbstractIntegrationTestCase
+{
+    use DatabaseHelpers;
+    use TimeHelpers;
+
+    public function test(): void
+    {
+        // Database assertions
+        $this->assertDatabaseHas('product', ['id' => $productId]);
+
+        // Time assertions
+        $this->assertDateInFuture($expirationDate);
+    }
+}
+```
 
 ---
 
@@ -66,18 +103,22 @@ src/TestUtils/
 │   ├── CartHelper.php                  # Actions on carts (clear, remove, etc.)
 │   ├── OrderHelper.php                 # Actions on orders (place, cancel, etc.)
 │   ├── MediaHelper.php                 # Actions on media (assign, delete, etc.)
+│   ├── ConfigHelper.php                # Configuration management
+│   ├── TimeHelper.php                  # Time travel and date manipulation
+│   ├── ProductHelper.php               # Product creation and management
+│   ├── CustomerHelper.php              # Customer creation and management
 │   ├── StateManager.php                # State machine management
 │   └── MigrationDataTester.php         # Migration integrity testing
-└── Traits/                              # REUSABLE BEHAVIORS
-    ├── DatabaseHelpers.php             # DB operations (truncate, snapshot)
-    ├── CacheHelpers.php                # Cache management
-    ├── TimeHelpers.php                 # Time travel for tests
-    ├── ConfigHelpers.php               # Config management
-    ├── LogHelpers.php                  # Capture and assert logs
-    ├── MailHelpers.php                 # Capture and assert emails
-    ├── EventHelpers.php                # Capture and assert events
-    ├── QueueHelpers.php                # Queue management
-    └── MigrationHelpers.php            # Migration utilities
+└── Traits/                              # ASSERTIONS & TEST UTILITIES
+    ├── HelperAccessor.php              # Convenient access to all helpers
+    ├── DatabaseHelpers.php             # DB assertions (table exists, row count)
+    ├── CacheHelpers.php                # Cache assertions (key exists, cleared)
+    ├── TimeHelpers.php                 # Time assertions (date in future/past)
+    ├── LogHelpers.php                  # Log assertions (error logged, contains)
+    ├── MailHelpers.php                 # Mail assertions (email sent, recipient)
+    ├── EventHelpers.php                # Event assertions (dispatched, payload)
+    ├── QueueHelpers.php                # Queue assertions (job queued, empty)
+    └── MigrationHelpers.php            # Migration assertions (idempotency, schema)
 ```
 
 ---
@@ -112,30 +153,63 @@ class OrderHelper
     public function getOrder(string $orderId): OrderEntity { ... }
 }
 
-// Usage:
-$helper = new OrderHelper($container);
-$helper->cancelOrder($orderId);
+class ConfigHelper
+{
+    public function set(string $key, $value): void { ... }
+    public function get(string $key) { ... }
+}
+
+class TimeHelper
+{
+    public function freezeTime(\DateTimeInterface $at): void { ... }
+    public function travelForward(string $interval): void { ... }
+}
+
+// Usage with HelperAccessor:
+class MyTest extends AbstractIntegrationTestCase
+{
+    use HelperAccessor;
+
+    public function test(): void
+    {
+        $this->orderHelper()->cancelOrder($orderId);
+        $this->configHelper()->set('core.cart.maxQuantity', 100);
+        $this->timeHelper()->travelForward('30 days');
+    }
+}
 ```
 
-### **3. Trait Pattern (Behaviors)**
+### **3. Trait Pattern (Assertions)**
 
 ```php
-// ✅ CORRECT - Trait provides reusable methods
+// ✅ CORRECT - Trait provides assertion methods
 trait TimeHelpers
 {
-    protected function freezeTime(\DateTimeInterface $at): void { ... }
-    protected function travelTo(\DateTimeInterface $to): void { ... }
+    protected function assertDateInFuture(\DateTimeInterface $date): void { ... }
+    protected function assertDateInPast(\DateTimeInterface $date): void { ... }
+}
+
+trait DatabaseHelpers
+{
+    protected function assertDatabaseHas(string $table, array $data): void { ... }
+    protected function assertTableExists(string $table): void { ... }
 }
 
 // Usage in test:
 class MyTest extends AbstractIntegrationTestCase
 {
-    use TimeHelpers;
+    use HelperAccessor;  // For actions
+    use TimeHelpers;     // For time assertions
+    use DatabaseHelpers; // For DB assertions
 
     public function testExpiration(): void
     {
-        $this->freezeTime(new \DateTime('2025-01-01'));
-        // ...
+        // Action via helper
+        $this->timeHelper()->freezeTime(new \DateTime('2025-01-01'));
+
+        // Assertion via trait
+        $this->assertDateInFuture($expirationDate);
+        $this->assertDatabaseHas('product', ['id' => $productId]);
     }
 }
 ```
@@ -159,18 +233,29 @@ class OrderHelper
 }
 ```
 
-### **2. Helper that creates entities**
+### **2. Trait that performs actions**
 ```php
-// ❌ WRONG - Helper should not create
-class MediaHelper
+// ❌ WRONG - Trait should not perform actions (use Helper instead)
+trait ConfigHelpers
 {
-    public function createTestImage(): MediaEntity { ... }  // NO!
+    protected function setSystemConfig(string $key, $value): void { ... }  // NO!
 }
 
-// ✅ CORRECT - Use Factory
-class MediaFactory
+// ✅ CORRECT - Actions go in Helper, accessed via HelperAccessor
+class ConfigHelper
 {
-    public function createTestImage(): MediaEntity { ... }  // OK!
+    public function set(string $key, $value): void { ... }  // OK!
+}
+
+// Usage:
+class MyTest extends AbstractIntegrationTestCase
+{
+    use HelperAccessor;
+
+    public function test(): void
+    {
+        $this->configHelper()->set('key', 'value');  // OK!
+    }
 }
 ```
 

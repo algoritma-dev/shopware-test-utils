@@ -139,4 +139,51 @@ class CartHelper
     {
         return $cart->getLineItems()->count() === 0;
     }
+
+    // --- Cart Assertions ---
+
+    /**
+     * Assert that the cart contains a specific product.
+     */
+    public function assertCartContainsProduct(Cart $cart, string $productId): void
+    {
+        $lineItems = $cart->getLineItems();
+        $found = false;
+
+        foreach ($lineItems as $lineItem) {
+            if ($lineItem->getReferencedId() === $productId) {
+                $found = true;
+                break;
+            }
+        }
+
+        assert($found, sprintf('Cart does not contain product with ID %s', $productId));
+    }
+
+    /**
+     * Assert that the cart total matches the expected value.
+     */
+    public function assertCartTotal(Cart $cart, float $expectedTotal): void
+    {
+        $actualTotal = $cart->getPrice()->getTotalPrice();
+        assert(abs($actualTotal - $expectedTotal) < 0.01, sprintf('Cart total is %.2f, expected %.2f', $actualTotal, $expectedTotal));
+    }
+
+    /**
+     * Assert that a cart item has the expected quantity.
+     */
+    public function assertCartItemQuantity(Cart $cart, string $productId, int $expectedQuantity): void
+    {
+        $lineItems = $cart->getLineItems();
+        $quantity = 0;
+
+        foreach ($lineItems as $lineItem) {
+            if ($lineItem->getReferencedId() === $productId) {
+                $quantity = $lineItem->getQuantity();
+                break;
+            }
+        }
+
+        assert($quantity === $expectedQuantity, sprintf('Product %s has quantity %d, expected %d', $productId, $quantity, $expectedQuantity));
+    }
 }

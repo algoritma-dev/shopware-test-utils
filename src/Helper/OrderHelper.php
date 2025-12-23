@@ -4,7 +4,9 @@ namespace Algoritma\ShopwareTestUtils\Helper;
 
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
+use Shopware\Core\Checkout\Order\Aggregate\OrderDelivery\OrderDeliveryCollection;
 use Shopware\Core\Checkout\Order\Aggregate\OrderLineItem\OrderLineItemCollection;
+use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionCollection;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -136,5 +138,51 @@ class OrderHelper
         }
 
         return false;
+    }
+
+    // --- Order Assertions ---
+
+    /**
+     * Assert that an order is in a specific state.
+     */
+    public function assertOrderState(OrderEntity $order, string $expectedState): void
+    {
+        $stateName = $order->getStateMachineState()?->getTechnicalName();
+        assert($stateName === $expectedState, sprintf('Order state is "%s", expected "%s"', $stateName, $expectedState));
+    }
+
+    /**
+     * Assert that an order has at least one transaction.
+     */
+    public function assertOrderHasTransaction(OrderEntity $order): void
+    {
+        $transactions = $order->getTransactions();
+        assert($transactions instanceof OrderTransactionCollection, 'Order has no transactions collection');
+        assert($transactions->count() > 0, 'Order has no transactions');
+    }
+
+    /**
+     * Assert that an order has at least one delivery.
+     */
+    public function assertOrderHasDelivery(OrderEntity $order): void
+    {
+        $deliveries = $order->getDeliveries();
+        assert($deliveries instanceof OrderDeliveryCollection, 'Order has no deliveries collection');
+        assert($deliveries->count() > 0, 'Order has no deliveries');
+    }
+
+    /**
+     * Assert that a line item has the expected price.
+     */
+    public function assertLineItemPrice(OrderEntity $order, string $lineItemId, float $expectedPrice): void
+    {
+        $lineItems = $order->getLineItems();
+        assert($lineItems instanceof OrderLineItemCollection, 'Order has no line items');
+
+        $lineItem = $lineItems->get($lineItemId);
+        assert($lineItem !== null, sprintf('Line item %s not found in order', $lineItemId));
+
+        $actualPrice = $lineItem->getPrice()->getTotalPrice();
+        assert(abs($actualPrice - $expectedPrice) < 0.01, sprintf('Line item %s has price %.2f, expected %.2f', $lineItemId, $actualPrice, $expectedPrice));
     }
 }

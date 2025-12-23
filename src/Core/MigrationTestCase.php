@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
-use Algoritma\ShopwareTestUtils\Assert\ShopwareAssertions;
 use Algoritma\ShopwareTestUtils\Traits\DatabaseHelpers;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
@@ -16,7 +15,6 @@ use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 abstract class MigrationTestCase extends TestCase
 {
     use KernelTestBehaviour;
-    use ShopwareAssertions;
     use DatabaseHelpers;
 
     /**

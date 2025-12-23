@@ -201,6 +201,64 @@ class BudgetValidationHelper
         return ($budget->getUsedAmount() / $budget->getAmount()) * 100;
     }
 
+    // --- Budget Assertions ---
+
+    /**
+     * Assert budget is exceeded.
+     */
+    public function assertBudgetExceeded(string $budgetId, ?Context $context = null): void
+    {
+        $budget = $this->loadBudget($budgetId, $context);
+        $remaining = $budget->getAmount() - $budget->getUsedAmount();
+
+        assert(
+            $remaining < 0,
+            sprintf('Expected budget to be exceeded, but remaining budget is %.2f', $remaining)
+        );
+    }
+
+    /**
+     * Assert budget is not exceeded.
+     */
+    public function assertBudgetNotExceeded(string $budgetId, ?Context $context = null): void
+    {
+        $budget = $this->loadBudget($budgetId, $context);
+        $remaining = $budget->getAmount() - $budget->getUsedAmount();
+
+        assert(
+            $remaining >= 0,
+            sprintf('Expected budget not to be exceeded, but it is over by %.2f', abs($remaining))
+        );
+    }
+
+    /**
+     * Assert budget notification should be triggered.
+     */
+    public function assertBudgetNotificationTriggered(string $budgetId, ?Context $context = null): void
+    {
+        $budget = $this->loadBudget($budgetId, $context);
+
+        $notify = $budget->isNotify();
+
+        assert($notify, 'Budget notification is not enabled');
+
+        $usagePercentage = ($budget->getUsedAmount() / $budget->getAmount()) * 100;
+        $notificationConfig = $budget->getNotificationConfig();
+
+        if (! $notificationConfig) {
+            throw new \RuntimeException('Budget has no notification configuration');
+        }
+
+        $threshold = (float) ($notificationConfig['value'] ?? 0);
+
+        if ($notificationConfig['type'] === 'percentage') {
+            assert(
+                $usagePercentage >= $threshold,
+                sprintf('Expected budget to reach notification threshold of %.2f%%, but usage is only %.2f%%', $threshold, $usagePercentage)
+            );
+        }
+    }
+
     private function loadBudget(string $budgetId, ?Context $context): BudgetEntity
     {
         $context ??= Context::createCLIContext();

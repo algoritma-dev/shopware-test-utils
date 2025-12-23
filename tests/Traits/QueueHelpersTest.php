@@ -12,16 +12,16 @@ class QueueHelpersTest extends TestCase
 {
     use QueueHelpers;
 
-    private Stub&ContainerInterface $container;
+    private static Stub&ContainerInterface $container;
 
     private Stub&TraceableMessageBus $bus;
 
     protected function setUp(): void
     {
-        $this->container = $this->createStub(ContainerInterface::class);
+        self::$container = $this->createStub(ContainerInterface::class);
         $this->bus = $this->createStub(TraceableMessageBus::class);
 
-        $this->container->method('get')->willReturn($this->bus);
+        self::$container->method('get')->willReturn($this->bus);
     }
 
     public function testAssertMessageQueued(): void
@@ -41,8 +41,8 @@ class QueueHelpersTest extends TestCase
         $this->assertQueueEmpty();
     }
 
-    protected function getContainer(): ContainerInterface
+    protected static function getContainer(): ContainerInterface
     {
-        return $this->container;
+        return self::$container;
     }
 }

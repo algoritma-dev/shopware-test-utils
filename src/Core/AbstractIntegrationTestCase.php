@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
-use Algoritma\ShopwareTestUtils\Assert\ShopwareAssertions;
 use Algoritma\ShopwareTestUtils\Factory\CartFactory;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
@@ -33,7 +32,6 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use EventHelpers;
     use MailHelpers;
     use QueueHelpers;
-    use ShopwareAssertions;
 
     protected function getConnection(): Connection
     {

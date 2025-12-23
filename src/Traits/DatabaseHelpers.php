@@ -231,6 +231,134 @@ trait DatabaseHelpers
      */
     abstract protected function getConnection(): Connection;
 
+    // --- Database Assertions ---
+
+    /**
+     * Assert that a table contains a row with the given conditions.
+     *
+     * @param array<string, mixed> $conditions
+     */
+    protected function assertDatabaseHas(string $table, array $conditions): void
+    {
+        $connection = $this->getConnection();
+        $qb = $connection->createQueryBuilder();
+        $qb->select('COUNT(*)')
+            ->from($table);
+
+        foreach ($conditions as $column => $value) {
+            $qb->andWhere($qb->expr()->eq($column, $qb->createNamedParameter($value)));
+        }
+
+        $count = (int) $qb->executeQuery()->fetchOne();
+        static::assertGreaterThan(0, $count, sprintf('Failed asserting that table "%s" contains row with conditions: %s', $table, json_encode($conditions)));
+    }
+
+    /**
+     * Assert that a table does not contain a row with the given conditions.
+     *
+     * @param array<string, mixed> $conditions
+     */
+    protected function assertDatabaseMissing(string $table, array $conditions): void
+    {
+        $connection = $this->getConnection();
+        $qb = $connection->createQueryBuilder();
+        $qb->select('COUNT(*)')
+            ->from($table);
+
+        foreach ($conditions as $column => $value) {
+            $qb->andWhere($qb->expr()->eq($column, $qb->createNamedParameter($value)));
+        }
+
+        $count = (int) $qb->executeQuery()->fetchOne();
+        static::assertEquals(0, $count, sprintf('Failed asserting that table "%s" does not contain row with conditions: %s', $table, json_encode($conditions)));
+    }
+
+    /**
+     * Assert that a table exists.
+     */
+    protected function assertTableExists(string $table): void
+    {
+        $connection = $this->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        static::assertTrue($schemaManager->tablesExist([$table]), sprintf('Table "%s" does not exist.', $table));
+    }
+
+    /**
+     * Assert that a table does not exist.
+     */
+    protected function assertTableNotExists(string $table): void
+    {
+        $connection = $this->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        static::assertFalse($schemaManager->tablesExist([$table]), sprintf('Table "%s" exists but should not.', $table));
+    }
+
+    /**
+     * Assert that a column exists in a table.
+     */
+    protected function assertColumnExists(string $table, string $column): void
+    {
+        $connection = $this->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        $columns = $schemaManager->listTableColumns($table);
+        static::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s".', $column, $table));
+    }
+
+    /**
+     * Assert that a column has a specific type.
+     */
+    protected function assertColumnType(string $table, string $column, string $expectedType): void
+    {
+        $connection = $this->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        $columns = $schemaManager->listTableColumns($table);
+        static::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s".', $column, $table));
+
+        $actualType = $columns[$column]->getType()->getName();
+        static::assertEquals($expectedType, $actualType, sprintf('Column "%s.%s" has type "%s", expected "%s".', $table, $column, $actualType, $expectedType));
+    }
+
+    /**
+     * Assert that an index exists on a table.
+     */
+    protected function assertIndexExists(string $table, string $index): void
+    {
+        $connection = $this->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        $indexes = $schemaManager->listTableIndexes($table);
+        static::assertArrayHasKey($index, $indexes, sprintf('Index "%s" does not exist on table "%s".', $index, $table));
+    }
+
+    /**
+     * Assert that a foreign key exists on a table.
+     */
+    protected function assertForeignKeyExists(string $table, string $foreignKey): void
+    {
+        $connection = $this->getConnection();
+        $schemaManager = $connection->createSchemaManager();
+        $foreignKeys = $schemaManager->listTableForeignKeys($table);
+
+        $found = false;
+        foreach ($foreignKeys as $fk) {
+            if ($fk->getName() === $foreignKey) {
+                $found = true;
+                break;
+            }
+        }
+
+        static::assertTrue($found, sprintf('Foreign key "%s" does not exist on table "%s".', $foreignKey, $table));
+    }
+
+    /**
+     * Assert that a table has an expected number of rows.
+     */
+    protected function assertRowCount(string $table, int $expectedCount): void
+    {
+        $connection = $this->getConnection();
+        $count = (int) $connection->fetchOne("SELECT COUNT(*) FROM `{$table}`");
+        static::assertEquals($expectedCount, $count, sprintf('Table "%s" has %d rows, expected %d.', $table, $count, $expectedCount));
+    }
+
     /**
      * Gets columns that can be inserted into (excludes generated columns).
      */
@@ -241,12 +369,12 @@ trait DatabaseHelpers
 
         $sql = <<<'EOD'
 
-                        SELECT COLUMN_NAME 
-                        FROM information_schema.COLUMNS 
-                        WHERE TABLE_SCHEMA = :database 
-                        AND TABLE_NAME = :table 
+                        SELECT COLUMN_NAME
+                        FROM information_schema.COLUMNS
+                        WHERE TABLE_SCHEMA = :database
+                        AND TABLE_NAME = :table
                         AND EXTRA NOT LIKE '%GENERATED%'
-                    
+
             EOD;
 
         return $connection->fetchFirstColumn($sql, ['database' => $database, 'table' => $table]);
