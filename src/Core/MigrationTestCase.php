@@ -2,15 +2,51 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
+use Algoritma\ShopwareTestUtils\Assert\ShopwareAssertions;
 use Algoritma\ShopwareTestUtils\Traits\DatabaseHelpers;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
+use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Migration\MigrationStep;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 
-abstract class MigrationTestCase extends AbstractIntegrationTestCase
+abstract class MigrationTestCase extends TestCase
 {
+    use KernelTestBehaviour;
+    use ShopwareAssertions;
     use DatabaseHelpers;
+
+    private ?string $dbSnapshotId = null;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->dbSnapshotId = $this->snapshotDatabase();
+    }
+
+    protected function tearDown(): void
+    {
+        if ($this->dbSnapshotId) {
+            $this->restoreDatabaseSnapshot($this->dbSnapshotId);
+        }
+        parent::tearDown();
+    }
+
+    protected function getConnection(): Connection
+    {
+        return $this->getContainer()->get(Connection::class);
+    }
+
+    /**
+     * @return object|null
+     */
+    protected function getService(string $serviceId)
+    {
+        return $this->getContainer()->get($serviceId);
+    }
 
     /**
      * Executes a migration.
@@ -92,7 +128,10 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
 
         Assert::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s"', $column, $table));
 
-        $actualType = $columns[$column]->getType()->getName();
+        $type = $columns[$column]->getType();
+
+        $actualType = method_exists($type, 'getName') ? $type->getName() : Type::lookupName($type);
+
         Assert::assertEquals(
             $expectedType,
             $actualType,
