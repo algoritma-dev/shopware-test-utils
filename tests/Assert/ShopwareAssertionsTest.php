@@ -212,6 +212,33 @@ class ShopwareAssertionsTest extends TestCase
         $this->assertCustomerLoggedIn($context);
     }
 
+    public function testAssertMailTemplateExists(): void
+    {
+        $connection = $this->createStub(Connection::class);
+        self::$container->method('get')->willReturn($connection);
+        $connection->method('fetchOne')->willReturn(1);
+
+        $this->assertMailTemplateExists('order_confirmation');
+    }
+
+    public function testAssertMailTemplateSubjectContains(): void
+    {
+        $connection = $this->createStub(Connection::class);
+        self::$container->method('get')->willReturn($connection);
+        $connection->method('fetchOne')->willReturn('Order confirmation');
+
+        $this->assertMailTemplateSubjectContains('order_confirmation', 'en-GB', 'Order');
+    }
+
+    public function testAssertMailTemplateContentContains(): void
+    {
+        $connection = $this->createStub(Connection::class);
+        self::$container->method('get')->willReturn($connection);
+        $connection->method('fetchOne')->willReturn('<h1>Order confirmation</h1>');
+
+        $this->assertMailTemplateContentContains('order_confirmation', 'en-GB', 'Order', true);
+    }
+
     protected static function getContainer(): ContainerInterface
     {
         return self::$container;

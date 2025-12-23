@@ -401,4 +401,71 @@ trait ShopwareAssertions
         $stateName = $connection->fetchOne($sql, ['entityId' => str_replace('-', '', $entityId)]);
         Assert::assertEquals($expectedState, $stateName, sprintf('Entity %s has state "%s", expected "%s"', $entityId, $stateName, $expectedState));
     }
+
+    // --- Mail Template Assertions ---
+
+    protected function assertMailTemplateExists(string $typeTechnicalName): void
+    {
+        $connection = self::getContainer()->get(Connection::class);
+
+        $sql = <<<'SQL'
+                SELECT COUNT(*)
+                FROM mail_template t
+                INNER JOIN mail_template_type type ON t.mail_template_type_id = type.id
+                WHERE type.technical_name = :technicalName
+            SQL;
+
+        $count = (int) $connection->fetchOne($sql, ['technicalName' => $typeTechnicalName]);
+
+        Assert::assertGreaterThan(0, $count, sprintf('Mail template for type "%s" does not exist.', $typeTechnicalName));
+    }
+
+    protected function assertMailTemplateSubjectContains(string $typeTechnicalName, string $locale, string $expectedSubjectPart): void
+    {
+        $connection = self::getContainer()->get(Connection::class);
+
+        $sql = <<<'SQL'
+                SELECT trans.subject
+                FROM mail_template_translation trans
+                INNER JOIN mail_template t ON trans.mail_template_id = t.id
+                INNER JOIN mail_template_type type ON t.mail_template_type_id = type.id
+                INNER JOIN language l ON trans.language_id = l.id
+                INNER JOIN locale loc ON l.locale_id = loc.id
+                WHERE type.technical_name = :technicalName
+                AND loc.code = :locale
+            SQL;
+
+        $subject = $connection->fetchOne($sql, [
+            'technicalName' => $typeTechnicalName,
+            'locale' => $locale,
+        ]);
+
+        Assert::assertNotFalse($subject, sprintf('No translation found for mail template "%s" in locale "%s".', $typeTechnicalName, $locale));
+        Assert::assertStringContainsString($expectedSubjectPart, $subject, sprintf('Mail template subject for "%s" (%s) does not contain "%s". Actual: "%s"', $typeTechnicalName, $locale, $expectedSubjectPart, $subject));
+    }
+
+    protected function assertMailTemplateContentContains(string $typeTechnicalName, string $locale, string $expectedContentPart, bool $html = true): void
+    {
+        $connection = self::getContainer()->get(Connection::class);
+        $column = $html ? 'content_html' : 'content_plain';
+
+        $sql = <<<SQL
+                SELECT trans.{$column}
+                FROM mail_template_translation trans
+                INNER JOIN mail_template t ON trans.mail_template_id = t.id
+                INNER JOIN mail_template_type type ON t.mail_template_type_id = type.id
+                INNER JOIN language l ON trans.language_id = l.id
+                INNER JOIN locale loc ON l.locale_id = loc.id
+                WHERE type.technical_name = :technicalName
+                AND loc.code = :locale
+            SQL;
+
+        $content = $connection->fetchOne($sql, [
+            'technicalName' => $typeTechnicalName,
+            'locale' => $locale,
+        ]);
+
+        Assert::assertNotFalse($content, sprintf('No translation found for mail template "%s" in locale "%s".', $typeTechnicalName, $locale));
+        Assert::assertStringContainsString($expectedContentPart, $content, sprintf('Mail template content (%s) for "%s" (%s) does not contain "%s".', $html ? 'HTML' : 'Plain', $typeTechnicalName, $locale, $expectedContentPart));
+    }
 }
