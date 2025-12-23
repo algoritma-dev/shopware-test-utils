@@ -276,6 +276,11 @@ $this->assertTableExists('custom_table');
 $this->assertColumnExists('product', 'custom_field');
 $this->assertIndexExists('product', 'idx_custom');
 $this->assertForeignKeyExists('order_line_item', 'fk_order_id');
+
+// Mail Template assertions
+$this->assertMailTemplateExists('order_confirmation');
+$this->assertMailTemplateSubjectContains('order_confirmation', 'en-GB', 'Order confirmation');
+$this->assertMailTemplateContentContains('order_confirmation', 'en-GB', 'Thank you for your order', true);
 ```
 
 ---

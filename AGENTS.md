@@ -113,6 +113,7 @@ Traits integrated into the base classes to simplify assertions.
     *   `assertMailSent()`: (Placeholder/Base for mail assertions).
 *   **`ShopwareAssertions`**:
     *   `assertEntityExists()`, `assertPriceEquals()`, `assertCustomerHasRole()`.
+    *   `assertMailTemplateExists()`, `assertMailTemplateSubjectContains()`, `assertMailTemplateContentContains()`.
 *   **`B2BAssertions`**:
     *   `assertQuoteInState()`: Verifies quote state machine state.
     *   `assertBudgetExceeded()` / `assertBudgetNotExceeded()`: Budget limit checks.
