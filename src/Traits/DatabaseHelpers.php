@@ -40,10 +40,17 @@ trait DatabaseHelpers
         $snapshotId = uniqid('snapshot_', true);
         $tempTable = "temp_snapshot_{$snapshotId}";
 
-        $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
-        $connection->executeStatement("INSERT INTO `{$tempTable}` SELECT * FROM `{$table}`");
+        $columns = $this->getInsertableColumns($table);
+        $columnList = implode('`, `', $columns);
 
-        $this->databaseSnapshots[$snapshotId] = ['table' => $table, 'tempTable' => $tempTable];
+        $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
+        $connection->executeStatement("INSERT INTO `{$tempTable}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$table}`");
+
+        $this->databaseSnapshots[$snapshotId] = [
+            'table' => $table,
+            'tempTable' => $tempTable,
+            'columns' => $columns,
+        ];
 
         return $snapshotId;
     }
@@ -60,9 +67,12 @@ trait DatabaseHelpers
         $connection = $this->getConnection();
         $snapshot = $this->databaseSnapshots[$snapshotId];
 
+        $columns = $snapshot['columns'] ?? $this->getInsertableColumns($snapshot['table']);
+        $columnList = implode('`, `', $columns);
+
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
         $connection->executeStatement("TRUNCATE TABLE `{$snapshot['table']}`");
-        $connection->executeStatement("INSERT INTO `{$snapshot['table']}` SELECT * FROM `{$snapshot['tempTable']}`");
+        $connection->executeStatement("INSERT INTO `{$snapshot['table']}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$snapshot['tempTable']}`");
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
     }
 
@@ -89,7 +99,7 @@ trait DatabaseHelpers
     {
         $connection = $this->getConnection();
         // Use shorter ID to prevent table name overflow (max 64 chars)
-        $snapshotId = uniqid();
+        $snapshotId = uniqid('', true);
 
         $tables = $connection->fetchFirstColumn('SHOW TABLES');
 
@@ -107,10 +117,17 @@ trait DatabaseHelpers
                 $tempTable = "ts_{$snapshotId}_" . md5((string) $table);
             }
 
-            $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
-            $connection->executeStatement("INSERT INTO `{$tempTable}` SELECT * FROM `{$table}`");
+            $columns = $this->getInsertableColumns((string) $table);
+            $columnList = implode('`, `', $columns);
 
-            $this->databaseSnapshots[$snapshotId][] = ['table' => $table, 'tempTable' => $tempTable];
+            $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
+            $connection->executeStatement("INSERT INTO `{$tempTable}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$table}`");
+
+            $this->databaseSnapshots[$snapshotId][] = [
+                'table' => $table,
+                'tempTable' => $tempTable,
+                'columns' => $columns,
+            ];
         }
 
         return $snapshotId;
@@ -129,8 +146,11 @@ trait DatabaseHelpers
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
 
         foreach ($this->databaseSnapshots[$snapshotId] as $snapshot) {
+            $columns = $snapshot['columns'] ?? $this->getInsertableColumns($snapshot['table']);
+            $columnList = implode('`, `', $columns);
+
             $connection->executeStatement("TRUNCATE TABLE `{$snapshot['table']}`");
-            $connection->executeStatement("INSERT INTO `{$snapshot['table']}` SELECT * FROM `{$snapshot['tempTable']}`");
+            $connection->executeStatement("INSERT INTO `{$snapshot['table']}` (`{$columnList}`) SELECT `{$columnList}` FROM `{$snapshot['tempTable']}`");
         }
 
         $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
@@ -174,4 +194,25 @@ trait DatabaseHelpers
      * Gets the Connection instance.
      */
     abstract protected function getConnection(): Connection;
+
+    /**
+     * Gets columns that can be inserted into (excludes generated columns).
+     */
+    private function getInsertableColumns(string $table): array
+    {
+        $connection = $this->getConnection();
+        $database = $connection->fetchOne('SELECT DATABASE()');
+
+        $sql = <<<'EOD'
+
+                        SELECT COLUMN_NAME 
+                        FROM information_schema.COLUMNS 
+                        WHERE TABLE_SCHEMA = :database 
+                        AND TABLE_NAME = :table 
+                        AND EXTRA NOT LIKE '%GENERATED%'
+                    
+            EOD;
+
+        return $connection->fetchFirstColumn($sql, ['database' => $database, 'table' => $table]);
+    }
 }

@@ -296,9 +296,6 @@ abstract class MigrationTestCase extends TestCase
             if (str_starts_with((string) $table, 'temp_snapshot_')) {
                 continue;
             }
-            if (str_starts_with((string) $table, 'ts_')) {
-                continue;
-            }
             $snapshot[$table] = $this->getTableSchema($table);
         }
 
