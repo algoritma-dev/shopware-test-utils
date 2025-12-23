@@ -13,6 +13,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SubscriptionPlanFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -50,11 +53,14 @@ class SubscriptionPlanFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<SubscriptionPlanEntity> $repository */
         $repository = $this->container->get('subscription_plan.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var SubscriptionPlanEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

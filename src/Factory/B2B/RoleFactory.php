@@ -13,6 +13,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RoleFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -42,6 +45,9 @@ class RoleFactory
         return $this;
     }
 
+    /**
+     * @param array<string> $permissions
+     */
     public function withPermissions(array $permissions): self
     {
         $this->data['permissions'] = $permissions;
@@ -55,11 +61,14 @@ class RoleFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<RoleEntity> $repository */
         $repository = $this->container->get('b2b_role.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var RoleEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

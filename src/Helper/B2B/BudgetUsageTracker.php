@@ -13,6 +13,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class BudgetUsageTracker
 {
+    /**
+     * @var array<string, array<int, array<string, mixed>>>
+     */
     private array $usageHistory = [];
 
     public function __construct(private readonly ContainerInterface $container) {}
@@ -27,7 +30,7 @@ class BudgetUsageTracker
 
         $newUsedAmount = $budget->getUsedAmount() + $amount;
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -50,13 +53,15 @@ class BudgetUsageTracker
 
     /**
      * Simulate multiple usage transactions.
+     *
+     * @param array<int, array<string, mixed>> $transactions
      */
     public function simulateUsage(string $budgetId, array $transactions, ?Context $context = null): BudgetEntity
     {
         $context ??= Context::createCLIContext();
         foreach ($transactions as $transaction) {
-            $amount = $transaction['amount'] ?? 0;
-            $description = $transaction['description'] ?? '';
+            $amount = isset($transaction['amount']) ? (float) $transaction['amount'] : 0.0;
+            $description = isset($transaction['description']) ? (string) $transaction['description'] : '';
             $this->trackUsage($budgetId, $amount, $description, $context);
         }
 
@@ -65,6 +70,8 @@ class BudgetUsageTracker
 
     /**
      * Get usage history for a budget.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getUsageHistory(string $budgetId): array
     {
@@ -129,10 +136,11 @@ class BudgetUsageTracker
 
     private function loadBudget(string $budgetId, Context $context): BudgetEntity
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);
+        /** @var BudgetEntity|null $budget */
         $budget = $repository->search($criteria, $context)->first();
 
         if (! $budget) {

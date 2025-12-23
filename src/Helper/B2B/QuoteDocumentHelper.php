@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
@@ -19,6 +20,8 @@ class QuoteDocumentHelper
 
     /**
      * Generate a document for a quote.
+     *
+     * @param array<string, mixed> $config
      */
     public function generateDocument(
         string $quoteId,
@@ -28,7 +31,7 @@ class QuoteDocumentHelper
     ): string {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $documentId = Uuid::randomHex();
@@ -47,12 +50,14 @@ class QuoteDocumentHelper
 
     /**
      * Get all documents for a quote.
+     *
+     * @return array<Entity>
      */
     public function getDocuments(string $quoteId, ?Context $context = null): array
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $criteria = new Criteria();
@@ -67,11 +72,11 @@ class QuoteDocumentHelper
     /**
      * Get document by ID.
      */
-    public function getDocument(string $documentId, ?Context $context = null): ?array
+    public function getDocument(string $documentId, ?Context $context = null): ?Entity
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $criteria = new Criteria([$documentId]);
@@ -87,7 +92,7 @@ class QuoteDocumentHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $repository->delete([['id' => $documentId]], $context);
@@ -112,7 +117,7 @@ class QuoteDocumentHelper
     /**
      * Get latest document for a quote.
      */
-    public function getLatestDocument(string $quoteId, ?Context $context = null): ?array
+    public function getLatestDocument(string $quoteId, ?Context $context = null): ?Entity
     {
         $documents = $this->getDocuments($quoteId, $context);
 
@@ -121,13 +126,15 @@ class QuoteDocumentHelper
         }
 
         // Sort by created date descending
-        usort($documents, fn ($a, $b): int => $b->getCreatedAt() <=> $a->getCreatedAt());
+        usort($documents, fn (Entity $a, Entity $b): int => $b->getCreatedAt() <=> $a->getCreatedAt());
 
         return $documents[0];
     }
 
     /**
      * Regenerate all documents for a quote.
+     *
+     * @return array<string>
      */
     public function regenerateDocuments(string $quoteId, ?Context $context = null): array
     {

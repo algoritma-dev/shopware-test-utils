@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\B2B\B2BContextFactory;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Commercial\B2B\OrganizationUnit\Entity\OrganizationEntity;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\Context;
@@ -86,9 +87,10 @@ class OrganizationContextHelper
         $factory->withSalesChannel($currentContext->getSalesChannelId());
 
         // Preserve employee if present
-        $employeeId = $currentContext->getCustomer()?->getExtension('employee')?->getId();
-        if ($employeeId) {
-            $factory->withEmployee($employeeId);
+        /** @var EmployeeEntity|null $employee */
+        $employee = $currentContext->getCustomer()?->getExtension('employee');
+        if ($employee) {
+            $factory->withEmployee($employee->getId());
         }
 
         // Preserve customer
@@ -102,11 +104,11 @@ class OrganizationContextHelper
     /**
      * Get all organizations for a customer.
      *
-     * @return OrganizationEntity[]
+     * @return array<OrganizationEntity>
      */
     public function getCustomerOrganizations(string $customerId): array
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<OrganizationEntity> $repository */
         $repository = $this->container->get('b2b_components_organization.repository');
 
         $criteria = new Criteria();
@@ -125,10 +127,11 @@ class OrganizationContextHelper
      */
     public function employeeBelongsToOrganization(string $employeeId, string $organizationId): bool
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<EmployeeEntity> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
+        /** @var EmployeeEntity|null $employee */
         $employee = $repository->search($criteria, Context::createCLIContext())->first();
 
         if (! $employee) {
@@ -140,7 +143,7 @@ class OrganizationContextHelper
 
     private function loadOrganization(string $organizationId): ?OrganizationEntity
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<OrganizationEntity> $repository */
         $repository = $this->container->get('b2b_components_organization.repository');
 
         $criteria = new Criteria([$organizationId]);
@@ -151,7 +154,10 @@ class OrganizationContextHelper
         $criteria->addAssociation('defaultShippingAddress');
         $criteria->addAssociation('defaultBillingAddress');
 
-        return $repository->search($criteria, Context::createCLIContext())->first();
+        /** @var OrganizationEntity|null $entity */
+        $entity = $repository->search($criteria, Context::createCLIContext())->first();
+
+        return $entity;
     }
 
     private function findCustomerDefaultOrganization(string $customerId): ?OrganizationEntity

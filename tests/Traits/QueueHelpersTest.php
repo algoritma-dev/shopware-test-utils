@@ -3,7 +3,6 @@
 namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
 use Algoritma\ShopwareTestUtils\Traits\QueueHelpers;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -13,9 +12,9 @@ class QueueHelpersTest extends TestCase
 {
     use QueueHelpers;
 
-    private Stub $container;
+    private Stub&ContainerInterface $container;
 
-    private Stub $bus;
+    private Stub&TraceableMessageBus $bus;
 
     protected function setUp(): void
     {

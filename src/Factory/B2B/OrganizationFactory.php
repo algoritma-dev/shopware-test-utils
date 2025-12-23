@@ -13,6 +13,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class OrganizationFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -47,11 +50,14 @@ class OrganizationFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<OrganizationEntity> $repository */
         $repository = $this->container->get('b2b_components_organization.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var OrganizationEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

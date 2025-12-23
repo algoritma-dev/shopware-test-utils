@@ -13,6 +13,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class EmployeeFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -66,11 +69,14 @@ class EmployeeFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<EmployeeEntity> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var EmployeeEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

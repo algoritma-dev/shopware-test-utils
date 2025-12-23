@@ -16,7 +16,7 @@ class CartFactoryTest extends TestCase
         $container = $this->createStub(ContainerInterface::class);
         $context = $this->createStub(SalesChannelContext::class);
         $cartService = $this->createStub(CartService::class);
-        $cart = new Cart('test-token', 'test-token');
+        $cart = new Cart('test-token');
 
         $container->method('get')->willReturn($cartService);
         $cartService->method('getCart')->willReturn($cart);
@@ -32,7 +32,7 @@ class CartFactoryTest extends TestCase
         $container = $this->createStub(ContainerInterface::class);
         $context = $this->createStub(SalesChannelContext::class);
         $cartService = $this->createStub(CartService::class);
-        $cart = new Cart('test-token', 'test-token');
+        $cart = new Cart('test-token');
 
         $container->method('get')->willReturn($cartService);
         $cartService->method('getCart')->willReturn($cart);

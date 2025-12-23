@@ -34,7 +34,7 @@ class ShoppingListCartConverterTest extends TestCase
         $searchResult = $this->createStub(EntitySearchResult::class);
         $shoppingList = new ShoppingListEntity();
         $context = $this->createStub(SalesChannelContext::class);
-        $cart = new Cart('token', 'token');
+        $cart = new Cart('token');
 
         $container->method('get')->willReturnMap([
             [CartService::class, 1, $cartService],

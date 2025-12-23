@@ -3,7 +3,6 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
-use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEnum;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -25,7 +24,7 @@ class BudgetRenewHelper
         $context ??= Context::createCLIContext();
         $this->loadBudget($budgetId, $context);
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -53,12 +52,11 @@ class BudgetRenewHelper
         }
 
         $lastRenews = $budget->getLastRenews();
+        if (! $lastRenews) {
+            return true;
+        }
 
         $now = new \DateTime();
-
-        if ($lastRenews === null) {
-            return false;
-        }
 
         return match (strtolower($renewsType)) {
             'daily' => $lastRenews->format('Y-m-d') !== $now->format('Y-m-d'),
@@ -124,6 +122,8 @@ class BudgetRenewHelper
 
     /**
      * Test renewal for different periods.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function testRenewalCycle(string $budgetId, int $cycles, ?Context $context = null): array
     {
@@ -157,12 +157,12 @@ class BudgetRenewHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);
 
-        /** @var BudgetEntity $budget */
+        /** @var BudgetEntity|null $budget */
         $budget = $repository->search($criteria, $context)->first();
 
         if (! $budget) {
@@ -175,15 +175,7 @@ class BudgetRenewHelper
     private function getRenewsTypeValue(BudgetEntity $budget): ?string
     {
         $type = $budget->getRenewsType();
-        
-        if ($type instanceof \BackedEnum) {
-            return $type->value;
-        }
-        
-        if (is_string($type)) {
-            return $type;
-        }
-        
-        return null;
+
+        return $type->value;
     }
 }

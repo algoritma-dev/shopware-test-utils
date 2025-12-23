@@ -28,13 +28,13 @@ class EmployeeLoginHelper
      */
     public function login(string $email, string $password, ?string $salesChannelId = null): SalesChannelContext
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<EmployeeEntity> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('email', $email));
 
-        /** @var EmployeeEntity $employee */
+        /** @var EmployeeEntity|null $employee */
         $employee = $repository->search($criteria, Context::createCLIContext())->first();
 
         if (! $employee) {

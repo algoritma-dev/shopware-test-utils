@@ -3,10 +3,13 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use PHPUnit\Framework\Assert;
+use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
 use Symfony\Contracts\EventDispatcher\Event;
 
 trait EventHelpers
 {
+    use EventDispatcherBehaviour;
+
     /**
      * @var Event
      */
@@ -24,16 +27,7 @@ trait EventHelpers
             $this->caughtEvents[$eventClass][] = $event;
         };
 
-        // Use Shopware's EventDispatcherBehaviour to register the listener if available.
-        // This ensures the listener is automatically removed after the test.
-        if (method_exists($this, 'addEventListener')) {
-            // Call EventDispatcherBehaviour::addEventListener
-            // Signature: addEventListener(EventDispatcherInterface $dispatcher, string $eventName, callable $callback, int $priority = 0, bool $once = false)
-            $this->addEventListener($dispatcher, $eventClass, $callback);
-        } else {
-            // Fallback if behaviour is not used
-            $dispatcher->addListener($eventClass, $callback);
-        }
+        $this->addEventListener($dispatcher, $eventClass, $callback);
     }
 
     protected function assertEventDispatched(string $eventClass, ?callable $callback = null): void

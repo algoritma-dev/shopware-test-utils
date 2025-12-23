@@ -6,16 +6,22 @@ use Doctrine\DBAL\Connection;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
+use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\Country\CountryEntity;
+use Shopware\Core\System\Salutation\SalutationEntity;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CustomerFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -74,17 +80,20 @@ class CustomerFactory
             $this->data['salesChannelId'] = $this->getSalesChannelId();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<CustomerEntity> $repository */
         $repository = $this->container->get('customer.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var CustomerEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 
     private function getSalutationId(): string
     {
-        /** @var EntityRepository $repo */
+        /** @var EntityRepository<SalutationEntity> $repo */
         $repo = $this->container->get('salutation.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -92,7 +101,7 @@ class CustomerFactory
 
     private function getCountryId(): string
     {
-        /** @var EntityRepository $repo */
+        /** @var EntityRepository<CountryEntity> $repo */
         $repo = $this->container->get('country.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -100,7 +109,7 @@ class CustomerFactory
 
     private function getDefaultPaymentMethodId(): string
     {
-        /** @var EntityRepository $repo */
+        /** @var EntityRepository<PaymentMethodEntity> $repo */
         $repo = $this->container->get('payment_method.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();

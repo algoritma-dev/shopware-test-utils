@@ -25,7 +25,7 @@ class QuoteHelperTest extends TestCase
         $converter = $this->createStub(QuoteToCartConverter::class);
         $quote = new QuoteEntity();
         $context = $this->createStub(SalesChannelContext::class);
-        $cart = new Cart('token', 'token');
+        $cart = new Cart('token');
 
         $container->method('get')->willReturn($converter);
         $converter->method('convertToCart')->willReturn($cart);

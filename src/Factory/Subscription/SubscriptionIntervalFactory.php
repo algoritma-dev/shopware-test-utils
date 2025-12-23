@@ -12,6 +12,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SubscriptionIntervalFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     public function __construct(private readonly ContainerInterface $container) {}
@@ -43,11 +46,14 @@ class SubscriptionIntervalFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<SubscriptionIntervalEntity> $repository */
         $repository = $this->container->get('subscription_interval.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var SubscriptionIntervalEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

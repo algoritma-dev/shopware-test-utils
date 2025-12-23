@@ -10,7 +10,6 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use function method_exists;
 
 /**
  * Helper for creating authenticated employee contexts.
@@ -57,7 +56,7 @@ class EmployeeContextHelper
 
         $factory->withEmployee($employee->getId());
 
-        if ($employee->getBusinessPartnerCustomerId()) {
+        if ($employee->getBusinessPartnerCustomerId() !== '' && $employee->getBusinessPartnerCustomerId() !== '0') {
             $factory->withCustomer($employee->getBusinessPartnerCustomerId());
         }
 
@@ -65,7 +64,7 @@ class EmployeeContextHelper
             $factory->withRole($employee->getRoleId());
         }
 
-        if (method_exists($employee, 'getOrganizationId') && $employee->getOrganizationId()) {
+        if (\method_exists($employee, 'getOrganizationId') && $employee->getOrganizationId()) {
             $factory->withOrganization($employee->getOrganizationId());
         }
 
@@ -78,7 +77,7 @@ class EmployeeContextHelper
 
     private function loadEmployee(string $employeeId): ?EmployeeEntity
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<EmployeeEntity> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
@@ -86,12 +85,15 @@ class EmployeeContextHelper
         $criteria->addAssociation('role');
         $criteria->addAssociation('organization');
 
-        return $repository->search($criteria, Context::createCLIContext())->first();
+        /** @var EmployeeEntity|null $entity */
+        $entity = $repository->search($criteria, Context::createCLIContext())->first();
+
+        return $entity;
     }
 
     private function loadEmployeeByEmail(string $email): ?EmployeeEntity
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<EmployeeEntity> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria();
@@ -100,6 +102,9 @@ class EmployeeContextHelper
         $criteria->addAssociation('role');
         $criteria->addAssociation('organization');
 
-        return $repository->search($criteria, Context::createCLIContext())->first();
+        /** @var EmployeeEntity|null $entity */
+        $entity = $repository->search($criteria, Context::createCLIContext())->first();
+
+        return $entity;
     }
 }

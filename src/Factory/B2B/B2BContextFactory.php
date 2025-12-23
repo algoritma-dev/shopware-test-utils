@@ -30,6 +30,9 @@ class B2BContextFactory
 
     private ?string $currencyId = null;
 
+    /**
+     * @var array<string>
+     */
     private array $permissions = [];
 
     public function __construct(private readonly ContainerInterface $container) {}
@@ -106,6 +109,8 @@ class B2BContextFactory
 
     /**
      * Add B2B permissions to the context.
+     *
+     * @param array<string> $permissions
      */
     public function withPermissions(array $permissions): self
     {

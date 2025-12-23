@@ -10,6 +10,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class AdvancedProductCatalogFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     public function __construct(private readonly ContainerInterface $container) {}
@@ -34,11 +37,14 @@ class AdvancedProductCatalogFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<AdvancedProductCatalogsEntity> $repository */
         $repository = $this->container->get('b2b_advanced_product_catalogs.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var AdvancedProductCatalogsEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

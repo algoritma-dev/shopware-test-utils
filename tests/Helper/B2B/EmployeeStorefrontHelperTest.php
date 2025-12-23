@@ -5,8 +5,6 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 use Algoritma\ShopwareTestUtils\Helper\B2B\EmployeeStorefrontHelper;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
-use Shopware\Commercial\B2B\EmployeeManagement\Entity\Permission\PermissionCollection;
-use Shopware\Commercial\B2B\EmployeeManagement\Entity\Permission\PermissionEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;

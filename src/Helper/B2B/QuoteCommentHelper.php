@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
@@ -29,7 +30,7 @@ class QuoteCommentHelper
     ): string {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
         $commentId = Uuid::randomHex();
@@ -51,6 +52,10 @@ class QuoteCommentHelper
 
     /**
      * Add multiple comments in sequence.
+     *
+     * @param array<string> $messages
+     *
+     * @return array<string>
      */
     public function addComments(string $quoteId, array $messages, ?string $employeeId = null, ?Context $context = null): array
     {
@@ -65,12 +70,14 @@ class QuoteCommentHelper
 
     /**
      * Get all comments for a quote.
+     *
+     * @return array<Entity>
      */
     public function getComments(string $quoteId, ?Context $context = null): array
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
         $criteria = new Criteria();
@@ -94,7 +101,7 @@ class QuoteCommentHelper
     /**
      * Get last comment for a quote.
      */
-    public function getLastComment(string $quoteId, ?Context $context = null): ?array
+    public function getLastComment(string $quoteId, ?Context $context = null): ?Entity
     {
         $comments = $this->getComments($quoteId, $context);
 
@@ -108,7 +115,7 @@ class QuoteCommentHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
         $repository->delete([['id' => $commentId]], $context);
@@ -127,15 +134,19 @@ class QuoteCommentHelper
 
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
-        $ids = array_map(fn ($comment): array => ['id' => $comment->getId()], $comments);
+        $ids = array_map(fn (Entity $comment): array => ['id' => $comment->getId()], $comments);
         $repository->delete($ids, $context);
     }
 
     /**
      * Simulate a conversation between admin and employee.
+     *
+     * @param array<int, array<string, string>> $conversation
+     *
+     * @return array<string>
      */
     public function simulateConversation(
         string $quoteId,

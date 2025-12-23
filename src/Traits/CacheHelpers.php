@@ -10,7 +10,7 @@ use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 trait CacheHelpers
 {
     use KernelTestBehaviour;
-    
+
     /**
      * Clears all cache pools.
      */

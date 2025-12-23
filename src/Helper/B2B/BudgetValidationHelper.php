@@ -63,11 +63,11 @@ class BudgetValidationHelper
         $startDate = $budget->getStartDate();
         $endDate = $budget->getEndDate();
 
-        if ($startDate && $startDate > $now) {
+        if ($startDate > $now) {
             return false;
         }
 
-        return ! ($endDate && $endDate < $now);
+        return ! ($endDate instanceof \DateTimeInterface && $endDate < $now);
     }
 
     /**
@@ -95,7 +95,7 @@ class BudgetValidationHelper
         $budget = $this->loadBudget($budgetId, $context);
         $newUsedAmount = $budget->getUsedAmount() + $amount;
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -115,7 +115,7 @@ class BudgetValidationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -130,12 +130,14 @@ class BudgetValidationHelper
 
     /**
      * Get all active budgets for an organization.
+     *
+     * @return array<BudgetEntity>
      */
     public function getActiveBudgetsForOrganization(string $organizationId, ?Context $context = null): array
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria();
@@ -155,7 +157,8 @@ class BudgetValidationHelper
     {
         $budget = $this->loadBudget($budgetId, $context);
 
-        if (! $budget->getNotify()) {
+        // The method getNotify() does not exist, it should be isNotify()
+        if (! $budget->isNotify()) {
             return false;
         }
 
@@ -202,7 +205,7 @@ class BudgetValidationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);
@@ -210,6 +213,7 @@ class BudgetValidationHelper
         $criteria->addAssociation('employees');
         $criteria->addAssociation('roles');
 
+        /** @var BudgetEntity|null $budget */
         $budget = $repository->search($criteria, $context)->first();
 
         if (! $budget) {

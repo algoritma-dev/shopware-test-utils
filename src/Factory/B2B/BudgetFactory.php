@@ -14,6 +14,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class BudgetFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -64,11 +67,14 @@ class BudgetFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_budget.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var BudgetEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

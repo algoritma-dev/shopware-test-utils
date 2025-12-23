@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\QuickOrder\Entity\CustomerSpecificFeaturesEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -82,14 +83,18 @@ class CustomerFeatureToggleHelper
         $this->updateFeatures($customerId, [], $context);
     }
 
+    /**
+     * @return array<string, mixed>
+     */
     private function getOrCreateCustomerFeatures(string $customerId, Context $context): array
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<CustomerSpecificFeaturesEntity> $repository */
         $repository = $this->container->get('b2b_customer_specific_features.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('customerId', $customerId));
 
+        /** @var CustomerSpecificFeaturesEntity|null $existing */
         $existing = $repository->search($criteria, $context)->first();
 
         if ($existing) {
@@ -106,9 +111,12 @@ class CustomerFeatureToggleHelper
         ];
     }
 
+    /**
+     * @param array<string, mixed> $features
+     */
     private function updateFeatures(string $customerId, array $features, Context $context): void
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<CustomerSpecificFeaturesEntity> $repository */
         $repository = $this->container->get('b2b_customer_specific_features.repository');
 
         $data = $this->getOrCreateCustomerFeatures($customerId, $context);

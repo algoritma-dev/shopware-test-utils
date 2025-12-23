@@ -17,8 +17,14 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class RolePermissionFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
+    /**
+     * @var array<string>
+     */
     private array $permissions = [];
 
     public function __construct(private readonly ContainerInterface $container)
@@ -50,6 +56,8 @@ class RolePermissionFactory
 
     /**
      * Add multiple permissions.
+     *
+     * @param array<string> $permissionCodes
      */
     public function withPermissions(array $permissionCodes): self
     {
@@ -175,13 +183,13 @@ class RolePermissionFactory
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<RoleEntity> $repository */
         $repository = $this->container->get('b2b_role.repository');
 
         // Resolve permission IDs
         $permissionIds = $this->resolvePermissionIds($context);
 
-        $this->data['permissions'] = array_map(fn ($id): array => ['id' => $id], $permissionIds);
+        $this->data['permissions'] = array_map(fn (string $id): array => ['id' => $id], $permissionIds);
 
         $repository->create([$this->data], $context);
 
@@ -240,13 +248,16 @@ class RolePermissionFactory
             ->create($context);
     }
 
+    /**
+     * @return array<string>
+     */
     private function resolvePermissionIds(Context $context): array
     {
         if ($this->permissions === []) {
             return [];
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<Entity> $repository */
         $repository = $this->container->get('b2b_permission.repository');
 
         $criteria = new Criteria();
@@ -259,12 +270,13 @@ class RolePermissionFactory
 
     private function load(string $id, Context $context): RoleEntity
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<RoleEntity> $repository */
         $repository = $this->container->get('b2b_role.repository');
 
         $criteria = new Criteria([$id]);
         $criteria->addAssociation('permissions');
 
+        /** @var RoleEntity|null $role */
         $role = $repository->search($criteria, $context)->first();
 
         if (! $role) {

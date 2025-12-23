@@ -21,7 +21,7 @@ class OrderHelperTest extends TestCase
         $repository = $this->createStub(EntityRepository::class);
         $searchResult = $this->createStub(EntitySearchResult::class);
         $order = new OrderEntity();
-        $cart = new Cart('token', 'token');
+        $cart = new Cart('token');
         $context = $this->createStub(SalesChannelContext::class);
 
         $container->method('get')->willReturnMap([

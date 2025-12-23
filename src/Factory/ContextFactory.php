@@ -18,6 +18,9 @@ class ContextFactory
         return Context::createCLIContext();
     }
 
+    /**
+     * @param array<string, mixed> $options
+     */
     public function createSalesChannelContext(?string $salesChannelId = null, array $options = []): SalesChannelContext
     {
         if (! $salesChannelId) {

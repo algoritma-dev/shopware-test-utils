@@ -10,6 +10,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CustomerSpecificFeaturesFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     public function __construct(private readonly ContainerInterface $container) {}
@@ -21,6 +24,9 @@ class CustomerSpecificFeaturesFactory
         return $this;
     }
 
+    /**
+     * @param array<string, mixed> $features
+     */
     public function withFeatures(array $features): self
     {
         $this->data['features'] = $features;
@@ -34,11 +40,14 @@ class CustomerSpecificFeaturesFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<CustomerSpecificFeaturesEntity> $repository */
         $repository = $this->container->get('b2b_customer_specific_features.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var CustomerSpecificFeaturesEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

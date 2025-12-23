@@ -14,9 +14,9 @@ class EventHelpersTest extends TestCase
 {
     use EventHelpers;
 
-    private Stub $container;
+    private Stub&ContainerInterface $container;
 
-    private MockObject $dispatcher;
+    private MockObject&EventDispatcherInterface $dispatcher;
 
     protected function setUp(): void
     {

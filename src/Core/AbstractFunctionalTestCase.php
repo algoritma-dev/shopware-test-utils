@@ -9,6 +9,9 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
 {
     use SalesChannelFunctionalTestBehaviour;
 
+    /**
+     * @param array<string, mixed> $options
+     */
     protected function createStorefrontHelper(array $options = []): StorefrontRequestHelper
     {
         // createCustomSalesChannelBrowser is provided by SalesChannelFunctionalTestBehaviour

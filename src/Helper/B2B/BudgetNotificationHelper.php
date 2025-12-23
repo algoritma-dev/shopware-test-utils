@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -80,7 +81,7 @@ class BudgetNotificationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -100,7 +101,7 @@ class BudgetNotificationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -115,24 +116,30 @@ class BudgetNotificationHelper
 
     /**
      * Get notification recipients for budget.
+     *
+     * @return array<int, array<string, string>>
      */
     public function getRecipients(string $budgetId, ?Context $context = null): array
     {
         $budget = $this->loadBudget($budgetId, $context);
 
-        if (! $budget->getNotificationRecipients()) {
+        if (! $budget->getNotificationRecipients() instanceof EmployeeCollection) {
             return [];
         }
 
         $recipients = [];
         foreach ($budget->getNotificationRecipients() as $recipient) {
-            if ($recipient->getEmployee()) {
-                $recipients[] = [
-                    'type' => 'employee',
-                    'id' => $recipient->getEmployee()->getId(),
-                    'email' => $recipient->getEmployee()->getEmail(),
-                ];
-            }
+            // Assuming $recipient is EmployeeEntity or similar that has getEmployee() or is the employee itself?
+            // The error says: Call to an undefined method Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity::getEmployee().
+            // This suggests that $recipient IS an EmployeeEntity, so we don't need getEmployee().
+            // Wait, if getNotificationRecipients returns EmployeeCollection, then $recipient is EmployeeEntity.
+            // So we should use $recipient directly.
+
+            $recipients[] = [
+                'type' => 'employee',
+                'id' => $recipient->getId(),
+                'email' => $recipient->getEmail(),
+            ];
         }
 
         return $recipients;
@@ -140,6 +147,8 @@ class BudgetNotificationHelper
 
     /**
      * Simulate notification trigger.
+     *
+     * @return array<string, mixed>
      */
     public function simulateNotificationTrigger(string $budgetId, ?Context $context = null): array
     {
@@ -171,6 +180,10 @@ class BudgetNotificationHelper
 
     /**
      * Test multiple notification scenarios.
+     *
+     * @param array<float> $usageAmounts
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function testNotificationScenarios(string $budgetId, array $usageAmounts, ?Context $context = null): array
     {
@@ -192,7 +205,7 @@ class BudgetNotificationHelper
 
     private function updateBudgetUsage(string $budgetId, float $usedAmount, Context $context): void
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -208,13 +221,14 @@ class BudgetNotificationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<BudgetEntity> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);
         $criteria->addAssociation('notificationRecipients');
         $criteria->addAssociation('notificationRecipients.employee');
 
+        /** @var BudgetEntity|null $budget */
         $budget = $repository->search($criteria, $context)->first();
 
         if (! $budget) {

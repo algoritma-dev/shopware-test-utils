@@ -119,6 +119,8 @@ class QuoteStateMachineHelper
 
     /**
      * Get available transitions for a quote.
+     *
+     * @return array<int, array<string, mixed>>
      */
     public function getAvailableTransitions(string $quoteId, ?Context $context = null): array
     {
@@ -166,13 +168,14 @@ class QuoteStateMachineHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<QuoteEntity> $repository */
         $repository = $this->container->get('quote.repository');
 
         $criteria = new Criteria([$quoteId]);
         $criteria->addAssociation('stateMachineState');
         $criteria->addAssociation('lineItems');
 
+        /** @var QuoteEntity|null $quote */
         $quote = $repository->search($criteria, $context)->first();
 
         if (! $quote) {

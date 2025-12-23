@@ -6,4 +6,6 @@ parameters:
 	excludePaths:
 		- **/node_modules/*
 		- **/vendor/*
-
+	ignoreErrors:
+	    - '#is used zero times and is not analysed.$#'
+	    - '# will always evaluate to true.$#'

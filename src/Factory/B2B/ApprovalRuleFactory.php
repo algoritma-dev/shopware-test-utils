@@ -13,6 +13,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ApprovalRuleFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -44,6 +47,9 @@ class ApprovalRuleFactory
         return $this;
     }
 
+    /**
+     * @param array<int, mixed> $conditions
+     */
     public function withConditions(array $conditions): self
     {
         $this->data['conditions'] = $conditions;
@@ -57,11 +63,14 @@ class ApprovalRuleFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<ApprovalRuleEntity> $repository */
         $repository = $this->container->get('b2b_approval_rule.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var ApprovalRuleEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 }

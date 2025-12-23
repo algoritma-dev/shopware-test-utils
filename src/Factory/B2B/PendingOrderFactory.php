@@ -20,6 +20,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class PendingOrderFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     public function __construct(private readonly ContainerInterface $container) {}
@@ -70,6 +73,8 @@ class PendingOrderFactory
 
     /**
      * Set designated payers for budget approval.
+     *
+     * @param array<string> $payerIds
      */
     public function withDesignatedPayers(array $payerIds): self
     {
@@ -90,6 +95,8 @@ class PendingOrderFactory
 
     /**
      * Set custom fields.
+     *
+     * @param array<string, mixed> $customFields
      */
     public function withCustomFields(array $customFields): self
     {
@@ -125,7 +132,7 @@ class PendingOrderFactory
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<PendingOrderEntity> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         if (! isset($this->data['id'])) {
@@ -173,7 +180,7 @@ class PendingOrderFactory
 
     private function load(string $id, Context $context): PendingOrderEntity
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<PendingOrderEntity> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         $criteria = new Criteria([$id]);
@@ -182,6 +189,7 @@ class PendingOrderFactory
         $criteria->addAssociation('approvalRule');
         $criteria->addAssociation('stateMachineState');
 
+        /** @var PendingOrderEntity|null $entity */
         $entity = $repository->search($criteria, $context)->first();
 
         if (! $entity) {

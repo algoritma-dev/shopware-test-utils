@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use PHPUnit\Framework\Assert;
+use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Mailer\Event\MessageEvent;
 use Symfony\Component\Mime\Email;
@@ -10,6 +11,7 @@ use Symfony\Component\Mime\Email;
 trait MailHelpers
 {
     use KernelTestBehaviour;
+    use EventDispatcherBehaviour;
 
     private array $capturedEmails = [];
 
@@ -21,17 +23,13 @@ trait MailHelpers
         $this->capturedEmails = [];
 
         // Subscribe to MessageEvent to capture emails
-        $dispatcher = $this->getContainer()->get('event_dispatcher');
+        $dispatcher = self::getContainer()->get('event_dispatcher');
 
         $callback = function (MessageEvent $event): void {
             $this->capturedEmails[] = $event->getMessage();
         };
 
-        if (method_exists($this, 'addEventListener')) {
-            $this->addEventListener($dispatcher, MessageEvent::class, $callback);
-        } else {
-            $dispatcher->addListener(MessageEvent::class, $callback);
-        }
+        $this->addEventListener($dispatcher, MessageEvent::class, $callback);
     }
 
     /**

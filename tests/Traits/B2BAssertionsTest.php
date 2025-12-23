@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
 use Algoritma\ShopwareTestUtils\Traits\B2BAssertions;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
@@ -22,19 +23,14 @@ class B2BAssertionsTest extends TestCase
 {
     use B2BAssertions;
 
-    private $container;
+    private Stub&ContainerInterface $container;
 
     protected function setUp(): void
     {
-        if (!class_exists(BudgetEntity::class)) {
+        if (! class_exists(BudgetEntity::class)) {
             $this->markTestSkipped('Shopware Commercial B2B extension is not installed.');
         }
         $this->container = $this->createStub(ContainerInterface::class);
-    }
-
-    protected function getContainer(): ContainerInterface
-    {
-        return $this->container;
     }
 
     public function testAssertQuoteInState(): void
@@ -43,7 +39,7 @@ class B2BAssertionsTest extends TestCase
         $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
         $state = new StateMachineStateEntity();
-        
+
         $state->setTechnicalName('open');
         $quote->setStateMachineState($state);
 
@@ -59,7 +55,7 @@ class B2BAssertionsTest extends TestCase
         $repository = $this->createStub(EntityRepository::class);
         $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
-        
+
         $budget->setAmount(100.0);
         $budget->setUsedAmount(110.0);
 
@@ -72,7 +68,7 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertEmployeeHasPermission(): void
     {
-        if (!class_exists(PermissionEntity::class)) {
+        if (! class_exists(PermissionEntity::class)) {
             $this->markTestSkipped('PermissionEntity not found');
         }
 
@@ -138,7 +134,7 @@ class B2BAssertionsTest extends TestCase
     {
         $repository = $this->createStub(EntityRepository::class);
         $searchResult = $this->createStub(EntitySearchResult::class);
-        
+
         $this->container->method('get')->willReturn($repository);
         $repository->method('search')->willReturn($searchResult);
         $searchResult->method('getElements')->willReturn([new \stdClass()]);
@@ -151,7 +147,7 @@ class B2BAssertionsTest extends TestCase
         $repository = $this->createStub(EntityRepository::class);
         $searchResult = $this->createStub(EntitySearchResult::class);
         $budget = new BudgetEntity();
-        
+
         $budget->setNotify(true);
         $budget->setAmount(100.0);
         $budget->setUsedAmount(90.0);
@@ -169,7 +165,7 @@ class B2BAssertionsTest extends TestCase
         $repository = $this->createStub(EntityRepository::class);
         $searchResult = $this->createStub(EntitySearchResult::class);
         $employee = new EmployeeEntity();
-        
+
         $employee->setRoleId('role-id');
 
         $this->container->method('get')->willReturn($repository);
@@ -181,7 +177,7 @@ class B2BAssertionsTest extends TestCase
 
     public function testAssertQuoteCanBeConverted(): void
     {
-        if (!class_exists(QuoteLineItemCollection::class)) {
+        if (! class_exists(QuoteLineItemCollection::class)) {
             $this->markTestSkipped('QuoteLineItemCollection not found');
         }
 
@@ -203,5 +199,10 @@ class B2BAssertionsTest extends TestCase
         $searchResult->method('first')->willReturn($quote);
 
         $this->assertQuoteCanBeConverted('quote-id');
+    }
+
+    protected function getContainer(): ContainerInterface
+    {
+        return $this->container;
     }
 }

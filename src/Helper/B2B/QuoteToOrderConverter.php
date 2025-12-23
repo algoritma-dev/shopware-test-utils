@@ -5,8 +5,10 @@ namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 use Algoritma\ShopwareTestUtils\Helper\CheckoutRunner;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteStates;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemCollection;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
+use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
 use Shopware\Core\Checkout\Cart\Price\Struct\QuantityPriceDefinition;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\OrderEntity;
@@ -39,10 +41,6 @@ class QuoteToOrderConverter
     {
         $quote = $this->loadQuote($quoteId, $context->getContext());
 
-        if (! $quote) {
-            throw new \RuntimeException(sprintf('Quote with ID "%s" not found', $quoteId));
-        }
-
         // Create cart from quote
         $cart = $this->createCartFromQuote($quote, $context);
 
@@ -57,7 +55,7 @@ class QuoteToOrderConverter
     {
         $cart = $this->cartService->createNew($context->getToken());
 
-        if (! $quote->getLineItems()) {
+        if (! $quote->getLineItems() instanceof QuoteLineItemCollection) {
             throw new \RuntimeException('Quote has no line items');
         }
 
@@ -70,7 +68,7 @@ class QuoteToOrderConverter
             );
 
             // Set price from quote
-            if ($quoteLineItem->getPrice()) {
+            if ($quoteLineItem->getPrice() instanceof CalculatedPrice) {
                 $lineItem->setPriceDefinition(
                     new QuantityPriceDefinition(
                         $quoteLineItem->getPrice()->getUnitPrice(),
@@ -131,14 +129,14 @@ class QuoteToOrderConverter
         }
 
         // Check if quote has line items
-        return $quote->getLineItems() && count($quote->getLineItems()) !== 0;
+        return $quote->getLineItems() instanceof QuoteLineItemCollection && count($quote->getLineItems()) !== 0;
     }
 
     private function loadQuote(string $quoteId, ?Context $context): QuoteEntity
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<QuoteEntity> $repository */
         $repository = $this->container->get('quote.repository');
 
         $criteria = new Criteria([$quoteId]);
@@ -148,6 +146,7 @@ class QuoteToOrderConverter
         $criteria->addAssociation('customer');
         $criteria->addAssociation('price');
 
+        /** @var QuoteEntity|null $quote */
         $quote = $repository->search($criteria, $context)->first();
 
         if (! $quote) {

@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity;
+use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingListLineItem\ShoppingListLineItemCollection;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
@@ -34,7 +35,7 @@ class ShoppingListCartConverter
 
         $cart = $this->cartService->createNew($context->getToken());
 
-        if (! $shoppingList->getLineItems() || count($shoppingList->getLineItems()) === 0) {
+        if (! $shoppingList->getLineItems() instanceof ShoppingListLineItemCollection || count($shoppingList->getLineItems()) === 0) {
             return $cart;
         }
 
@@ -59,7 +60,7 @@ class ShoppingListCartConverter
     {
         $shoppingList = $this->loadShoppingList($shoppingListId, $context->getContext());
 
-        if (! $shoppingList->getLineItems()) {
+        if (! $shoppingList->getLineItems() instanceof ShoppingListLineItemCollection) {
             return $cart;
         }
 
@@ -94,7 +95,7 @@ class ShoppingListCartConverter
     {
         $shoppingList = $this->loadShoppingList($shoppingListId, $context);
 
-        return $shoppingList->getLineItems() ? count($shoppingList->getLineItems()) : 0;
+        return $shoppingList->getLineItems() instanceof ShoppingListLineItemCollection ? count($shoppingList->getLineItems()) : 0;
     }
 
     private function loadShoppingList(string $shoppingListId, ?Context $context): ShoppingListEntity

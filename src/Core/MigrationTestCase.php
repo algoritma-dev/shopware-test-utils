@@ -3,6 +3,8 @@
 namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Traits\DatabaseHelpers;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use PHPUnit\Framework\Assert;
 use Shopware\Core\Framework\Migration\MigrationStep;
 
@@ -85,6 +87,7 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
+        /** @var Column[] $columns */
         $columns = $schemaManager->listTableColumns($table);
 
         Assert::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s"', $column, $table));
@@ -120,6 +123,7 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
+        /** @var ForeignKeyConstraint[] $foreignKeys */
         $foreignKeys = $schemaManager->listTableForeignKeys($table);
 
         $found = false;
@@ -146,6 +150,8 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
 
     /**
      * Creates a legacy table for testing data migration.
+     *
+     * @param array<string, string> $columns
      */
     protected function createLegacyTable(string $table, array $columns): void
     {
@@ -167,6 +173,8 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
 
     /**
      * Seeds legacy data for testing migration.
+     *
+     * @param array<int, array<string, mixed>> $rows
      */
     protected function seedLegacyData(string $table, array $rows): void
     {
@@ -175,6 +183,8 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
 
     /**
      * Asserts that data was correctly migrated.
+     *
+     * @param array<int, array<string, mixed>> $expected
      */
     protected function assertDataMigrated(string $table, array $expected): void
     {
@@ -217,6 +227,8 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
 
     /**
      * Gets the schema snapshot of a table.
+     *
+     * @return array<string, mixed>
      */
     protected function getTableSchema(string $table): array
     {
@@ -232,6 +244,8 @@ abstract class MigrationTestCase extends AbstractIntegrationTestCase
 
     /**
      * Gets a full schema snapshot.
+     *
+     * @return array<string, array<string, mixed>>
      */
     protected function getSchemaSnapshot(): array
     {

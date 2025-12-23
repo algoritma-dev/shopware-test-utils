@@ -2,7 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -44,11 +46,13 @@ class EmployeeStorefrontHelper
     public function canPerformAction(string $employeeId, string $permissionCode, ?Context $context = null): bool
     {
         $context ??= Context::createCLIContext();
+        /** @var EntityRepository<EmployeeEntity> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
         $criteria->addAssociation('role.permissions');
 
+        /** @var EmployeeEntity|null $employee */
         $employee = $repository->search($criteria, $context)->first();
 
         if (! $employee || ! $employee->getRole()) {

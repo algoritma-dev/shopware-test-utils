@@ -38,6 +38,9 @@ abstract class AbstractIntegrationTestCase extends TestCase
         return $this->getContainer()->get(Connection::class);
     }
 
+    /**
+     * @return object|null
+     */
     protected function getService(string $serviceId)
     {
         return $this->getContainer()->get($serviceId);

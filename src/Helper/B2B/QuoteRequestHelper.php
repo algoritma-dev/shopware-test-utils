@@ -17,6 +17,8 @@ class QuoteRequestHelper
 
     /**
      * Convert cart to quote request.
+     *
+     * @param array<string, mixed> $additionalData
      */
     public function requestQuote(Cart $cart, SalesChannelContext $context, array $additionalData = []): string
     {
@@ -50,6 +52,9 @@ class QuoteRequestHelper
         return $quoteId;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     private function convertCartLineItems(Cart $cart): array
     {
         $lineItems = [];

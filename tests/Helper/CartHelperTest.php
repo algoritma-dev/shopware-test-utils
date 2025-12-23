@@ -15,7 +15,7 @@ class CartHelperTest extends TestCase
     {
         $container = $this->createStub(ContainerInterface::class);
         $cartService = $this->createStub(CartService::class);
-        $cart = new Cart('token', 'token');
+        $cart = new Cart('token');
         $context = $this->createStub(SalesChannelContext::class);
 
         $container->method('get')->willReturn($cartService);
@@ -31,7 +31,7 @@ class CartHelperTest extends TestCase
     {
         $container = $this->createStub(ContainerInterface::class);
         $cartService = $this->createStub(CartService::class);
-        $cart = new Cart('token', 'token');
+        $cart = new Cart('token');
         $context = $this->createStub(SalesChannelContext::class);
 
         $container->method('get')->willReturn($cartService);

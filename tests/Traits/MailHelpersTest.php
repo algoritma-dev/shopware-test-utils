@@ -15,9 +15,9 @@ class MailHelpersTest extends TestCase
 {
     use MailHelpers;
 
-    private static Stub $container;
+    private static Stub&ContainerInterface $container;
 
-    private MockObject $dispatcher;
+    private MockObject&EventDispatcherInterface $dispatcher;
 
     protected function setUp(): void
     {

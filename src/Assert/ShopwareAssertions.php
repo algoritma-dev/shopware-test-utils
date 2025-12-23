@@ -3,6 +3,9 @@
 namespace Algoritma\ShopwareTestUtils\Assert;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use PHPUnit\Framework\Assert;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
@@ -13,6 +16,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\System\SalesChannel\SalesChannelEntity;
 
 trait ShopwareAssertions
 {
@@ -58,9 +62,13 @@ trait ShopwareAssertions
 
     // --- Database Assertions ---
 
+    /**
+     * @param array<string, mixed> $conditions
+     */
     protected function assertDatabaseHas(string $table, array $conditions): void
     {
         $connection = $this->getContainer()->get(Connection::class);
+        /** @var QueryBuilder $qb */
         $qb = $connection->createQueryBuilder();
         $qb->select('COUNT(*)')
             ->from($table);
@@ -73,9 +81,13 @@ trait ShopwareAssertions
         Assert::assertGreaterThan(0, $count, sprintf('Failed asserting that table "%s" contains row with conditions: %s', $table, json_encode($conditions)));
     }
 
+    /**
+     * @param array<string, mixed> $conditions
+     */
     protected function assertDatabaseMissing(string $table, array $conditions): void
     {
         $connection = $this->getContainer()->get(Connection::class);
+        /** @var QueryBuilder $qb */
         $qb = $connection->createQueryBuilder();
         $qb->select('COUNT(*)')
             ->from($table);
@@ -114,6 +126,7 @@ trait ShopwareAssertions
     {
         $connection = $this->getContainer()->get(Connection::class);
         $schemaManager = $connection->createSchemaManager();
+        /** @var Column[] $columns */
         $columns = $schemaManager->listTableColumns($table);
         Assert::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s".', $column, $table));
 
@@ -133,6 +146,7 @@ trait ShopwareAssertions
     {
         $connection = $this->getContainer()->get(Connection::class);
         $schemaManager = $connection->createSchemaManager();
+        /** @var ForeignKeyConstraint[] $foreignKeys */
         $foreignKeys = $schemaManager->listTableForeignKeys($table);
 
         $found = false;
@@ -189,6 +203,7 @@ trait ShopwareAssertions
             Assert::fail(sprintf('Entity %s does not have attribute/getter "%s".', $entityName, $attribute));
         }
 
+        // @phpstan-ignore-next-line
         $actualValue = $entity->$getter();
         Assert::assertEquals($expectedValue, $actualValue, sprintf('Entity %s attribute "%s" has value "%s", expected "%s".', $entityName, $attribute, $actualValue, $expectedValue));
     }
@@ -348,6 +363,7 @@ trait ShopwareAssertions
         $repository = $this->getContainer()->get('sales_channel.repository');
         $context = Context::createCLIContext();
 
+        /** @var SalesChannelEntity|null $salesChannel */
         $salesChannel = $repository->search(new Criteria([$salesChannelId]), $context)->first();
         Assert::assertNotNull($salesChannel, sprintf('Sales channel %s not found', $salesChannelId));
         Assert::assertTrue($salesChannel->getActive(), sprintf('Sales channel %s is not active', $salesChannelId));

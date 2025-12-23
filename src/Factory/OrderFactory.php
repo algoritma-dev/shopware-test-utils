@@ -16,10 +16,15 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\Country\CountryEntity;
+use Shopware\Core\System\Salutation\SalutationEntity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class OrderFactory
 {
+    /**
+     * @var array<string, mixed>
+     */
     private array $data;
 
     private readonly Generator $faker;
@@ -177,12 +182,15 @@ class OrderFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<OrderEntity> $repository */
         $repository = $this->container->get('order.repository');
 
         $repository->create([$this->data], $context);
 
-        return $repository->search(new Criteria([$this->data['id']]), $context)->first();
+        /** @var OrderEntity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
     }
 
     private function getSalesChannelId(): string
@@ -216,6 +224,7 @@ class OrderFactory
 
     private function getSalutationId(): string
     {
+        /** @var EntityRepository<SalutationEntity> $repo */
         $repo = $this->container->get('salutation.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -223,6 +232,7 @@ class OrderFactory
 
     private function getCountryId(): string
     {
+        /** @var EntityRepository<CountryEntity> $repo */
         $repo = $this->container->get('country.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();

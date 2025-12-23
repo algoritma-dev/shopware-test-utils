@@ -6,14 +6,13 @@ use Algoritma\ShopwareTestUtils\Helper\B2B\QuoteToOrderConverter;
 use Algoritma\ShopwareTestUtils\Helper\CheckoutRunner;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
-use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteLineItem\QuoteLineItemCollection;
-use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteLineItem\QuoteLineItemEntity;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemCollection;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemEntity;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Cart\Tax\Struct\CalculatedTaxCollection;
 use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRuleCollection;
-use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -39,16 +38,7 @@ class QuoteToOrderConverterTest extends TestCase
         $searchResult = $this->createStub(EntitySearchResult::class);
         $quote = new QuoteEntity();
         $context = $this->createStub(SalesChannelContext::class);
-        $cart = new Cart('token', 'token');
-        new OrderEntity();
-
-        // Mock CheckoutRunner behavior (since it's instantiated in constructor, we might need to mock container get)
-        // But CheckoutRunner is new'ed up in constructor in the provided code:
-        // $this->checkoutRunner = new CheckoutRunner($this->container);
-        // So we need to mock what CheckoutRunner needs from container.
-
-        // CheckoutRunner needs 'cart.service' and 'order.repository' usually.
-        // Let's assume we can mock the container to return services needed by CheckoutRunner too.
+        $cart = new Cart('token');
 
         $container->method('get')->willReturnMap([
             [CartService::class, 1, $cartService],
