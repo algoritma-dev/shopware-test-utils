@@ -17,6 +17,7 @@ The suite provides two base classes located in `src/TestUtils/Core/`:
         *   Service Container access helpers (`getService`).
         *   Integrated Assertions (`EventHelpers`, `QueueHelpers`, `MailHelpers`, `ShopwareAssertions`).
         *   Fluent Factory access.
+        *   **Fixture Loading**: `loadFixtures()` helper for loading data fixtures with dependency resolution.
 *   **`AbstractFunctionalTestCase`**: Extends `AbstractIntegrationTestCase` for HTTP/Browser-based functional tests.
     *   **Features:**
         *   Includes `SalesChannelFunctionalTestBehaviour`.
@@ -125,6 +126,26 @@ Traits integrated into the base classes to simplify assertions.
     *   `assertBudgetNotificationTriggered()`: Budget notification checks.
     *   `assertEmployeeHasRole()`: Role assignment verification.
     *   `assertQuoteCanBeConverted()`: Quote→Order conversion validation.
+
+### 2.5 Fixtures (`src/TestUtils/Fixture/`)
+A robust fixture system for loading test data with dependency resolution.
+
+*   **`FixtureInterface`**: Contract for all fixtures.
+*   **`AbstractFixture`**: Base class providing container access (`getContainer()`).
+*   **`FixtureManager`**: Handles loading order and dependency injection.
+*   **`ReferenceRepository`**: Shares objects between fixtures.
+
+**Example:**
+```php
+class MyFixture extends AbstractFixture
+{
+    public function load(ReferenceRepository $references): void
+    {
+        $repo = $this->getContainer()->get('product.repository');
+        // ...
+    }
+}
+```
 
 ## 3. IDE Integration
 *   **`.phpstorm.meta.php`**: Provides autocompletion for `$this->getService('service.id')`.
@@ -318,3 +339,4 @@ class BudgetExceededApprovalTest extends AbstractIntegrationTestCase
 - [x] **MultiWarehouse Integration:** Added factories for Warehouse and WarehouseGroup.
 - [x] **Subscription Integration:** Added factories for SubscriptionPlan and SubscriptionInterval.
 - [x] **ReturnManagement Integration:** Added factory for OrderReturn.
+- [x] **Fixture System:** Implemented `FixtureManager`, `AbstractFixture`, and `FixtureInterface` with container injection support.

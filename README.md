@@ -220,6 +220,7 @@ Base class for **integration tests** (database, repositories, services).
 - Mail capturing
 - Queue testing support
 - Custom assertions
+- **Fixture Loading**: Load fixtures with automatic dependency resolution and container injection.
 
 ### `AbstractFunctionalTestCase`
 
@@ -316,12 +317,41 @@ src/
 └── Fixture/
     ├── FixtureInterface.php
     ├── FixtureManager.php
+    ├── AbstractFixture.php
     └── ReferenceRepository.php
 ```
 
 ---
 
 ## 🔍 Advanced Examples
+
+### Testing with Fixtures
+
+```php
+use Algoritma\ShopwareTestUtils\Fixture\AbstractFixture;
+use Algoritma\ShopwareTestUtils\Fixture\ReferenceRepository;
+
+class MyFixture extends AbstractFixture
+{
+    public function load(ReferenceRepository $references): void
+    {
+        // Access container
+        $repo = $this->getContainer()->get('product.repository');
+        
+        // Create data...
+    }
+}
+
+class MyTest extends AbstractIntegrationTestCase
+{
+    public function testWithFixture(): void
+    {
+        $this->loadFixtures(new MyFixture());
+        
+        // ...
+    }
+}
+```
 
 ### Testing with Time Travel
 
