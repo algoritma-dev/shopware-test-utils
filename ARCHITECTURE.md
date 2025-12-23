@@ -1,17 +1,17 @@
 # Test Suite Architecture
 
-## 📐 Principi di Separazione delle Responsabilità
+## 📐 Separation of Responsibilities Principles
 
-Questa test suite segue rigorosamente il **Single Responsibility Principle (SRP)** e il pattern **Factory/Builder/Helper**:
+This test suite strictly follows the **Single Responsibility Principle (SRP)** and the **Factory/Builder/Helper** pattern:
 
-### **Factory** = Crea entità/oggetti
-- **Responsabilità**: Costruire e configurare nuove istanze di entità
-- **Ritorna**: L'entità creata
-- **Naming**: `*Factory` (es. `ProductFactory`, `CustomerFactory`)
-- **Pattern**: Builder pattern per configurazioni complesse
-- **Metodo finale**: `create()` per ottenere l'istanza
+### **Factory** = Creates entities/objects
+- **Responsibility**: Build and configure new entity instances
+- **Returns**: The created entity
+- **Naming**: `*Factory` (e.g. `ProductFactory`, `CustomerFactory`)
+- **Pattern**: Builder pattern for complex configurations
+- **Final method**: `create()` to obtain the instance
 
-**Esempio:**
+**Example:**
 ```php
 $product = (new ProductFactory($container))
     ->withName('Test Product')
@@ -22,13 +22,13 @@ $product = (new ProductFactory($container))
 
 ---
 
-### **Helper** = Esegue azioni su entità esistenti
-- **Responsabilità**: Operazioni, trasformazioni, azioni su entità già create
-- **NON crea** entità (usa Factory per quello)
-- **Naming**: `*Helper` (es. `OrderHelper`, `MediaHelper`, `CartHelper`)
-- **Esempi di azioni**: delete, update, assign, transition, cancel
+### **Helper** = Executes actions on existing entities
+- **Responsibility**: Operations, transformations, actions on already created entities
+- **Does NOT create** entities (use Factory for that)
+- **Naming**: `*Helper` (e.g. `OrderHelper`, `MediaHelper`, `CartHelper`)
+- **Action examples**: delete, update, assign, transition, cancel
 
-**Esempio:**
+**Example:**
 ```php
 $orderHelper = new OrderHelper($container);
 $orderHelper->cancelOrder($orderId);
@@ -38,56 +38,56 @@ $orderHelper->markOrderAsShipped($orderId);
 
 ---
 
-### **Builder** = Pattern specifico per costruzioni complesse
-- **Uso**: Solo quando serve costruzione step-by-step con stato mutabile
-- **Nota**: In questa suite, `CartFactory` usa il pattern Builder internamente
-- **Differenza**: Builder ha stato mutabile, Factory è immutabile
+### **Builder** = Specific pattern for complex constructions
+- **Usage**: Only when step-by-step construction with mutable state is needed
+- **Note**: In this suite, `CartFactory` uses the Builder pattern internally
+- **Difference**: Builder has mutable state, Factory is immutable
 
 ---
 
-## 🗂️ Struttura Directory
+## 🗂️ Directory Structure
 
 ```
 src/TestUtils/
 ├── Assert/
-│   └── ShopwareAssertions.php          # Asserzioni personalizzate
+│   └── ShopwareAssertions.php          # Custom assertions
 ├── Core/
-│   ├── AbstractIntegrationTestCase.php # Base per integration tests
-│   ├── AbstractFunctionalTestCase.php  # Base per functional tests
-│   └── MigrationTestCase.php           # Base per migration tests
-├── Factory/                             # CREA ENTITÀ
-│   ├── CartFactory.php                 # Crea e configura carrelli
-│   ├── ProductFactory.php              # Crea prodotti
-│   ├── CustomerFactory.php             # Crea clienti
-│   ├── OrderFactory.php                # Crea ordini
-│   ├── MediaFactory.php                # Crea media
+│   ├── AbstractIntegrationTestCase.php # Base for integration tests
+│   ├── AbstractFunctionalTestCase.php  # Base for functional tests
+│   └── MigrationTestCase.php           # Base for migration tests
+├── Factory/                             # CREATES ENTITIES
+│   ├── CartFactory.php                 # Creates and configures carts
+│   ├── ProductFactory.php              # Creates products
+│   ├── CustomerFactory.php             # Creates customers
+│   ├── OrderFactory.php                # Creates orders
+│   ├── MediaFactory.php                # Creates media
 │   └── ...
-├── Helper/                              # ESEGUE AZIONI
-│   ├── CartHelper.php                  # Azioni su carrelli (clear, remove, etc.)
-│   ├── OrderHelper.php                 # Azioni su ordini (place, cancel, etc.)
-│   ├── MediaHelper.php                 # Azioni su media (assign, delete, etc.)
-│   ├── StateManager.php                # Gestione state machine
-│   └── MigrationDataTester.php         # Test integrità migrazioni
-└── Traits/                              # COMPORTAMENTI RIUTILIZZABILI
-    ├── DatabaseHelpers.php             # Operazioni DB (truncate, snapshot)
-    ├── CacheHelpers.php                # Gestione cache
-    ├── TimeHelpers.php                 # Time travel per test
-    ├── ConfigHelpers.php               # Gestione config
-    ├── LogHelpers.php                  # Capture e assert log
-    ├── MailHelpers.php                 # Capture e assert email
-    ├── EventHelpers.php                # Capture e assert eventi
-    ├── QueueHelpers.php                # Gestione queue
-    └── MigrationHelpers.php            # Utility migrazioni
+├── Helper/                              # EXECUTES ACTIONS
+│   ├── CartHelper.php                  # Actions on carts (clear, remove, etc.)
+│   ├── OrderHelper.php                 # Actions on orders (place, cancel, etc.)
+│   ├── MediaHelper.php                 # Actions on media (assign, delete, etc.)
+│   ├── StateManager.php                # State machine management
+│   └── MigrationDataTester.php         # Migration integrity testing
+└── Traits/                              # REUSABLE BEHAVIORS
+    ├── DatabaseHelpers.php             # DB operations (truncate, snapshot)
+    ├── CacheHelpers.php                # Cache management
+    ├── TimeHelpers.php                 # Time travel for tests
+    ├── ConfigHelpers.php               # Config management
+    ├── LogHelpers.php                  # Capture and assert logs
+    ├── MailHelpers.php                 # Capture and assert emails
+    ├── EventHelpers.php                # Capture and assert events
+    ├── QueueHelpers.php                # Queue management
+    └── MigrationHelpers.php            # Migration utilities
 ```
 
 ---
 
-## 🎨 Pattern e Best Practices
+## 🎨 Patterns and Best Practices
 
-### **1. Factory Pattern (Creazione)**
+### **1. Factory Pattern (Creation)**
 
 ```php
-// ✅ CORRETTO - Factory crea entità
+// ✅ CORRECT - Factory creates entities
 class ProductFactory
 {
     public function withName(string $name): self { ... }
@@ -95,16 +95,16 @@ class ProductFactory
     public function create(): ProductEntity { ... }
 }
 
-// Uso:
+// Usage:
 $product = (new ProductFactory($container))
     ->withName('Product')
     ->create();
 ```
 
-### **2. Helper Pattern (Azioni)**
+### **2. Helper Pattern (Actions)**
 
 ```php
-// ✅ CORRETTO - Helper esegue azioni
+// ✅ CORRECT - Helper executes actions
 class OrderHelper
 {
     public function cancelOrder(string $orderId): void { ... }
@@ -112,22 +112,22 @@ class OrderHelper
     public function getOrder(string $orderId): OrderEntity { ... }
 }
 
-// Uso:
+// Usage:
 $helper = new OrderHelper($container);
 $helper->cancelOrder($orderId);
 ```
 
-### **3. Trait Pattern (Comportamenti)**
+### **3. Trait Pattern (Behaviors)**
 
 ```php
-// ✅ CORRETTO - Trait fornisce metodi riutilizzabili
+// ✅ CORRECT - Trait provides reusable methods
 trait TimeHelpers
 {
     protected function freezeTime(\DateTimeInterface $at): void { ... }
     protected function travelTo(\DateTimeInterface $to): void { ... }
 }
 
-// Uso nel test:
+// Usage in test:
 class MyTest extends AbstractIntegrationTestCase
 {
     use TimeHelpers;
@@ -142,54 +142,54 @@ class MyTest extends AbstractIntegrationTestCase
 
 ---
 
-## ❌ Anti-Pattern da Evitare
+## ❌ Anti-Patterns to Avoid
 
-### **1. Factory che esegue azioni**
+### **1. Factory that executes actions**
 ```php
-// ❌ SBAGLIATO - Factory non dovrebbe fare azioni
+// ❌ WRONG - Factory should not perform actions
 class OrderFactory
 {
     public function cancelOrder(string $id): void { ... }  // NO!
 }
 
-// ✅ CORRETTO - Usa Helper
+// ✅ CORRECT - Use Helper
 class OrderHelper
 {
     public function cancelOrder(string $id): void { ... }  // OK!
 }
 ```
 
-### **2. Helper che crea entità**
+### **2. Helper that creates entities**
 ```php
-// ❌ SBAGLIATO - Helper non dovrebbe creare
+// ❌ WRONG - Helper should not create
 class MediaHelper
 {
     public function createTestImage(): MediaEntity { ... }  // NO!
 }
 
-// ✅ CORRETTO - Usa Factory
+// ✅ CORRECT - Use Factory
 class MediaFactory
 {
     public function createTestImage(): MediaEntity { ... }  // OK!
 }
 ```
 
-### **3. Nomenclatura confusa**
+### **3. Confusing nomenclature**
 ```php
-// ❌ SBAGLIATO - CartBuilder ma fa azioni
+// ❌ WRONG - CartBuilder but performs actions
 class CartBuilder
 {
-    public function clearCart(): void { ... }  // NO! Questo è un Helper
+    public function clearCart(): void { ... }  // NO! This is a Helper
 }
 
-// ✅ CORRETTO - Separare responsabilità
-class CartFactory  // Crea carrelli
+// ✅ CORRECT - Separate responsibilities
+class CartFactory  // Creates carts
 {
     public function withProduct(string $id): self { ... }
     public function create(): Cart { ... }
 }
 
-class CartHelper  // Azioni su carrelli
+class CartHelper  // Actions on carts
 {
     public function clear(Cart $cart): Cart { ... }
     public function removeItem(Cart $cart, string $id): Cart { ... }
@@ -198,14 +198,14 @@ class CartHelper  // Azioni su carrelli
 
 ---
 
-## 📚 Esempi di Uso Corretto
+## 📚 Correct Usage Examples
 
-### **Esempio 1: Creare e testare un ordine**
+### **Example 1: Create and test an order**
 
 ```php
 public function testOrderPlacement(): void
 {
-    // Factory: crea entità
+    // Factory: creates entities
     $customer = (new CustomerFactory($this->getContainer()))
         ->withEmail('test@example.com')
         ->create();
@@ -221,7 +221,7 @@ public function testOrderPlacement(): void
         ->withProduct($product->getId())
         ->create();
 
-    // Helper: esegue azione
+    // Helper: executes action
     $order = $this->placeOrder($cart, $context);
 
     // Assert
@@ -229,19 +229,19 @@ public function testOrderPlacement(): void
 }
 ```
 
-### **Esempio 2: Test con media**
+### **Example 2: Test with media**
 
 ```php
 public function testProductWithMedia(): void
 {
-    // Factory: crea entità
+    // Factory: creates entities
     $media = (new MediaFactory($this->getContainer()))
         ->createTestImage('product-image');
 
     $product = (new ProductFactory($this->getContainer()))
         ->create();
 
-    // Helper: esegue azione
+    // Helper: executes action
     $mediaHelper = new MediaHelper($this->getContainer());
     $mediaHelper->assignToProduct($media->getId(), $product->getId(), true);
 
@@ -250,17 +250,17 @@ public function testProductWithMedia(): void
 }
 ```
 
-### **Esempio 3: Test con state machine**
+### **Example 3: Test with state machine**
 
 ```php
 public function testOrderStateMachine(): void
 {
-    // Factory: crea ordine
+    // Factory: creates order
     $order = (new OrderFactory($this->getContainer()))
         ->withState('open')
         ->create();
 
-    // Helper: esegue transizione
+    // Helper: executes transition
     $stateManager = new StateManager($this->getContainer());
     $stateManager->transitionOrderState($order->getId(), 'process');
 
@@ -273,7 +273,7 @@ public function testOrderStateMachine(): void
 
 ## 🔄 Migration Testing
 
-Per i test delle migrazioni, seguire questa struttura:
+For migration tests, follow this structure:
 
 ```php
 class MyMigrationTest extends MigrationTestCase
@@ -282,13 +282,13 @@ class MyMigrationTest extends MigrationTestCase
 
     public function testMigrationAddsTable(): void
     {
-        // Verifica idempotenza
+        // Verify idempotency
         $this->assertMigrationIsIdempotent(MyMigration::class);
 
-        // Verifica creazione tabella
+        // Verify table creation
         $this->assertMigrationAddsTable(MyMigration::class, 'my_new_table');
 
-        // Test integrità dati
+        // Test data integrity
         $tester = new MigrationDataTester($this->getConnection());
         $tester->testDataIntegrity('old_table', 'new_table', function($oldRow) {
             return ['new_col' => $oldRow['old_col']];
@@ -299,20 +299,20 @@ class MyMigrationTest extends MigrationTestCase
 
 ---
 
-## ✅ Checklist per Nuovi Componenti
+## ✅ Checklist for New Components
 
-Quando aggiungi un nuovo componente, assicurati:
+When adding a new component, make sure:
 
-- [ ] **Nome corretto**: Factory per creare, Helper per azioni
-- [ ] **Singola responsabilità**: Un componente = un compito
-- [ ] **Documentazione**: PHPDoc chiara su cosa fa
-- [ ] **Test**: Il componente è testabile
-- [ ] **Riusabilità**: Evita duplicazioni, usa Trait se necessario
+- [ ] **Correct name**: Factory to create, Helper for actions
+- [ ] **Single responsibility**: One component = one task
+- [ ] **Documentation**: Clear PHPDoc on what it does
+- [ ] **Testability**: The component is testable
+- [ ] **Reusability**: Avoid duplications, use Trait if necessary
 
 ---
 
-## 🎯 Principio Guida
+## 🎯 Guiding Principle
 
-> **"Factory CREA, Helper AGISCE, Trait CONDIVIDE"**
+> **"Factory CREATES, Helper ACTS, Trait SHARES"**
 
-Se un componente fa più di una di queste cose, va refactorato.
+If a component does more than one of these things, it needs to be refactored.
