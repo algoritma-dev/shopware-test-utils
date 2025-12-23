@@ -4,6 +4,8 @@ namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Assert\ShopwareAssertions;
 use Algoritma\ShopwareTestUtils\Factory\CartFactory;
+use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
+use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
 use Algoritma\ShopwareTestUtils\Helper\OrderHelper;
 use Algoritma\ShopwareTestUtils\Traits\EventHelpers;
 use Algoritma\ShopwareTestUtils\Traits\MailHelpers;
@@ -83,5 +85,16 @@ abstract class AbstractIntegrationTestCase extends TestCase
         $salesChannelId = $customer->getSalesChannelId();
 
         return $factory->create(Uuid::randomHex(), $salesChannelId, $options);
+    }
+
+    /**
+     * Loads one or more fixtures.
+     *
+     * @param FixtureInterface|array<FixtureInterface> $fixtures
+     */
+    protected function loadFixtures(FixtureInterface|array $fixtures): void
+    {
+        $fixtureManager = new FixtureManager($this->getContainer());
+        $fixtureManager->load($fixtures);
     }
 }

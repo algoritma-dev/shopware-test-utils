@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Algoritma\ShopwareTestUtils\Fixture;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 interface FixtureInterface
 {
     /**
@@ -17,4 +19,6 @@ interface FixtureInterface
      * @return array<class-string<FixtureInterface>>
      */
     public function getDependencies(): array;
+
+    public function setContainer(ContainerInterface $container): void;
 }

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Algoritma\ShopwareTestUtils\Fixture;
 
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
 class FixtureManager
 {
     private readonly ReferenceRepository $references;
@@ -13,8 +15,9 @@ class FixtureManager
      */
     private array $loadedFixtures = [];
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly ContainerInterface $container
+    ) {
         $this->references = new ReferenceRepository();
     }
 
@@ -38,6 +41,7 @@ class FixtureManager
                 continue;
             }
 
+            $fixture->setContainer($this->container);
             $fixture->load($this->references);
             $this->loadedFixtures[$fixtureClass] = $fixture;
         }
@@ -104,6 +108,7 @@ class FixtureManager
                 throw new \RuntimeException(sprintf('Dependency "%s" must implement FixtureInterface', $dependencyClass));
             }
 
+            $dependency->setContainer($this->container);
             $this->topologicalSort($dependency, $sorted, $visiting, $visited);
         }
 
