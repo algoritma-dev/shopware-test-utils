@@ -24,7 +24,7 @@ class QuoteFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($quote);
 
         $factory = new QuoteFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(QuoteEntity::class, $result);
     }

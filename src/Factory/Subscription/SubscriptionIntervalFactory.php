@@ -40,7 +40,7 @@ class SubscriptionIntervalFactory
     public function create(?Context $context = null): SubscriptionIntervalEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

@@ -24,7 +24,7 @@ class ApprovalRuleFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($rule);
 
         $factory = new ApprovalRuleFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(ApprovalRuleEntity::class, $result);
     }

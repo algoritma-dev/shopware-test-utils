@@ -37,8 +37,8 @@ class OrganizationContextHelper
         $factory = new B2BContextFactory($this->container);
         $factory->withOrganization($organizationId);
 
-        if ($organization->getCustomerId()) {
-            $factory->withCustomer($organization->getCustomerId());
+        if ($organization->customerId) {
+            $factory->withCustomer($organization->customerId);
         }
 
         if ($employeeId) {
@@ -115,7 +115,7 @@ class OrganizationContextHelper
         $criteria->addAssociation('paymentMethods');
         $criteria->addAssociation('shippingMethods');
 
-        $result = $repository->search($criteria, Context::createDefaultContext());
+        $result = $repository->search($criteria, Context::createCLIContext());
 
         return array_values($result->getElements());
     }
@@ -129,7 +129,7 @@ class OrganizationContextHelper
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
-        $employee = $repository->search($criteria, Context::createDefaultContext())->first();
+        $employee = $repository->search($criteria, Context::createCLIContext())->first();
 
         if (! $employee) {
             return false;
@@ -151,7 +151,7 @@ class OrganizationContextHelper
         $criteria->addAssociation('defaultShippingAddress');
         $criteria->addAssociation('defaultBillingAddress');
 
-        return $repository->search($criteria, Context::createDefaultContext())->first();
+        return $repository->search($criteria, Context::createCLIContext())->first();
     }
 
     private function findCustomerDefaultOrganization(string $customerId): ?OrganizationEntity

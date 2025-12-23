@@ -24,7 +24,7 @@ class ShoppingListFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($list);
 
         $factory = new ShoppingListFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(ShoppingListEntity::class, $result);
     }

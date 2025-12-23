@@ -29,7 +29,7 @@ class QuoteStateMachineHelper
      */
     public function transition(string $quoteId, string $action, ?Context $context = null): QuoteEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         $transition = new Transition(
             'quote',
@@ -122,7 +122,7 @@ class QuoteStateMachineHelper
      */
     public function getAvailableTransitions(string $quoteId, ?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         return $this->stateMachineRegistry->getAvailableTransitions('quote', $quoteId, 'stateId', $context);
     }
@@ -164,7 +164,7 @@ class QuoteStateMachineHelper
 
     private function loadQuote(string $quoteId, ?Context $context): QuoteEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote.repository');

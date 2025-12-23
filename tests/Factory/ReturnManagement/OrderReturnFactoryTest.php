@@ -24,7 +24,7 @@ class OrderReturnFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($return);
 
         $factory = new OrderReturnFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(OrderReturnEntity::class, $result);
     }

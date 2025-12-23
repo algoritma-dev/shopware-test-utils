@@ -23,11 +23,15 @@ class BudgetNotificationHelper
     {
         $budget = $this->loadBudget($budgetId, $context);
 
-        if (! $budget->getNotify()) {
+        $notify = $budget->isNotify();
+
+        if (! $notify) {
             return false;
         }
 
-        if ($budget->getSent()) {
+        $sent = $budget->isSent();
+
+        if ($sent) {
             return false; // Already sent
         }
 
@@ -74,7 +78,7 @@ class BudgetNotificationHelper
      */
     public function markAsSent(string $budgetId, ?Context $context = null): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
@@ -94,7 +98,7 @@ class BudgetNotificationHelper
      */
     public function resetNotificationStatus(string $budgetId, ?Context $context = null): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
@@ -202,7 +206,7 @@ class BudgetNotificationHelper
 
     private function loadBudget(string $budgetId, ?Context $context): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_budget.repository');

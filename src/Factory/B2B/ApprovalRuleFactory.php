@@ -54,7 +54,7 @@ class ApprovalRuleFactory
     public function create(?Context $context = null): ApprovalRuleEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

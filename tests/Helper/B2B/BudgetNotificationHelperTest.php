@@ -24,7 +24,6 @@ class BudgetNotificationHelperTest extends TestCase
         $repository = $this->createMock(EntityRepository::class);
         $searchResult = $this->createMock(EntitySearchResult::class);
         $budget = new BudgetEntity();
-
         $budget->setNotify(true);
         $budget->setSent(false);
         $budget->setNotificationConfig(['type' => 'percentage', 'value' => 80]);

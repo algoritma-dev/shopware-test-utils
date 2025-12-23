@@ -90,7 +90,7 @@ class BudgetValidationHelper
      */
     public function simulateBudgetUsage(string $budgetId, float $amount, ?Context $context = null): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         $budget = $this->loadBudget($budgetId, $context);
         $newUsedAmount = $budget->getUsedAmount() + $amount;
@@ -113,7 +113,7 @@ class BudgetValidationHelper
      */
     public function resetBudgetUsage(string $budgetId, ?Context $context = null): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
@@ -133,7 +133,7 @@ class BudgetValidationHelper
      */
     public function getActiveBudgetsForOrganization(string $organizationId, ?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
@@ -200,7 +200,7 @@ class BudgetValidationHelper
 
     private function loadBudget(string $budgetId, ?Context $context): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_budget.repository');

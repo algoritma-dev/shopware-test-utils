@@ -24,7 +24,7 @@ class ProductFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($product);
 
         $factory = new ProductFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(ProductEntity::class, $result);
     }

@@ -24,7 +24,7 @@ class CategoryFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($category);
 
         $factory = new CategoryFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(CategoryEntity::class, $result);
     }

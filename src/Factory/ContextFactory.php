@@ -15,7 +15,7 @@ class ContextFactory
 
     public function createDefaultContext(): Context
     {
-        return Context::createDefaultContext();
+        return Context::createCLIContext();
     }
 
     public function createSalesChannelContext(?string $salesChannelId = null, array $options = []): SalesChannelContext

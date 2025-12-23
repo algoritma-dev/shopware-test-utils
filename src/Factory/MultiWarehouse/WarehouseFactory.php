@@ -38,7 +38,7 @@ class WarehouseFactory
     public function create(?Context $context = null): WarehouseEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

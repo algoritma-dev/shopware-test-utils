@@ -10,6 +10,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use function method_exists;
 
 /**
  * Helper for creating authenticated employee contexts.
@@ -64,7 +65,7 @@ class EmployeeContextHelper
             $factory->withRole($employee->getRoleId());
         }
 
-        if ($employee->getOrganizationId()) {
+        if (method_exists($employee, 'getOrganizationId') && $employee->getOrganizationId()) {
             $factory->withOrganization($employee->getOrganizationId());
         }
 
@@ -85,7 +86,7 @@ class EmployeeContextHelper
         $criteria->addAssociation('role');
         $criteria->addAssociation('organization');
 
-        return $repository->search($criteria, Context::createDefaultContext())->first();
+        return $repository->search($criteria, Context::createCLIContext())->first();
     }
 
     private function loadEmployeeByEmail(string $email): ?EmployeeEntity
@@ -99,6 +100,6 @@ class EmployeeContextHelper
         $criteria->addAssociation('role');
         $criteria->addAssociation('organization');
 
-        return $repository->search($criteria, Context::createDefaultContext())->first();
+        return $repository->search($criteria, Context::createCLIContext())->first();
     }
 }

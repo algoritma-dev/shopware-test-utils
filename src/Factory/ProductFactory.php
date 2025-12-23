@@ -69,7 +69,7 @@ class ProductFactory
     public function create(?Context $context = null): ProductEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

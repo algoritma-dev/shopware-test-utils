@@ -29,7 +29,7 @@ class RolePermissionFactoryTest extends TestCase
         $searchResult->method('getElements')->willReturn([]);
 
         $factory = new RolePermissionFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(RoleEntity::class, $result);
     }
@@ -60,7 +60,7 @@ class RolePermissionFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($role);
         $searchResult->method('getElements')->willReturn([]);
 
-        $result = RolePermissionFactory::createAdmin($container, Context::createDefaultContext());
+        $result = RolePermissionFactory::createAdmin($container, Context::createCLIContext());
 
         $this->assertInstanceOf(RoleEntity::class, $result);
     }

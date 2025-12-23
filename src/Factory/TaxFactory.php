@@ -39,7 +39,7 @@ class TaxFactory
     public function create(?Context $context = null): TaxEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

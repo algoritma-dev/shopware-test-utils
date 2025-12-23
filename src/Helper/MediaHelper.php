@@ -34,7 +34,7 @@ class MediaHelper
     public function assignToProduct(string $mediaId, string $productId, bool $setCover = false, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $productRepository = $this->container->get('product.repository');
@@ -61,7 +61,7 @@ class MediaHelper
     public function delete(string $mediaId, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $this->mediaRepository->delete([['id' => $mediaId]], $context);
@@ -73,7 +73,7 @@ class MediaHelper
     public function get(string $mediaId, ?Context $context = null): ?MediaEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         return $this->mediaRepository->search(new Criteria([$mediaId]), $context)->first();
@@ -85,7 +85,7 @@ class MediaHelper
     public function updateMetadata(string $mediaId, array $metadata, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $data = array_merge(['id' => $mediaId], $metadata);
@@ -98,7 +98,7 @@ class MediaHelper
     public function moveToFolder(string $mediaId, string $folderId, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $this->mediaRepository->update([
@@ -131,7 +131,7 @@ class MediaHelper
     public function bulkDelete(array $mediaIds, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $deleteData = array_map(fn ($id): array => ['id' => $id], $mediaIds);

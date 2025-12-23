@@ -227,7 +227,7 @@ class MigrationDataTester
         $memoryUsed = memory_get_usage(true) - $memoryBefore;
         $peakMemory = memory_get_peak_usage(true);
 
-        $throughput = $expectedRowCount > 0 ? $expectedRowCount / $duration : 0;
+        $throughput = ($expectedRowCount > 0 && $duration > 0) ? $expectedRowCount / $duration : 0;
 
         return [
             'duration_seconds' => $duration,

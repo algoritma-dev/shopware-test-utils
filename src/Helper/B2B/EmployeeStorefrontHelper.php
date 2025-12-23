@@ -43,7 +43,7 @@ class EmployeeStorefrontHelper
      */
     public function canPerformAction(string $employeeId, string $permissionCode, ?Context $context = null): bool
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
@@ -61,7 +61,7 @@ class EmployeeStorefrontHelper
         }
 
         foreach ($permissions as $permission) {
-            if ($permission->getCode() === $permissionCode) {
+            if ($permission === $permissionCode) {
                 return true;
             }
         }

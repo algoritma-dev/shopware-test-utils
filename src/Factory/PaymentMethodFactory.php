@@ -41,7 +41,7 @@ class PaymentMethodFactory
     public function create(?Context $context = null): PaymentMethodEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */
@@ -56,6 +56,6 @@ class PaymentMethodFactory
     {
         $repo = $this->container->get('rule.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 }

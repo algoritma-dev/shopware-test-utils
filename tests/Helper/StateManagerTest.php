@@ -20,7 +20,7 @@ class StateManagerTest extends TestCase
         $registry->expects($this->once())->method('transition');
 
         $manager = new StateManager($container);
-        $manager->transitionOrderState('order-id', 'cancel', Context::createDefaultContext());
+        $manager->transitionOrderState('order-id', 'cancel', Context::createCLIContext());
     }
 
     public function testTransitionPaymentState(): void
@@ -33,6 +33,6 @@ class StateManagerTest extends TestCase
         $registry->expects($this->once())->method('transition');
 
         $manager = new StateManager($container);
-        $manager->transitionPaymentState('transaction-id', 'pay', Context::createDefaultContext());
+        $manager->transitionPaymentState('transaction-id', 'pay', Context::createCLIContext());
     }
 }

@@ -48,7 +48,7 @@ class PromotionFactory
     public function create(?Context $context = null): PromotionEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

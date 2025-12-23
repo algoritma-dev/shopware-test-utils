@@ -24,7 +24,7 @@ class PromotionFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($promotion);
 
         $factory = new PromotionFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(PromotionEntity::class, $result);
     }

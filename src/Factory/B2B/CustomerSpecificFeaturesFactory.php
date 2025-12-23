@@ -31,7 +31,7 @@ class CustomerSpecificFeaturesFactory
     public function create(?Context $context = null): CustomerSpecificFeaturesEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

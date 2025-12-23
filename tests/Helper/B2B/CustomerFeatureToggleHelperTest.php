@@ -24,6 +24,7 @@ class CustomerFeatureToggleHelperTest extends TestCase
         $repository = $this->createMock(EntityRepository::class);
         $searchResult = $this->createMock(EntitySearchResult::class);
         $features = new CustomerSpecificFeaturesEntity();
+        $features->setId('features-id');
 
         $container->method('get')->willReturn($repository);
         $repository->method('search')->willReturn($searchResult);
@@ -41,7 +42,7 @@ class CustomerFeatureToggleHelperTest extends TestCase
         $repository = $this->createMock(EntityRepository::class);
         $searchResult = $this->createMock(EntitySearchResult::class);
         $features = new CustomerSpecificFeaturesEntity();
-
+        $features->setId('features-id');
         $features->setFeatures(['QUICK_ORDER' => true]);
 
         $container->method('get')->willReturn($repository);

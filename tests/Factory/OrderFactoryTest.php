@@ -39,7 +39,7 @@ class OrderFactoryTest extends TestCase
         $connection->method('fetchOne')->willReturn('some-id');
 
         $factory = new OrderFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(OrderEntity::class, $result);
     }

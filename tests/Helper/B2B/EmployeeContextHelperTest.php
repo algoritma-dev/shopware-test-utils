@@ -32,6 +32,7 @@ class EmployeeContextHelperTest extends TestCase
         $connection = $this->createMock(Connection::class);
 
         $employee->setId('employee-id');
+        $employee->setBusinessPartnerCustomerId('customer-id');
 
         $container->method('get')->willReturnMap([
             ['b2b_employee.repository', 1, $repository],
@@ -62,6 +63,7 @@ class EmployeeContextHelperTest extends TestCase
         $connection = $this->createMock(Connection::class);
 
         $employee->setId('employee-id');
+        $employee->setBusinessPartnerCustomerId('customer-id');
 
         $container->method('get')->willReturnMap([
             ['b2b_employee.repository', 1, $repository],

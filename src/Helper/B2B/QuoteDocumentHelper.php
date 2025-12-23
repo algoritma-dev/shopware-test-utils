@@ -26,7 +26,7 @@ class QuoteDocumentHelper
         array $config = [],
         ?Context $context = null
     ): string {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_document.repository');
@@ -50,7 +50,7 @@ class QuoteDocumentHelper
      */
     public function getDocuments(string $quoteId, ?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_document.repository');
@@ -69,7 +69,7 @@ class QuoteDocumentHelper
      */
     public function getDocument(string $documentId, ?Context $context = null): ?array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_document.repository');
@@ -85,7 +85,7 @@ class QuoteDocumentHelper
      */
     public function deleteDocument(string $documentId, ?Context $context = null): void
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_document.repository');

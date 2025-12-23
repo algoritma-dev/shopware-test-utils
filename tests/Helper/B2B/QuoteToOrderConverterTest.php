@@ -26,6 +26,9 @@ class QuoteToOrderConverterTest extends TestCase
         if (! class_exists(QuoteEntity::class)) {
             $this->markTestSkipped('Shopware Commercial B2B extension is not installed.');
         }
+        if (! class_exists(QuoteLineItemEntity::class)) {
+            $this->markTestSkipped('QuoteLineItemEntity class not found.');
+        }
     }
 
     public function testConvertToOrder(): void

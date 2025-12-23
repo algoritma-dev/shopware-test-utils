@@ -51,7 +51,7 @@ class SalesChannelFactory
     public function create(?Context $context = null): SalesChannelEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */
@@ -66,21 +66,21 @@ class SalesChannelFactory
     {
         $repo = $this->container->get('payment_method.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getDefaultShippingMethodId(): string
     {
         $repo = $this->container->get('shipping_method.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getCountryId(): string
     {
         $repo = $this->container->get('country.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getRootCategoryId(): string
@@ -89,6 +89,6 @@ class SalesChannelFactory
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('parentId', null));
 
-        return $repo->searchIds($criteria, Context::createDefaultContext())->firstId();
+        return $repo->searchIds($criteria, Context::createCLIContext())->firstId();
     }
 }

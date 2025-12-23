@@ -24,7 +24,7 @@ class WarehouseFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($warehouse);
 
         $factory = new WarehouseFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(WarehouseEntity::class, $result);
     }

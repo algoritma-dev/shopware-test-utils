@@ -34,7 +34,7 @@ class ShippingMethodFactoryTest extends TestCase
         $idSearchResult->method('firstId')->willReturn('some-id');
 
         $factory = new ShippingMethodFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(ShippingMethodEntity::class, $result);
     }

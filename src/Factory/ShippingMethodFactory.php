@@ -49,7 +49,7 @@ class ShippingMethodFactory
     public function create(?Context $context = null): ShippingMethodEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */
@@ -65,13 +65,13 @@ class ShippingMethodFactory
         // Fetch any rule, or create a simple "always valid" one if none exist (simplified here)
         $repo = $this->container->get('rule.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getDeliveryTimeId(): string
     {
         $repo = $this->container->get('delivery_time.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 }

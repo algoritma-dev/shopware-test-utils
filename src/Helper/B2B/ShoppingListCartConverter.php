@@ -99,7 +99,7 @@ class ShoppingListCartConverter
 
     private function loadShoppingList(string $shoppingListId, ?Context $context): ShoppingListEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('shopping_list.repository');

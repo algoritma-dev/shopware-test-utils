@@ -260,7 +260,7 @@
   </template>
 
   <!-- Common Shopware Patterns -->
-  <template name="swctx" value="\Shopware\Core\Framework\Context::createDefaultContext()" description="Create default context" toReformat="true" toShortenFQNames="true">
+  <template name="swctx" value="\Shopware\Core\Framework\Context::createCLIContext()" description="Create default context" toReformat="true" toShortenFQNames="true">
     <context>
       <option name="PHP_EXPRESSION" value="true" />
     </context>

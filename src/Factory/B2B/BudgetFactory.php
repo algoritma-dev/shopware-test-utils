@@ -61,7 +61,7 @@ class BudgetFactory
     public function create(?Context $context = null): BudgetEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

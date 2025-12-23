@@ -58,7 +58,7 @@ class OrderApprovalRequestHelperTest extends TestCase
         $context->method('getCustomer')->willReturn($customer);
         $context->method('getCurrency')->willReturn($currency);
         $context->method('getSalesChannelId')->willReturn('sales-channel-id');
-        $context->method('getContext')->willReturn(Context::createDefaultContext());
+        $context->method('getContext')->willReturn(Context::createCLIContext());
 
         $helper = new OrderApprovalRequestHelper($container);
         $result = $helper->requestApproval($cart, $context, 'employee-id');

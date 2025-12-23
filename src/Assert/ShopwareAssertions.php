@@ -21,7 +21,7 @@ trait ShopwareAssertions
     protected function assertEntityExists(string $entityName, string $id): void
     {
         $repository = $this->getContainer()->get($entityName . '.repository');
-        $context = Context::createDefaultContext();
+        $context = Context::createCLIContext();
 
         $result = $repository->search(new Criteria([$id]), $context);
 
@@ -156,7 +156,7 @@ trait ShopwareAssertions
     protected function assertEntityNotExists(string $entityName, string $id): void
     {
         $repository = $this->getContainer()->get($entityName . '.repository');
-        $context = Context::createDefaultContext();
+        $context = Context::createCLIContext();
 
         $result = $repository->search(new Criteria([$id]), $context);
 
@@ -166,7 +166,7 @@ trait ShopwareAssertions
     protected function assertEntityCount(string $entityName, int $expectedCount, ?Criteria $criteria = null): void
     {
         $repository = $this->getContainer()->get($entityName . '.repository');
-        $context = Context::createDefaultContext();
+        $context = Context::createCLIContext();
 
         if (! $criteria instanceof Criteria) {
             $criteria = new Criteria();
@@ -179,7 +179,7 @@ trait ShopwareAssertions
     protected function assertEntityHasAttribute(string $entityName, string $id, string $attribute, $expectedValue): void
     {
         $repository = $this->getContainer()->get($entityName . '.repository');
-        $context = Context::createDefaultContext();
+        $context = Context::createCLIContext();
 
         $entity = $repository->search(new Criteria([$id]), $context)->first();
         Assert::assertNotNull($entity, sprintf('Entity %s with ID %s does not exist.', $entityName, $id));
@@ -346,7 +346,7 @@ trait ShopwareAssertions
     protected function assertSalesChannelActive(string $salesChannelId): void
     {
         $repository = $this->getContainer()->get('sales_channel.repository');
-        $context = Context::createDefaultContext();
+        $context = Context::createCLIContext();
 
         $salesChannel = $repository->search(new Criteria([$salesChannelId]), $context)->first();
         Assert::assertNotNull($salesChannel, sprintf('Sales channel %s not found', $salesChannelId));

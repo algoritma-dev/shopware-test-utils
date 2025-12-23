@@ -136,7 +136,7 @@ class QuoteToOrderConverter
 
     private function loadQuote(string $quoteId, ?Context $context): QuoteEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote.repository');

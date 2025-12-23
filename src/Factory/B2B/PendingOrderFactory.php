@@ -123,7 +123,7 @@ class PendingOrderFactory
      */
     public function create(?Context $context = null): PendingOrderEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');

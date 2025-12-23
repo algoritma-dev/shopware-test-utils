@@ -24,7 +24,7 @@ class EmployeeFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($employee);
 
         $factory = new EmployeeFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(EmployeeEntity::class, $result);
     }

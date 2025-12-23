@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
+use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEnum;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -21,7 +22,7 @@ class BudgetRenewHelper
      */
     public function renewBudget(string $budgetId, ?Context $context = null): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         $this->loadBudget($budgetId, $context);
 
         /** @var EntityRepository $repository */
@@ -45,18 +46,21 @@ class BudgetRenewHelper
     {
         $budget = $this->loadBudget($budgetId, $context);
 
-        if ($budget->getRenewsType() === 'none') {
+        $renewsType = $this->getRenewsTypeValue($budget);
+
+        if ($renewsType === 'none' || $renewsType === null) {
             return false;
         }
 
         $lastRenews = $budget->getLastRenews();
-        if (! $lastRenews) {
-            return true;
-        }
 
         $now = new \DateTime();
 
-        return match ($budget->getRenewsType()) {
+        if ($lastRenews === null) {
+            return false;
+        }
+
+        return match (strtolower($renewsType)) {
             'daily' => $lastRenews->format('Y-m-d') !== $now->format('Y-m-d'),
             'weekly' => $lastRenews->format('Y-W') !== $now->format('Y-W'),
             'monthly' => $lastRenews->format('Y-m') !== $now->format('Y-m'),
@@ -71,14 +75,15 @@ class BudgetRenewHelper
     public function getNextRenewalDate(string $budgetId, ?Context $context = null): ?\DateTime
     {
         $budget = $this->loadBudget($budgetId, $context);
+        $renewsType = $this->getRenewsTypeValue($budget);
 
-        if ($budget->getRenewsType() === 'none') {
+        if ($renewsType === 'none' || $renewsType === null) {
             return null;
         }
 
         $lastRenews = $budget->getLastRenews() ?? new \DateTime();
 
-        return match ($budget->getRenewsType()) {
+        return match (strtolower($renewsType)) {
             'daily' => (clone $lastRenews)->modify('+1 day'),
             'weekly' => (clone $lastRenews)->modify('+1 week'),
             'monthly' => (clone $lastRenews)->modify('+1 month'),
@@ -92,14 +97,19 @@ class BudgetRenewHelper
      */
     public function simulateTimePassage(string $budgetId, \DateTime $targetDate, ?Context $context = null): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         $budget = $this->loadBudget($budgetId, $context);
 
         $lastRenews = $budget->getLastRenews() ?? new \DateTime();
         $currentDate = clone $lastRenews;
+        $renewsType = $this->getRenewsTypeValue($budget);
+
+        if ($renewsType === 'none' || $renewsType === null) {
+            return $budget;
+        }
 
         while ($currentDate < $targetDate) {
-            $nextRenewal = $this->calculateNextRenewalFrom($currentDate, $budget->getRenewsType());
+            $nextRenewal = $this->calculateNextRenewalFrom($currentDate, $renewsType);
 
             if ($nextRenewal <= $targetDate) {
                 $this->renewBudget($budgetId, $context);
@@ -134,7 +144,7 @@ class BudgetRenewHelper
 
     private function calculateNextRenewalFrom(\DateTime $date, string $renewsType): \DateTime
     {
-        return match ($renewsType) {
+        return match (strtolower($renewsType)) {
             'daily' => (clone $date)->modify('+1 day'),
             'weekly' => (clone $date)->modify('+1 week'),
             'monthly' => (clone $date)->modify('+1 month'),
@@ -145,12 +155,14 @@ class BudgetRenewHelper
 
     private function loadBudget(string $budgetId, ?Context $context): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);
+
+        /** @var BudgetEntity $budget */
         $budget = $repository->search($criteria, $context)->first();
 
         if (! $budget) {
@@ -158,5 +170,20 @@ class BudgetRenewHelper
         }
 
         return $budget;
+    }
+
+    private function getRenewsTypeValue(BudgetEntity $budget): ?string
+    {
+        $type = $budget->getRenewsType();
+        
+        if ($type instanceof \BackedEnum) {
+            return $type->value;
+        }
+        
+        if (is_string($type)) {
+            return $type;
+        }
+        
+        return null;
     }
 }

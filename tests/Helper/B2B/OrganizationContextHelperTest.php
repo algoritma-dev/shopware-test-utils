@@ -31,7 +31,8 @@ class OrganizationContextHelperTest extends TestCase
         $context = $this->createMock(SalesChannelContext::class);
         $connection = $this->createMock(Connection::class);
 
-        $organization->setId('org-id');
+        $organization->id = 'org-id';
+        $organization->setUniqueIdentifier('org-id');
 
         $container->method('get')->willReturnMap([
             ['b2b_components_organization.repository', 1, $repository],

@@ -24,7 +24,7 @@ class RuleFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($rule);
 
         $factory = new RuleFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(RuleEntity::class, $result);
     }

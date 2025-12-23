@@ -40,7 +40,7 @@ class MediaFactory
     public function create(?Context $context = null): MediaEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

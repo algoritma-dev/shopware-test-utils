@@ -83,7 +83,7 @@ trait B2BAssertions
 
         $hasPermission = false;
         foreach ($permissions as $permission) {
-            if ($permission->getCode() === $permissionCode) {
+            if ($permission === $permissionCode) {
                 $hasPermission = true;
                 break;
             }
@@ -137,44 +137,6 @@ trait B2BAssertions
     }
 
     /**
-     * Assert shopping list is shared with employee.
-     */
-    protected function assertShoppingListShared(string $shoppingListId, string $employeeId, ?Context $context = null): void
-    {
-        $shoppingList = $this->loadShoppingListEntity($shoppingListId, $context);
-        $sharedWith = $shoppingList->getSharedWith();
-
-        $isShared = false;
-        if ($sharedWith) {
-            foreach ($sharedWith as $shared) {
-                if ($shared->getEmployeeId() === $employeeId) {
-                    $isShared = true;
-                    break;
-                }
-            }
-        }
-
-        static::assertTrue(
-            $isShared,
-            sprintf('Expected shopping list "%s" to be shared with employee "%s", but it is not', $shoppingListId, $employeeId)
-        );
-    }
-
-    /**
-     * Assert employee belongs to organization.
-     */
-    protected function assertEmployeeBelongsToOrganization(string $employeeId, string $organizationId, ?Context $context = null): void
-    {
-        $employee = $this->loadEmployeeEntity($employeeId, $context);
-
-        static::assertEquals(
-            $organizationId,
-            $employee->getOrganizationId(),
-            sprintf('Expected employee to belong to organization "%s", but belongs to "%s"', $organizationId, $employee->getOrganizationId())
-        );
-    }
-
-    /**
      * Assert quote has comments.
      */
     protected function assertQuoteHasComments(string $quoteId, ?int $expectedCount = null, ?Context $context = null): void
@@ -202,8 +164,10 @@ trait B2BAssertions
     {
         $budget = $this->loadBudgetEntity($budgetId, $context);
 
+        $notify = $budget->isNotify();
+
         static::assertTrue(
-            $budget->getNotify(),
+            $notify,
             'Budget notification is not enabled'
         );
 
@@ -268,7 +232,7 @@ trait B2BAssertions
 
     private function loadQuoteEntity(string $quoteId, ?Context $context): QuoteEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('quote.repository');
         $criteria = new Criteria([$quoteId]);
@@ -285,7 +249,7 @@ trait B2BAssertions
 
     private function loadBudgetEntity(string $budgetId, ?Context $context): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('b2b_components_budget.repository');
         $criteria = new Criteria([$budgetId]);
@@ -300,7 +264,7 @@ trait B2BAssertions
 
     private function loadEmployeeEntity(string $employeeId, ?Context $context): EmployeeEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('b2b_employee.repository');
         $criteria = new Criteria([$employeeId]);
@@ -317,7 +281,7 @@ trait B2BAssertions
 
     private function loadPendingOrderEntity(string $pendingOrderId, ?Context $context): PendingOrderEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('b2b_components_pending_order.repository');
         $criteria = new Criteria([$pendingOrderId]);
@@ -333,7 +297,7 @@ trait B2BAssertions
 
     private function loadPendingOrderByOrderId(string $orderId, ?Context $context): ?PendingOrderEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('b2b_components_pending_order.repository');
         $criteria = new Criteria();
@@ -344,7 +308,7 @@ trait B2BAssertions
 
     private function loadPendingOrdersForEmployee(string $employeeId, ?Context $context): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('b2b_components_pending_order.repository');
         $criteria = new Criteria();
@@ -355,7 +319,7 @@ trait B2BAssertions
 
     private function loadShoppingListEntity(string $shoppingListId, ?Context $context): ShoppingListEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('shopping_list.repository');
         $criteria = new Criteria([$shoppingListId]);
@@ -371,7 +335,7 @@ trait B2BAssertions
 
     private function loadQuoteComments(string $quoteId, ?Context $context): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         /** @var EntityRepository $repository */
         $repository = $this->getContainer()->get('quote_comment.repository');
         $criteria = new Criteria();

@@ -24,7 +24,7 @@ class StateManager
     public function transitionOrderState(string $orderId, string $toState, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $this->stateMachineRegistry->transition(
@@ -44,7 +44,7 @@ class StateManager
     public function transitionPaymentState(string $transactionId, string $toState, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $this->stateMachineRegistry->transition(
@@ -64,7 +64,7 @@ class StateManager
     public function transitionDeliveryState(string $deliveryId, string $toState, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $this->stateMachineRegistry->transition(
@@ -84,7 +84,7 @@ class StateManager
     public function getAvailableTransitions(string $entityId, string $stateMachineName, ?Context $context = null): array
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         return $this->stateMachineRegistry->getAvailableTransitions(
@@ -101,7 +101,7 @@ class StateManager
     public function getCurrentState(string $entityName, string $entityId, ?Context $context = null): ?string
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $repository = $this->container->get($entityName . '.repository');
@@ -126,7 +126,7 @@ class StateManager
     public function forceState(string $entityName, string $entityId, string $stateId, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $repository = $this->container->get($entityName . '.repository');
@@ -144,7 +144,7 @@ class StateManager
     public function getStateId(string $stateMachineName, string $stateName, ?Context $context = null): ?string
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $connection = $this->container->get(Connection::class);
@@ -167,7 +167,7 @@ class StateManager
     public function transitionOrderThroughStates(string $orderId, array $states, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         foreach ($states as $state) {

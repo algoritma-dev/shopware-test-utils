@@ -40,7 +40,7 @@ class CustomerFactoryTest extends TestCase
         $connection->method('fetchOne')->willReturn('sales-channel-id');
 
         $factory = new CustomerFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(CustomerEntity::class, $result);
     }

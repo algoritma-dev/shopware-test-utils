@@ -20,7 +20,7 @@ class SharedListPermissionHelper
      */
     public function canAccess(string $employeeId, string $shoppingListId, ?Context $context = null): bool
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('shopping_list.repository');
@@ -58,7 +58,7 @@ class SharedListPermissionHelper
      */
     public function shareWith(string $shoppingListId, string $employeeId, ?Context $context = null): void
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('shopping_list.repository');
@@ -78,7 +78,7 @@ class SharedListPermissionHelper
      */
     public function getSharedEmployees(string $shoppingListId, ?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('shopping_list.repository');
@@ -107,7 +107,7 @@ class SharedListPermissionHelper
      */
     public function getAccessibleLists(string $employeeId, ?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('shopping_list.repository');

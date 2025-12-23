@@ -22,7 +22,7 @@ class BudgetUsageTracker
      */
     public function trackUsage(string $budgetId, float $amount, string $description = '', ?Context $context = null): BudgetEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         $budget = $this->loadBudget($budgetId, $context);
 
         $newUsedAmount = $budget->getUsedAmount() + $amount;
@@ -53,6 +53,7 @@ class BudgetUsageTracker
      */
     public function simulateUsage(string $budgetId, array $transactions, ?Context $context = null): BudgetEntity
     {
+        $context ??= Context::createCLIContext();
         foreach ($transactions as $transaction) {
             $amount = $transaction['amount'] ?? 0;
             $description = $transaction['description'] ?? '';
@@ -97,6 +98,7 @@ class BudgetUsageTracker
      */
     public function fillToPercentage(string $budgetId, float $percentage, ?Context $context = null): BudgetEntity
     {
+        $context ??= Context::createCLIContext();
         $budget = $this->loadBudget($budgetId, $context);
         $targetAmount = ($budget->getAmount() * $percentage) / 100;
         $remainingToAdd = $targetAmount - $budget->getUsedAmount();
@@ -113,6 +115,7 @@ class BudgetUsageTracker
      */
     public function exceedBudget(string $budgetId, float $excessAmount = 100.0, ?Context $context = null): BudgetEntity
     {
+        $context ??= Context::createCLIContext();
         $budget = $this->loadBudget($budgetId, $context);
         $targetAmount = $budget->getAmount() + $excessAmount;
         $remainingToAdd = $targetAmount - $budget->getUsedAmount();

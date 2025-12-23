@@ -24,7 +24,7 @@ class MediaFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($media);
 
         $factory = new MediaFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(MediaEntity::class, $result);
     }

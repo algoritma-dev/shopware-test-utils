@@ -18,6 +18,9 @@ class OrderApprovalHelperTest extends TestCase
         if (! class_exists(PendingOrderEntity::class)) {
             $this->markTestSkipped('Shopware Commercial B2B extension is not installed.');
         }
+        if (! class_exists(PendingOrderRequestedResponse::class)) {
+            $this->markTestSkipped('PendingOrderRequestedResponse class not found.');
+        }
     }
 
     public function testRequestPendingOrder(): void

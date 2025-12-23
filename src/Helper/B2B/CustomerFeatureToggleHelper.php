@@ -22,7 +22,7 @@ class CustomerFeatureToggleHelper
      */
     public function enableFeature(string $customerId, string $featureCode, ?Context $context = null): void
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         $features = $this->getOrCreateCustomerFeatures($customerId, $context);
 
         $currentFeatures = $features['features'] ?? [];
@@ -36,7 +36,7 @@ class CustomerFeatureToggleHelper
      */
     public function disableFeature(string $customerId, string $featureCode, ?Context $context = null): void
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
         $features = $this->getOrCreateCustomerFeatures($customerId, $context);
 
         $currentFeatures = $features['features'] ?? [];
@@ -50,6 +50,7 @@ class CustomerFeatureToggleHelper
      */
     public function isFeatureEnabled(string $customerId, string $featureCode, ?Context $context = null): bool
     {
+        $context ??= Context::createCLIContext();
         $features = $this->getOrCreateCustomerFeatures($customerId, $context);
 
         return ($features['features'][$featureCode] ?? false) === true;
@@ -60,6 +61,7 @@ class CustomerFeatureToggleHelper
      */
     public function enableAllFeatures(string $customerId, ?Context $context = null): void
     {
+        $context ??= Context::createCLIContext();
         $this->updateFeatures($customerId, [
             'QUICK_ORDER' => true,
             'EMPLOYEE_MANAGEMENT' => true,
@@ -76,6 +78,7 @@ class CustomerFeatureToggleHelper
      */
     public function disableAllFeatures(string $customerId, ?Context $context = null): void
     {
+        $context ??= Context::createCLIContext();
         $this->updateFeatures($customerId, [], $context);
     }
 

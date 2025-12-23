@@ -31,7 +31,7 @@ class ApprovalWorkflowHelper
      */
     public function approvePendingOrder(string $pendingOrderId, ?Context $context = null): PendingOrderEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         $transition = new Transition(
             'b2b_components_pending_order',
@@ -50,7 +50,7 @@ class ApprovalWorkflowHelper
      */
     public function declinePendingOrder(string $pendingOrderId, ?string $reason = null, ?Context $context = null): PendingOrderEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         // Update reason if provided
         if ($reason) {
@@ -74,7 +74,7 @@ class ApprovalWorkflowHelper
      */
     public function convertToOrder(string $pendingOrderId, ?Context $context = null): OrderEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         $pendingOrder = $this->loadPendingOrder($pendingOrderId, $context);
 
@@ -121,7 +121,7 @@ class ApprovalWorkflowHelper
      */
     public function getPendingOrdersForEmployee(string $employeeId, ?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
@@ -142,7 +142,7 @@ class ApprovalWorkflowHelper
      */
     public function getAllPendingApprovals(?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');

@@ -119,7 +119,6 @@ Traits integrated into the base classes to simplify assertions.
     *   `assertEmployeeHasPermission()`: Verifies employee permissions.
     *   `assertOrderNeedsApproval()`: Checks if order requires approval.
     *   `assertPendingOrderCreated()` / `assertPendingOrderInState()`: Pending order assertions.
-    *   `assertShoppingListShared()`: Verifies list sharing.
     *   `assertEmployeeBelongsToOrganization()`: Organization membership checks.
     *   `assertQuoteHasComments()`: Quote comment verification.
     *   `assertBudgetNotificationTriggered()`: Budget notification checks.

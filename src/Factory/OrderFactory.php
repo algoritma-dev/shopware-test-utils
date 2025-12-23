@@ -174,7 +174,7 @@ class OrderFactory
     public function create(?Context $context = null): OrderEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */
@@ -218,13 +218,13 @@ class OrderFactory
     {
         $repo = $this->container->get('salutation.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getCountryId(): string
     {
         $repo = $this->container->get('country.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 }

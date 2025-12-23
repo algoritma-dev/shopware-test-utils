@@ -24,7 +24,7 @@ class RoleFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($role);
 
         $factory = new RoleFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(RoleEntity::class, $result);
     }

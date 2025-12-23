@@ -29,12 +29,7 @@ class EmployeeStorefrontHelperTest extends TestCase
         $employee = new EmployeeEntity();
         $role = new RoleEntity();
 
-        // Mock permissions
-        // Assuming permissions are entities with getCode()
-        $permission = new PermissionEntity();
-        $permission->setCode('test.action');
-
-        $role->setPermissions(new PermissionCollection([$permission]));
+        $role->setPermissions(['test.action']);
         $employee->setRole($role);
 
         $container->method('get')->willReturn($repository);

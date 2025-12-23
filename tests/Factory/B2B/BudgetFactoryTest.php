@@ -24,7 +24,7 @@ class BudgetFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($budget);
 
         $factory = new BudgetFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(BudgetEntity::class, $result);
     }

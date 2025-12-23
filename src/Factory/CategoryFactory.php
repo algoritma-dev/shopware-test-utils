@@ -47,7 +47,7 @@ class CategoryFactory
     public function create(?Context $context = null): CategoryEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

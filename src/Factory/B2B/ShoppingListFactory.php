@@ -52,7 +52,7 @@ class ShoppingListFactory
     public function create(?Context $context = null): ShoppingListEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

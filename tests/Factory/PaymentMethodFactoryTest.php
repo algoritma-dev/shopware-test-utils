@@ -33,7 +33,7 @@ class PaymentMethodFactoryTest extends TestCase
         $idSearchResult->method('firstId')->willReturn('some-id');
 
         $factory = new PaymentMethodFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(PaymentMethodEntity::class, $result);
     }

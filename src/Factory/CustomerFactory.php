@@ -65,7 +65,7 @@ class CustomerFactory
     public function create(?Context $context = null): CustomerEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         // Ensure SalesChannel exists if using default placeholder
@@ -87,7 +87,7 @@ class CustomerFactory
         /** @var EntityRepository $repo */
         $repo = $this->container->get('salutation.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getCountryId(): string
@@ -95,7 +95,7 @@ class CustomerFactory
         /** @var EntityRepository $repo */
         $repo = $this->container->get('country.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getDefaultPaymentMethodId(): string
@@ -103,7 +103,7 @@ class CustomerFactory
         /** @var EntityRepository $repo */
         $repo = $this->container->get('payment_method.repository');
 
-        return $repo->searchIds(new Criteria(), Context::createDefaultContext())->firstId();
+        return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
     }
 
     private function getSalesChannelId(): string

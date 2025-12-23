@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 use Algoritma\ShopwareTestUtils\Helper\B2B\BudgetRenewHelper;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
+use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEnum;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -43,8 +44,7 @@ class BudgetRenewHelperTest extends TestCase
         $repository = $this->createMock(EntityRepository::class);
         $searchResult = $this->createMock(EntitySearchResult::class);
         $budget = new BudgetEntity();
-
-        $budget->setRenewsType('monthly');
+        $budget->setRenewsType(BudgetEnum::RENEWS_TYPE_MONTHLY);
         $budget->setLastRenews(new \DateTime('-2 months'));
 
         $container->method('get')->willReturn($repository);

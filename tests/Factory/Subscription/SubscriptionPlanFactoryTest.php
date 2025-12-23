@@ -24,7 +24,7 @@ class SubscriptionPlanFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($plan);
 
         $factory = new SubscriptionPlanFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(SubscriptionPlanEntity::class, $result);
     }

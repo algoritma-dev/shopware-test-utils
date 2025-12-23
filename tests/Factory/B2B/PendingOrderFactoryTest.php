@@ -88,7 +88,7 @@ class PendingOrderFactoryTest extends TestCase
         
         // For now, let's fix the test compilation errors (TaxRuleCollection) and the skip logic.
         
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(PendingOrderEntity::class, $result);
     }
@@ -146,7 +146,7 @@ class PendingOrderFactoryTest extends TestCase
         $context->method('getCustomer')->willReturn($customer);
         $context->method('getCurrency')->willReturn($currency);
         $context->method('getSalesChannelId')->willReturn('sales-channel-id');
-        $context->method('getContext')->willReturn(Context::createDefaultContext());
+        $context->method('getContext')->willReturn(Context::createCLIContext());
 
         $result = PendingOrderFactory::fromCart($container, $cart, $context, 'employee-id', 'rule-id');
 

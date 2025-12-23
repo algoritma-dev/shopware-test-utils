@@ -24,7 +24,7 @@ class TaxFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($tax);
 
         $factory = new TaxFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(TaxEntity::class, $result);
     }

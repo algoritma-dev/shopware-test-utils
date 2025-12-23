@@ -5,8 +5,8 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 use Algoritma\ShopwareTestUtils\Helper\B2B\ShoppingListCartConverter;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity;
-use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListLineItemCollection;
-use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListLineItemEntity;
+use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingListLineItem\ShoppingListLineItemCollection;
+use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingListLineItem\ShoppingListLineItemEntity;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -20,6 +20,9 @@ class ShoppingListCartConverterTest extends TestCase
     {
         if (! class_exists(ShoppingListEntity::class)) {
             $this->markTestSkipped('Shopware Commercial B2B extension is not installed.');
+        }
+        if (! class_exists(ShoppingListLineItemEntity::class)) {
+            $this->markTestSkipped('ShoppingListLineItemEntity class not found.');
         }
     }
 

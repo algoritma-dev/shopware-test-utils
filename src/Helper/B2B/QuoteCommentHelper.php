@@ -27,7 +27,7 @@ class QuoteCommentHelper
         ?string $employeeId = null,
         ?Context $context = null
     ): string {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_comment.repository');
@@ -68,7 +68,7 @@ class QuoteCommentHelper
      */
     public function getComments(string $quoteId, ?Context $context = null): array
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_comment.repository');
@@ -106,7 +106,7 @@ class QuoteCommentHelper
      */
     public function deleteComment(string $commentId, ?Context $context = null): void
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_comment.repository');
@@ -125,7 +125,7 @@ class QuoteCommentHelper
             return;
         }
 
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('quote_comment.repository');

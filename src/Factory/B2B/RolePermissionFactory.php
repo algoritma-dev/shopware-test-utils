@@ -173,7 +173,7 @@ class RolePermissionFactory
      */
     public function create(?Context $context = null): RoleEntity
     {
-        $context ??= Context::createDefaultContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository $repository */
         $repository = $this->container->get('b2b_role.repository');

@@ -30,7 +30,7 @@ class SalesChannelFactoryTest extends TestCase
         $idSearchResult->method('firstId')->willReturn('some-id');
 
         $factory = new SalesChannelFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(SalesChannelEntity::class, $result);
     }

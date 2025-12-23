@@ -24,7 +24,7 @@ class OrganizationFactoryTest extends TestCase
         $searchResult->method('first')->willReturn($organization);
 
         $factory = new OrganizationFactory($container);
-        $result = $factory->create(Context::createDefaultContext());
+        $result = $factory->create(Context::createCLIContext());
 
         $this->assertInstanceOf(OrganizationEntity::class, $result);
     }

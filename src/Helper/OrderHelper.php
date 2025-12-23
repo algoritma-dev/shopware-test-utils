@@ -46,7 +46,7 @@ class OrderHelper
     public function getOrder(string $orderId, ?Context $context = null): ?OrderEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $orderRepository */
@@ -67,7 +67,7 @@ class OrderHelper
     public function cancelOrder(string $orderId, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $stateManager = new StateManager($this->container);
@@ -80,7 +80,7 @@ class OrderHelper
     public function markOrderAsPaid(string $orderId, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $order = $this->getOrder($orderId, $context);
@@ -98,7 +98,7 @@ class OrderHelper
     public function markOrderAsShipped(string $orderId, ?Context $context = null): void
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         $order = $this->getOrder($orderId, $context);

@@ -46,7 +46,7 @@ class QuoteFactory
     public function create(?Context $context = null): QuoteEntity
     {
         if (! $context instanceof Context) {
-            $context = Context::createDefaultContext();
+            $context = Context::createCLIContext();
         }
 
         /** @var EntityRepository $repository */

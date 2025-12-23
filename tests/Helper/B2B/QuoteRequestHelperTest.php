@@ -36,7 +36,7 @@ class QuoteRequestHelperTest extends TestCase
         $context->method('getSalesChannelId')->willReturn('sales-channel-id');
         $context->method('getCurrency')->willReturn($currency);
         $currency->method('getId')->willReturn('currency-id');
-        $context->method('getContext')->willReturn(Context::createDefaultContext());
+        $context->method('getContext')->willReturn(Context::createCLIContext());
 
         $cart->method('getPrice')->willReturn($price);
         $cart->method('getLineItems')->willReturn(new LineItemCollection([$lineItem]));
