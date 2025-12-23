@@ -1,0 +1,280 @@
+<templateSet group="Shopware Development">
+  <!-- Test Templates -->
+  <template name="swtest" value="<?php&#10;&#10;namespace $NAMESPACE$;&#10;&#10;use PHPUnit\Framework\TestCase;&#10;&#10;class $CLASS_NAME$ extends TestCase&#10;{&#10;    protected function setUp(): void&#10;    {&#10;        $SETUP$&#10;    }&#10;&#10;    public function test$TEST_NAME$(): void&#10;    {&#10;        $END$&#10;    }&#10;}" description="Crea un test PHPUnit base" toReformat="true" toShortenFQNames="true">
+    <variable name="NAMESPACE" expression="fileNamespace()" defaultValue="" alwaysStopAt="true" />
+    <variable name="CLASS_NAME" expression="fileName()" defaultValue="" alwaysStopAt="true" />
+    <variable name="SETUP" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TEST_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP" value="true" />
+    </context>
+  </template>
+
+  <template name="swtrait" value="<?php&#10;&#10;namespace $NAMESPACE$;&#10;&#10;use PHPUnit\Framework\TestCase;&#10;use $TRAIT_NAMESPACE$;&#10;&#10;class $CLASS_NAME$ extends TestCase&#10;{&#10;    use $TRAIT_NAME$;&#10;&#10;    protected function setUp(): void&#10;    {&#10;        $SETUP$&#10;    }&#10;&#10;    public function test$TEST_NAME$(): void&#10;    {&#10;        $END$&#10;    }&#10;}" description="Crea un test con trait" toReformat="true" toShortenFQNames="true">
+    <variable name="NAMESPACE" expression="fileNamespace()" defaultValue="" alwaysStopAt="true" />
+    <variable name="TRAIT_NAMESPACE" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TRAIT_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="CLASS_NAME" expression="fileName()" defaultValue="" alwaysStopAt="true" />
+    <variable name="SETUP" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TEST_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP" value="true" />
+    </context>
+  </template>
+
+  <template name="testm" value="public function test$TEST_NAME$(): void&#10;{&#10;    $END$&#10;}" description="Crea un metodo di test" toReformat="true" toShortenFQNames="true">
+    <variable name="TEST_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testdp" value="/**&#10; * @dataProvider $PROVIDER_NAME$&#10; */&#10;public function test$TEST_NAME$($PARAMS$): void&#10;{&#10;    $END$&#10;}&#10;&#10;public static function $PROVIDER_NAME$(): \Generator&#10;{&#10;    yield '$CASE_NAME$' =&gt; [$DATA$];&#10;}" description="Crea test con data provider" toReformat="true" toShortenFQNames="true">
+    <variable name="PROVIDER_NAME" expression="" defaultValue="provider" alwaysStopAt="true" />
+    <variable name="TEST_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="PARAMS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="CASE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="DATA" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <!-- Fixture Templates -->
+  <template name="swfix" value="<?php&#10;&#10;declare(strict_types=1);&#10;&#10;namespace $NAMESPACE$;&#10;&#10;use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;&#10;use Algoritma\ShopwareTestUtils\Fixture\ReferenceRepository;&#10;&#10;class $CLASS_NAME$ implements FixtureInterface&#10;{&#10;    public function load(ReferenceRepository \$references): void&#10;    {&#10;        $END$&#10;    }&#10;&#10;    public function getDependencies(): array&#10;    {&#10;        return [];&#10;    }&#10;}" description="Crea una fixture" toReformat="true" toShortenFQNames="true">
+    <variable name="NAMESPACE" expression="fileNamespace()" defaultValue="" alwaysStopAt="true" />
+    <variable name="CLASS_NAME" expression="fileName()" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP" value="true" />
+    </context>
+  </template>
+
+  <template name="swfixdep" value="<?php&#10;&#10;declare(strict_types=1);&#10;&#10;namespace $NAMESPACE$;&#10;&#10;use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;&#10;use Algoritma\ShopwareTestUtils\Fixture\ReferenceRepository;&#10;&#10;class $CLASS_NAME$ implements FixtureInterface&#10;{&#10;    public function load(ReferenceRepository \$references): void&#10;    {&#10;        $END$&#10;    }&#10;&#10;    public function getDependencies(): array&#10;    {&#10;        return [&#10;            $DEPENDENCIES$&#10;        ];&#10;    }&#10;}" description="Crea una fixture con dependencies" toReformat="true" toShortenFQNames="true">
+    <variable name="NAMESPACE" expression="fileNamespace()" defaultValue="" alwaysStopAt="true" />
+    <variable name="CLASS_NAME" expression="fileName()" defaultValue="" alwaysStopAt="true" />
+    <variable name="DEPENDENCIES" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP" value="true" />
+    </context>
+  </template>
+
+  <!-- Assert Templates -->
+  <template name="asse" value="\$this-&gt;assertEquals($EXPECTED$, $ACTUAL$);" description="Assert equals" toReformat="true" toShortenFQNames="true">
+    <variable name="EXPECTED" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="ACTUAL" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="asss" value="\$this-&gt;assertSame($EXPECTED$, $ACTUAL$);" description="Assert same" toReformat="true" toShortenFQNames="true">
+    <variable name="EXPECTED" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="ACTUAL" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="asst" value="\$this-&gt;assertTrue($CONDITION$);" description="Assert true" toReformat="true" toShortenFQNames="true">
+    <variable name="CONDITION" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assf" value="\$this-&gt;assertFalse($CONDITION$);" description="Assert false" toReformat="true" toShortenFQNames="true">
+    <variable name="CONDITION" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assn" value="\$this-&gt;assertNull($VALUE$);" description="Assert null" toReformat="true" toShortenFQNames="true">
+    <variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assnn" value="\$this-&gt;assertNotNull($VALUE$);" description="Assert not null" toReformat="true" toShortenFQNames="true">
+    <variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assc" value="\$this-&gt;assertCount($EXPECTED_COUNT$, $ARRAY$);" description="Assert count" toReformat="true" toShortenFQNames="true">
+    <variable name="EXPECTED_COUNT" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="ARRAY" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assem" value="\$this-&gt;assertEmpty($VALUE$);" description="Assert empty" toReformat="true" toShortenFQNames="true">
+    <variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assne" value="\$this-&gt;assertNotEmpty($VALUE$);" description="Assert not empty" toReformat="true" toShortenFQNames="true">
+    <variable name="VALUE" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assio" value="\$this-&gt;assertInstanceOf($EXPECTED_CLASS$::class, $OBJECT$);" description="Assert instance of" toReformat="true" toShortenFQNames="true">
+    <variable name="EXPECTED_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="OBJECT" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="assex" value="\$this-&gt;expectException($EXCEPTION_CLASS$::class);&#10;$END$" description="Expect exception" toReformat="true" toShortenFQNames="true">
+    <variable name="EXCEPTION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <!-- Mock Templates -->
+  <template name="mock" value="\$this-&gt;createMock($CLASS$::class)" description="Create mock" toReformat="true" toShortenFQNames="true">
+    <variable name="CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_EXPRESSION" value="true" />
+    </context>
+  </template>
+
+  <template name="mockm" value="\$$VAR$-&gt;method('$METHOD$')-&gt;willReturn($RETURN$);" description="Mock method" toReformat="true" toShortenFQNames="true">
+    <variable name="VAR" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="METHOD" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="RETURN" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <template name="mockex" value="\$$VAR$-&gt;expects(\$this-&gt;once())-&gt;method('$METHOD$')$WITH$;" description="Mock expects" toReformat="true" toShortenFQNames="true">
+    <variable name="VAR" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="METHOD" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="WITH" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_STATEMENT" value="true" />
+    </context>
+  </template>
+
+  <!-- Migration Test Templates -->
+  <template name="swmigtest" value="<?php&#10;&#10;namespace $NAMESPACE$;&#10;&#10;use Algoritma\ShopwareTestUtils\Core\MigrationTestCase;&#10;&#10;class $CLASS_NAME$ extends MigrationTestCase&#10;{&#10;    public function testMigrationCreatesTable(): void&#10;    {&#10;        \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;        &#10;        \$this-&gt;assertTableExists('$TABLE_NAME$');&#10;        $END$&#10;    }&#10;&#10;    public function testMigrationCanBeExecutedMultipleTimes(): void&#10;    {&#10;        \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;        \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;&#10;        \$this-&gt;assertTableExists('$TABLE_NAME$');&#10;    }&#10;}" description="Test completo per migration" toReformat="true" toShortenFQNames="true">
+    <variable name="NAMESPACE" expression="fileNamespace()" defaultValue="" alwaysStopAt="true" />
+    <variable name="CLASS_NAME" expression="fileName()" defaultValue="" alwaysStopAt="true" />
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TABLE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP" value="true" />
+    </context>
+  </template>
+
+  <template name="swmigtesttrans" value="<?php&#10;&#10;namespace $NAMESPACE$;&#10;&#10;use Algoritma\ShopwareTestUtils\Core\MigrationTestCase;&#10;&#10;class $CLASS_NAME$ extends MigrationTestCase&#10;{&#10;    public function testMigrationCreatesTablesWithTranslation(): void&#10;    {&#10;        \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;        &#10;        \$this-&gt;assertTableExists('$TABLE_NAME$');&#10;        \$this-&gt;assertTableExists('$TABLE_NAME$_translation');&#10;        &#10;        \$this-&gt;assertColumnExists('$TABLE_NAME$_translation', '$TABLE_NAME$_id');&#10;        \$this-&gt;assertColumnExists('$TABLE_NAME$_translation', 'language_id');&#10;        &#10;        \$this-&gt;assertForeignKeyExists('$TABLE_NAME$_translation', 'fk.$TABLE_NAME$_translation.$TABLE_NAME$_id');&#10;        \$this-&gt;assertForeignKeyExists('$TABLE_NAME$_translation', 'fk.$TABLE_NAME$_translation.language_id');&#10;        $END$&#10;    }&#10;}" description="Test migration con translation" toReformat="true" toShortenFQNames="true">
+    <variable name="NAMESPACE" expression="fileNamespace()" defaultValue="" alwaysStopAt="true" />
+    <variable name="CLASS_NAME" expression="fileName()" defaultValue="" alwaysStopAt="true" />
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TABLE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigtable" value="public function testMigrationCreatesTable(): void&#10;{&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    \$this-&gt;assertTableExists('$TABLE_NAME$');&#10;    $END$&#10;}" description="Test creazione tabella" toReformat="true" toShortenFQNames="true">
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TABLE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigcol" value="public function testMigrationCreatesColumns(): void&#10;{&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    \$this-&gt;assertColumnExists('$TABLE_NAME$', '$COLUMN_NAME$');&#10;    \$this-&gt;assertColumnType('$TABLE_NAME$', '$COLUMN_NAME$', '$TYPE$');&#10;    $END$&#10;}" description="Test colonne" toReformat="true" toShortenFQNames="true">
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TABLE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="COLUMN_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TYPE" expression="" defaultValue="string" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigfk" value="public function testMigrationCreatesForeignKeys(): void&#10;{&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    \$this-&gt;assertForeignKeyExists('$TABLE_NAME$', '$FK_NAME$');&#10;    $END$&#10;}" description="Test foreign keys" toReformat="true" toShortenFQNames="true">
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TABLE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="FK_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigidx" value="public function testMigrationCreatesIndexes(): void&#10;{&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    \$this-&gt;assertIndexExists('$TABLE_NAME$', '$INDEX_NAME$');&#10;    $END$&#10;}" description="Test indexes" toReformat="true" toShortenFQNames="true">
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TABLE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="INDEX_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigdata" value="public function testMigrationMigratesData(): void&#10;{&#10;    // Setup legacy data&#10;    \$this-&gt;createLegacyTable('$OLD_TABLE$', [&#10;        'id' =&gt; 'BINARY(16) NOT NULL',&#10;        $COLUMNS$&#10;    ]);&#10;    &#10;    \$this-&gt;seedLegacyData('$OLD_TABLE$', [&#10;        $DATA$&#10;    ]);&#10;    &#10;    // Execute migration&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    // Assert data migrated&#10;    \$this-&gt;assertDataMigrated('$NEW_TABLE$', [&#10;        $EXPECTED_DATA$&#10;    ]);&#10;    &#10;    \$this-&gt;assertRowCount('$NEW_TABLE$', $COUNT$);&#10;    $END$&#10;}" description="Test migrazione dati" toReformat="true" toShortenFQNames="true">
+    <variable name="OLD_TABLE" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="COLUMNS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="DATA" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="NEW_TABLE" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="EXPECTED_DATA" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="COUNT" expression="" defaultValue="1" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigdestr" value="public function testDestructiveMigration(): void&#10;{&#10;    // Setup&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    // Execute destructive&#10;    \$this-&gt;executeMigrationDestructive($MIGRATION_CLASS$::class);&#10;    &#10;    $ASSERTIONS$&#10;    $END$&#10;}" description="Test destructive migration" toReformat="true" toShortenFQNames="true">
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="ASSERTIONS" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigidempotent" value="public function testMigrationIsIdempotent(): void&#10;{&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    // Get schema snapshot&#10;    \$schemaAfterFirst = \$this-&gt;getSchemaSnapshot();&#10;    &#10;    // Execute again&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    &#10;    \$schemaAfterSecond = \$this-&gt;getSchemaSnapshot();&#10;    &#10;    // Schema should be identical&#10;    \$this-&gt;assertEquals(\$schemaAfterFirst, \$schemaAfterSecond);&#10;    $END$&#10;}" description="Test idempotenza migration" toReformat="true" toShortenFQNames="true">
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <template name="testmigrollback" value="public function testMigrationRollback(): void&#10;{&#10;    \$this-&gt;executeMigration($MIGRATION_CLASS$::class);&#10;    \$this-&gt;assertTableExists('$TABLE_NAME$');&#10;    &#10;    // Rollback&#10;    \$this-&gt;dropTableIfExists('$TABLE_NAME$');&#10;    &#10;    \$this-&gt;assertTableNotExists('$TABLE_NAME$');&#10;    $END$&#10;}" description="Test rollback migration" toReformat="true" toShortenFQNames="true">
+    <variable name="MIGRATION_CLASS" expression="" defaultValue="" alwaysStopAt="true" />
+    <variable name="TABLE_NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP_CLASS_MEMBER" value="true" />
+    </context>
+  </template>
+
+  <!-- Common Shopware Patterns -->
+  <template name="swctx" value="\Shopware\Core\Framework\Context::createDefaultContext()" description="Create default context" toReformat="true" toShortenFQNames="true">
+    <context>
+      <option name="PHP_EXPRESSION" value="true" />
+    </context>
+  </template>
+
+  <template name="swuuid" value="\Shopware\Core\Framework\Uuid\Uuid::randomHex()" description="Generate UUID" toReformat="true" toShortenFQNames="true">
+    <context>
+      <option name="PHP_EXPRESSION" value="true" />
+    </context>
+  </template>
+
+  <template name="swids" value="new \Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria([\$ids])" description="Create Criteria with IDs" toReformat="true" toShortenFQNames="true">
+    <context>
+      <option name="PHP_EXPRESSION" value="true" />
+    </context>
+  </template>
+</templateSet>

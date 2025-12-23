@@ -1,0 +1,8 @@
+<templateSet group="ShopwareTest">
+  <template name="testsw" value="public function test$NAME$(): void&#10;{&#10;    // Given&#10;    $END$&#10;&#10;    // When&#10;&#10;    // Then&#10;}" description="Shopware Test Method" toReformat="true" toShortenFQNames="true">
+    <variable name="NAME" expression="" defaultValue="" alwaysStopAt="true" />
+    <context>
+      <option name="PHP" value="true" />
+    </context>
+  </template>
+</templateSet>

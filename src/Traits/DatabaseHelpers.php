@@ -1,0 +1,168 @@
+<?php
+
+namespace Algoritma\ShopwareTestUtils\Traits;
+
+use Doctrine\DBAL\Connection;
+
+trait DatabaseHelpers
+{
+    private array $databaseSnapshots = [];
+
+    /**
+     * Truncates a table.
+     */
+    protected function truncateTable(string $table): void
+    {
+        $connection = $this->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+        $connection->executeStatement("TRUNCATE TABLE `{$table}`");
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+    }
+
+    /**
+     * Seeds a table with data.
+     */
+    protected function seedTable(string $table, array $rows): void
+    {
+        $connection = $this->getConnection();
+
+        foreach ($rows as $row) {
+            $connection->insert($table, $row);
+        }
+    }
+
+    /**
+     * Creates a snapshot of a table.
+     */
+    protected function snapshotTable(string $table): string
+    {
+        $connection = $this->getConnection();
+        $snapshotId = uniqid('snapshot_', true);
+        $tempTable = "temp_snapshot_{$snapshotId}";
+
+        $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
+        $connection->executeStatement("INSERT INTO `{$tempTable}` SELECT * FROM `{$table}`");
+
+        $this->databaseSnapshots[$snapshotId] = ['table' => $table, 'tempTable' => $tempTable];
+
+        return $snapshotId;
+    }
+
+    /**
+     * Restores a table from a snapshot.
+     */
+    protected function restoreTableSnapshot(string $snapshotId): void
+    {
+        if (! isset($this->databaseSnapshots[$snapshotId])) {
+            throw new \RuntimeException("Snapshot {$snapshotId} not found");
+        }
+
+        $connection = $this->getConnection();
+        $snapshot = $this->databaseSnapshots[$snapshotId];
+
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+        $connection->executeStatement("TRUNCATE TABLE `{$snapshot['table']}`");
+        $connection->executeStatement("INSERT INTO `{$snapshot['table']}` SELECT * FROM `{$snapshot['tempTable']}`");
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+    }
+
+    /**
+     * Drops a snapshot table.
+     */
+    protected function dropSnapshot(string $snapshotId): void
+    {
+        if (! isset($this->databaseSnapshots[$snapshotId])) {
+            return;
+        }
+
+        $connection = $this->getConnection();
+        $snapshot = $this->databaseSnapshots[$snapshotId];
+
+        $connection->executeStatement("DROP TABLE IF EXISTS `{$snapshot['tempTable']}`");
+        unset($this->databaseSnapshots[$snapshotId]);
+    }
+
+    /**
+     * Creates a full database snapshot.
+     */
+    protected function snapshotDatabase(): string
+    {
+        $connection = $this->getConnection();
+        $snapshotId = uniqid('db_snapshot_', true);
+
+        $tables = $connection->fetchFirstColumn('SHOW TABLES');
+
+        foreach ($tables as $table) {
+            if (str_starts_with((string) $table, 'temp_snapshot_')) {
+                continue;
+            }
+
+            $tempTable = "temp_snapshot_{$snapshotId}_{$table}";
+            $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
+            $connection->executeStatement("INSERT INTO `{$tempTable}` SELECT * FROM `{$table}`");
+
+            $this->databaseSnapshots[$snapshotId][] = ['table' => $table, 'tempTable' => $tempTable];
+        }
+
+        return $snapshotId;
+    }
+
+    /**
+     * Restores full database from snapshot.
+     */
+    protected function restoreDatabaseSnapshot(string $snapshotId): void
+    {
+        if (! isset($this->databaseSnapshots[$snapshotId])) {
+            throw new \RuntimeException("Database snapshot {$snapshotId} not found");
+        }
+
+        $connection = $this->getConnection();
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 0');
+
+        foreach ($this->databaseSnapshots[$snapshotId] as $snapshot) {
+            $connection->executeStatement("TRUNCATE TABLE `{$snapshot['table']}`");
+            $connection->executeStatement("INSERT INTO `{$snapshot['table']}` SELECT * FROM `{$snapshot['tempTable']}`");
+        }
+
+        $connection->executeStatement('SET FOREIGN_KEY_CHECKS = 1');
+    }
+
+    /**
+     * Executes a raw SQL query.
+     */
+    protected function queryRaw(string $sql, array $params = []): array
+    {
+        $connection = $this->getConnection();
+
+        return $connection->fetchAllAssociative($sql, $params);
+    }
+
+    /**
+     * Begins a manual transaction.
+     */
+    protected function beginTransaction(): void
+    {
+        $this->getConnection()->beginTransaction();
+    }
+
+    /**
+     * Rolls back a manual transaction.
+     */
+    protected function rollbackTransaction(): void
+    {
+        $this->getConnection()->rollBack();
+    }
+
+    /**
+     * Commits a manual transaction.
+     */
+    protected function commitTransaction(): void
+    {
+        $this->getConnection()->commit();
+    }
+
+    /**
+     * Gets the Connection instance.
+     */
+    abstract protected function getConnection(): Connection;
+}
