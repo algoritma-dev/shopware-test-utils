@@ -2,6 +2,12 @@
     "name": "algoritma/shopware-test-utils",
     "description": "A collection of helpers for Shopware 6 integration/functional tests.",
     "type": "library",
+    "authors": [
+        {
+            "name": "Algoritma srl",
+            "email": "info@algoritma.it"
+        }
+    ],
     "repositories": {
         "shopware-packages": {
             "type": "composer",
