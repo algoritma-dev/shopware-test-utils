@@ -4,7 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Algoritma\ShopwareTestUtils\Helper\B2B\CustomerFeatureToggleHelper;
 use Algoritma\ShopwareTestUtils\Helper\CartHelper;
-use Algoritma\ShopwareTestUtils\Helper\CheckoutRunner;
+use Algoritma\ShopwareTestUtils\Helper\CheckoutHelper;
 use Algoritma\ShopwareTestUtils\Helper\ConfigHelper;
 use Algoritma\ShopwareTestUtils\Helper\CustomerHelper;
 use Algoritma\ShopwareTestUtils\Helper\MailHelper;
@@ -36,9 +36,9 @@ trait HelperAccessor
         return $this->helpers[CartHelper::class] ??= new CartHelper(static::getContainer());
     }
 
-    protected function checkoutRunner(): CheckoutRunner
+    protected function checkoutRunner(): CheckoutHelper
     {
-        return $this->helpers[CheckoutRunner::class] ??= new CheckoutRunner(static::getContainer());
+        return $this->helpers[CheckoutHelper::class] ??= new CheckoutHelper(static::getContainer());
     }
 
     protected function configHelper(): ConfigHelper

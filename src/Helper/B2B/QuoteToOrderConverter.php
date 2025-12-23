@@ -2,7 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
-use Algoritma\ShopwareTestUtils\Helper\CheckoutRunner;
+use Algoritma\ShopwareTestUtils\Helper\CheckoutHelper;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteStates;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemCollection;
@@ -26,12 +26,12 @@ class QuoteToOrderConverter
 {
     private readonly CartService $cartService;
 
-    private readonly CheckoutRunner $checkoutRunner;
+    private readonly CheckoutHelper $checkoutRunner;
 
     public function __construct(private readonly ContainerInterface $container)
     {
         $this->cartService = $this->container->get(CartService::class);
-        $this->checkoutRunner = new CheckoutRunner($this->container);
+        $this->checkoutRunner = new CheckoutHelper($this->container);
     }
 
     /**

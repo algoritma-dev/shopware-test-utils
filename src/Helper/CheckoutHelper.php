@@ -12,7 +12,7 @@ use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class CheckoutRunner
+class CheckoutHelper
 {
     public function __construct(private readonly ContainerInterface $container) {}
 

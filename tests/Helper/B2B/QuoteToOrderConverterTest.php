@@ -3,7 +3,6 @@
 namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 
 use Algoritma\ShopwareTestUtils\Helper\B2B\QuoteToOrderConverter;
-use Algoritma\ShopwareTestUtils\Helper\CheckoutRunner;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemCollection;
