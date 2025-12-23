@@ -88,7 +88,8 @@ trait DatabaseHelpers
     protected function snapshotDatabase(): string
     {
         $connection = $this->getConnection();
-        $snapshotId = uniqid('db_snapshot_', true);
+        // Use shorter ID to prevent table name overflow (max 64 chars)
+        $snapshotId = uniqid();
 
         $tables = $connection->fetchFirstColumn('SHOW TABLES');
 
@@ -96,8 +97,16 @@ trait DatabaseHelpers
             if (str_starts_with((string) $table, 'temp_snapshot_')) {
                 continue;
             }
+            if (str_starts_with((string) $table, 'ts_')) {
+                continue;
+            }
+            $tempTable = "ts_{$snapshotId}_{$table}";
 
-            $tempTable = "temp_snapshot_{$snapshotId}_{$table}";
+            // Handle extremely long table names by hashing if necessary
+            if (strlen($tempTable) > 64) {
+                $tempTable = "ts_{$snapshotId}_" . md5((string) $table);
+            }
+
             $connection->executeStatement("CREATE TABLE `{$tempTable}` LIKE `{$table}`");
             $connection->executeStatement("INSERT INTO `{$tempTable}` SELECT * FROM `{$table}`");
 
