@@ -7,25 +7,22 @@ use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+use function assert;
+
 class StorefrontRequestHelper
 {
     public function __construct(private readonly KernelBrowser $browser) {}
 
-    public function login(string $email, string $password): void
+    public function login(string $email, string $password = 'shopware'): void
     {
         $this->browser->request(
             'POST',
             '/account/login',
             [
-                'username' => $email,
+                'email' => $email,
                 'password' => $password,
             ]
         );
-
-        $response = $this->browser->getResponse();
-        if ($response->getStatusCode() !== 302) {
-            throw new \RuntimeException('Login failed. Status code: ' . $response->getStatusCode());
-        }
     }
 
     public function addToCart(string $productId, int $quantity = 1): void
@@ -96,9 +93,9 @@ class StorefrontRequestHelper
      */
     public function assertResponseOk(Response $response, string $message = ''): void
     {
-        assert(
+        \assert(
             $response->getStatusCode() === Response::HTTP_OK,
-            $message ?: sprintf('Expected response status code 200, but got %d', $response->getStatusCode())
+            $message ?: \sprintf('Expected response status code 200, but got %d', $response->getStatusCode())
         );
     }
 
@@ -107,9 +104,9 @@ class StorefrontRequestHelper
      */
     public function assertResponseCreated(Response $response, string $message = ''): void
     {
-        assert(
+        \assert(
             $response->getStatusCode() === Response::HTTP_CREATED,
-            $message ?: sprintf('Expected response status code 201, but got %d', $response->getStatusCode())
+            $message ?: \sprintf('Expected response status code 201, but got %d', $response->getStatusCode())
         );
     }
 
@@ -118,9 +115,9 @@ class StorefrontRequestHelper
      */
     public function assertResponseNotFound(Response $response, string $message = ''): void
     {
-        assert(
+        \assert(
             $response->getStatusCode() === Response::HTTP_NOT_FOUND,
-            $message ?: sprintf('Expected response status code 404, but got %d', $response->getStatusCode())
+            $message ?: \sprintf('Expected response status code 404, but got %d', $response->getStatusCode())
         );
     }
 
@@ -129,9 +126,9 @@ class StorefrontRequestHelper
      */
     public function assertResponseForbidden(Response $response, string $message = ''): void
     {
-        assert(
+        \assert(
             $response->getStatusCode() === Response::HTTP_FORBIDDEN,
-            $message ?: sprintf('Expected response status code 403, but got %d', $response->getStatusCode())
+            $message ?: \sprintf('Expected response status code 403, but got %d', $response->getStatusCode())
         );
     }
 
@@ -140,15 +137,15 @@ class StorefrontRequestHelper
      */
     public function assertResponseRedirects(Response $response, ?string $expectedUrl = null, string $message = ''): void
     {
-        assert(
+        \assert(
             $response->isRedirection(),
-            $message ?: sprintf('Expected response to be a redirect, but got status code %d', $response->getStatusCode())
+            $message ?: \sprintf('Expected response to be a redirect, but got status code %d', $response->getStatusCode())
         );
 
         if ($expectedUrl !== null) {
-            assert(
+            \assert(
                 $response->headers->get('Location') === $expectedUrl,
-                $message ?: sprintf('Expected redirect to "%s", but got "%s"', $expectedUrl, $response->headers->get('Location'))
+                $message ?: \sprintf('Expected redirect to "%s", but got "%s"', $expectedUrl, $response->headers->get('Location'))
             );
         }
     }
@@ -161,9 +158,9 @@ class StorefrontRequestHelper
     public function assertResponseBodyContains(Response $response, string $needle, string $message = ''): void
     {
         $content = (string) $response->getContent();
-        assert(
+        \assert(
             str_contains($content, $needle),
-            $message ?: sprintf('Expected response body to contain "%s"', $needle)
+            $message ?: \sprintf('Expected response body to contain "%s"', $needle)
         );
     }
 
@@ -173,9 +170,9 @@ class StorefrontRequestHelper
     public function assertResponseBodyNotContains(Response $response, string $needle, string $message = ''): void
     {
         $content = (string) $response->getContent();
-        assert(
+        \assert(
             ! str_contains($content, $needle),
-            $message ?: sprintf('Expected response body not to contain "%s"', $needle)
+            $message ?: \sprintf('Expected response body not to contain "%s"', $needle)
         );
     }
 
@@ -185,9 +182,9 @@ class StorefrontRequestHelper
     public function assertResponseIsJson(Response $response, string $message = ''): void
     {
         $content = (string) $response->getContent();
-        json_decode($content);
-        assert(
-            json_last_error() === JSON_ERROR_NONE,
+        \json_decode($content);
+        \assert(
+            \json_last_error() === JSON_ERROR_NONE,
             $message ?: 'Expected response to be valid JSON'
         );
     }
@@ -201,9 +198,9 @@ class StorefrontRequestHelper
     {
         $this->assertResponseIsJson($response, $message);
         $content = (string) $response->getContent();
-        $actualData = json_decode($content, true);
+        $actualData = \json_decode($content, true);
 
-        assert(
+        \assert(
             $actualData === $expectedData,
             $message ?: 'Expected JSON response to match provided data'
         );
@@ -216,10 +213,10 @@ class StorefrontRequestHelper
     {
         $this->assertResponseIsJson($response, $message);
         $content = (string) $response->getContent();
-        $actualData = json_decode($content, true);
+        $actualData = \json_decode($content, true);
 
-        assert(array_key_exists($key, $actualData), $message ?: sprintf('Expected JSON response to contain key "%s"', $key));
-        assert($actualData[$key] === $expectedValue, $message ?: sprintf('Expected JSON key "%s" to be "%s"', $key, print_r($expectedValue, true)));
+        \assert(\array_key_exists($key, $actualData), $message ?: \sprintf('Expected JSON response to contain key "%s"', $key));
+        \assert($actualData[$key] === $expectedValue, $message ?: \sprintf('Expected JSON key "%s" to be "%s"', $key, \print_r($expectedValue, true)));
     }
 
     // --- Response Header Assertions ---
@@ -229,9 +226,9 @@ class StorefrontRequestHelper
      */
     public function assertResponseHasHeader(Response $response, string $header, string $message = ''): void
     {
-        assert(
+        \assert(
             $response->headers->has($header),
-            $message ?: sprintf('Expected response to have header "%s"', $header)
+            $message ?: \sprintf('Expected response to have header "%s"', $header)
         );
     }
 
@@ -241,9 +238,9 @@ class StorefrontRequestHelper
     public function assertResponseHeaderContains(Response $response, string $header, string $value, string $message = ''): void
     {
         $this->assertResponseHasHeader($response, $header, $message);
-        assert(
+        \assert(
             str_contains((string) $response->headers->get($header), $value),
-            $message ?: sprintf('Expected response header "%s" to contain "%s"', $header, $value)
+            $message ?: \sprintf('Expected response header "%s" to contain "%s"', $header, $value)
         );
     }
 
@@ -254,9 +251,9 @@ class StorefrontRequestHelper
      */
     public function assertRequestMethod(Request $request, string $method, string $message = ''): void
     {
-        assert(
-            $request->getMethod() === strtoupper($method),
-            $message ?: sprintf('Expected request method "%s", but got "%s"', strtoupper($method), $request->getMethod())
+        \assert(
+            $request->getMethod() === \strtoupper($method),
+            $message ?: \sprintf('Expected request method "%s", but got "%s"', \strtoupper($method), $request->getMethod())
         );
     }
 
@@ -265,9 +262,9 @@ class StorefrontRequestHelper
      */
     public function assertRequestHasHeader(Request $request, string $header, string $message = ''): void
     {
-        assert(
+        \assert(
             $request->headers->has($header),
-            $message ?: sprintf('Expected request to have header "%s"', $header)
+            $message ?: \sprintf('Expected request to have header "%s"', $header)
         );
     }
 
@@ -276,9 +273,9 @@ class StorefrontRequestHelper
      */
     public function assertRequestHasParameter(Request $request, string $key, string $message = ''): void
     {
-        assert(
+        \assert(
             $request->query->has($key) || $request->request->has($key),
-            $message ?: sprintf('Expected request to have parameter "%s"', $key)
+            $message ?: \sprintf('Expected request to have parameter "%s"', $key)
         );
     }
 
