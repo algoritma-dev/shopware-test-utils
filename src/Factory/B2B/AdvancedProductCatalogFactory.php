@@ -2,49 +2,20 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Shopware\Commercial\B2B\AdvancedProductCatalogs\Entity\AdvancedProductCatalogs\AdvancedProductCatalogsEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class AdvancedProductCatalogFactory
+class AdvancedProductCatalogFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
-    public function __construct(private readonly ContainerInterface $container) {}
-
-    public function withCustomer(string $customerId): self
+    public function __construct(ContainerInterface $container)
     {
-        $this->data['customerId'] = $customerId;
-
-        return $this;
+        parent::__construct($container);
     }
 
-    public function withSalesChannel(string $salesChannelId): self
+    protected function getRepositoryName(): string
     {
-        $this->data['salesChannelId'] = $salesChannelId;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): AdvancedProductCatalogsEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<AdvancedProductCatalogsEntity> $repository */
-        $repository = $this->container->get('b2b_advanced_product_catalogs.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var AdvancedProductCatalogsEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'b2b_advanced_product_catalogs.repository';
     }
 }

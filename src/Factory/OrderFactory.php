@@ -20,17 +20,13 @@ use Shopware\Core\System\Country\CountryEntity;
 use Shopware\Core\System\Salutation\SalutationEntity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class OrderFactory
+class OrderFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
         $this->faker = Factory::create();
 
         $addressId = Uuid::randomHex();
@@ -64,6 +60,11 @@ class OrderFactory
                 ],
             ],
         ];
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'order.repository';
     }
 
     public function withCustomer(string $customerId): self
@@ -174,23 +175,6 @@ class OrderFactory
         );
 
         return $this;
-    }
-
-    public function create(?Context $context = null): OrderEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<OrderEntity> $repository */
-        $repository = $this->container->get('order.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var OrderEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
     }
 
     private function getSalesChannelId(): string

@@ -2,58 +2,22 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\Subscription;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Shopware\Commercial\Subscription\Entity\SubscriptionInterval\SubscriptionIntervalEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldType\CronInterval;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldType\DateInterval;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class SubscriptionIntervalFactory
+class SubscriptionIntervalFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
-    public function __construct(private readonly ContainerInterface $container) {}
-
-    public function withName(string $name): self
+    public function __construct(ContainerInterface $container)
     {
-        $this->data['name'] = $name;
-
-        return $this;
+        parent::__construct($container);
     }
 
-    public function withDateInterval(string $interval): self
+    protected function getRepositoryName(): string
     {
-        $this->data['dateInterval'] = new DateInterval($interval);
-
-        return $this;
-    }
-
-    public function withCronInterval(string $cron): self
-    {
-        $this->data['cronInterval'] = new CronInterval($cron);
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): SubscriptionIntervalEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<SubscriptionIntervalEntity> $repository */
-        $repository = $this->container->get('subscription_interval.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var SubscriptionIntervalEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'subscription_interval.repository';
     }
 }

@@ -4,24 +4,17 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Content\Rule\RuleEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class RuleFactory
+class RuleFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
         $this->faker = Factory::create();
 
         $this->data = [
@@ -36,34 +29,8 @@ class RuleFactory
         ];
     }
 
-    public function withName(string $name): self
+    protected function getRepositoryName(): string
     {
-        $this->data['name'] = $name;
-
-        return $this;
-    }
-
-    public function withPriority(int $priority): self
-    {
-        $this->data['priority'] = $priority;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): RuleEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<RuleEntity> $repository */
-        $repository = $this->container->get('rule.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var RuleEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'rule.repository';
     }
 }

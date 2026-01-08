@@ -2,26 +2,22 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class QuoteFactory
+class QuoteFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->faker = Factory::create();
 
         $this->data = [
@@ -32,34 +28,8 @@ class QuoteFactory
         ];
     }
 
-    public function withCustomer(string $customerId): self
+    protected function getRepositoryName(): string
     {
-        $this->data['customerId'] = $customerId;
-
-        return $this;
-    }
-
-    public function withSalesChannel(string $salesChannelId): self
-    {
-        $this->data['salesChannelId'] = $salesChannelId;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): QuoteEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<QuoteEntity> $repository */
-        $repository = $this->container->get('quote.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var QuoteEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'quote.repository';
     }
 }

@@ -2,26 +2,22 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\ReturnManagement;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Commercial\ReturnManagement\Entity\OrderReturn\OrderReturnEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class OrderReturnFactory
+class OrderReturnFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->faker = Factory::create();
 
         $this->data = [
@@ -31,34 +27,8 @@ class OrderReturnFactory
         ];
     }
 
-    public function withOrder(string $orderId): self
+    protected function getRepositoryName(): string
     {
-        $this->data['orderId'] = $orderId;
-
-        return $this;
-    }
-
-    public function withInternalComment(string $comment): self
-    {
-        $this->data['internalComment'] = $comment;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): OrderReturnEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<OrderReturnEntity> $repository */
-        $repository = $this->container->get('order_return.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var OrderReturnEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'order_return.repository';
     }
 }

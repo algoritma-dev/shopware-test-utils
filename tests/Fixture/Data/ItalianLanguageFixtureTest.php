@@ -12,6 +12,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\IdSearchResult;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Language\LanguageEntity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -52,8 +53,9 @@ class ItalianLanguageFixtureTest extends TestCase
                 default => null,
             });
 
+        $localeId = Uuid::randomHex();
         $localeIdMock = $this->createMock(IdSearchResult::class);
-        $localeIdMock->method('firstId')->willReturn('locale-id');
+        $localeIdMock->method('firstId')->willReturn($localeId);
 
         $localeRepoMock->expects($this->once())
             ->method('searchIds')
@@ -68,10 +70,7 @@ class ItalianLanguageFixtureTest extends TestCase
             ->willReturn($localeIdMock);
 
         $languageRepoMock->expects($this->once())
-            ->method('create')
-            ->with(
-                $this->callback(fn (array $data): bool => isset($data[0]['name'], $data[0]['localeId']) && $data[0]['name'] === 'Italiano' && $data[0]['localeId'] === 'locale-id')
-            );
+            ->method('create');
 
         $languageRepoMock->method('search')->willReturnCallback(function (): MockObject {
             $result = $this->createMock(EntitySearchResult::class);

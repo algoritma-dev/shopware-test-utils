@@ -2,26 +2,22 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class RoleFactory
+class RoleFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->faker = Factory::create();
 
         $this->data = [
@@ -31,44 +27,8 @@ class RoleFactory
         ];
     }
 
-    public function withName(string $name): self
+    protected function getRepositoryName(): string
     {
-        $this->data['name'] = $name;
-
-        return $this;
-    }
-
-    public function withBusinessPartner(string $customerId): self
-    {
-        $this->data['businessPartnerCustomerId'] = $customerId;
-
-        return $this;
-    }
-
-    /**
-     * @param array<string> $permissions
-     */
-    public function withPermissions(array $permissions): self
-    {
-        $this->data['permissions'] = $permissions;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): RoleEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<RoleEntity> $repository */
-        $repository = $this->container->get('b2b_role.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var RoleEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'b2b_role.repository';
     }
 }

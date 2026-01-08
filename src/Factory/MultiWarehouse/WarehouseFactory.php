@@ -2,26 +2,22 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\MultiWarehouse;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Commercial\MultiWarehouse\Entity\Warehouse\WarehouseEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class WarehouseFactory
+class WarehouseFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->faker = Factory::create();
 
         $this->data = [
@@ -31,27 +27,8 @@ class WarehouseFactory
         ];
     }
 
-    public function withName(string $name): self
+    protected function getRepositoryName(): string
     {
-        $this->data['name'] = $name;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): WarehouseEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<WarehouseEntity> $repository */
-        $repository = $this->container->get('warehouse.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var WarehouseEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'warehouse.repository';
     }
 }

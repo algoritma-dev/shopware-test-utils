@@ -2,26 +2,22 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class EmployeeFactory
+class EmployeeFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->faker = Factory::create();
 
         $this->data = [
@@ -32,6 +28,16 @@ class EmployeeFactory
             'password' => 'shopware',
             'active' => true,
         ];
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'b2b_employee.repository';
+    }
+
+    protected function getRepository(): EntityRepository
+    {
+        return $this->container->get($this->getRepositoryName());
     }
 
     public function withName(string $firstName, string $lastName): self
@@ -61,22 +67,5 @@ class EmployeeFactory
         $this->data['roleId'] = $roleId;
 
         return $this;
-    }
-
-    public function create(?Context $context = null): EmployeeEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<EmployeeEntity> $repository */
-        $repository = $this->container->get('b2b_employee.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var EmployeeEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
     }
 }

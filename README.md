@@ -106,7 +106,13 @@ class StorefrontCheckoutTest extends AbstractFunctionalTestCase
 
 ### 🏭 Factories (Create Entities)
 
-Factories use the **Builder pattern** to create and configure entities with a fluent API.
+Factories use the **Builder pattern** with **magic methods** to create and configure entities with an ultra-fluent API.
+
+All factories extend `AbstractFactory` providing:
+- ✨ **Magic methods**: `with*()` and `set*()` for any property
+- 🎯 **Smart ID detection**: Automatically appends `Id` suffix when passing UUIDs
+- 🔗 **Method chaining**: All setters return `$this`
+- 📦 **Consistent API**: Same interface across all factories
 
 | Factory | Description |
 |---------|-------------|
@@ -122,16 +128,42 @@ Factories use the **Builder pattern** to create and configure entities with a fl
 | `ShippingMethodFactory` | Create shipping methods |
 | `PaymentMethodFactory` | Create payment methods |
 | `TaxFactory` | Create tax configurations |
+| **B2B/** | Organization, Employee, Quote, Role, etc. |
+| **Subscription/** | SubscriptionPlan, SubscriptionInterval |
+| **MultiWarehouse/** | Warehouse, WarehouseGroup |
+| **ReturnManagement/** | OrderReturn |
 
-**Example:**
+**Examples:**
 
 ```php
+// Standard fluent API
 $product = (new ProductFactory($container))
     ->withName('Gaming Laptop')
     ->withPrice(1499.99)
     ->withStock(50)
-    ->withTax(19.0)
     ->active()
+    ->create();
+
+// Magic methods - any property!
+$product = (new ProductFactory($container))
+    ->withName('Laptop')
+    ->withEan('1234567890123')        // Magic: sets 'ean'
+    ->withManufacturerNumber('MFG-01') // Magic: sets 'manufacturerNumber'
+    ->create();
+
+// Smart UUID handling - automatically adds 'Id' suffix
+$order = (new OrderFactory($container))
+    ->withCustomer($customerUuid)              // → sets 'customerId'
+    ->withSalesChannel($salesChannelUuid)      // → sets 'salesChannelId'
+    ->withPaymentMethod($paymentMethodUuid)    // → sets 'paymentMethodId'
+    ->withOrderNumber('ORD-001')               // → sets 'orderNumber' (not UUID)
+    ->create();
+
+// B2B Example
+$quote = (new B2B\QuoteFactory($container))
+    ->withCustomer($uuid)           // → 'customerId'
+    ->withOrganization($uuid)       // → 'organizationId'
+    ->withExpirationDate($date)     // Magic method
     ->create();
 ```
 
@@ -320,11 +352,18 @@ src/
 │   ├── AbstractFunctionalTestCase.php  # Functional test base
 │   └── MigrationTestCase.php           # Migration test base
 ├── Factory/                             # Entity factories
+│   ├── AbstractFactory.php             # Base factory with magic methods
 │   ├── ProductFactory.php
 │   ├── CustomerFactory.php
 │   ├── OrderFactory.php
 │   ├── CartFactory.php
-│   └── ...
+│   ├── B2B/                            # B2B factories
+│   │   ├── QuoteFactory.php
+│   │   ├── OrganizationFactory.php
+│   │   └── ...
+│   ├── Subscription/                   # Subscription factories
+│   ├── MultiWarehouse/                 # Multi-warehouse factories
+│   └── ReturnManagement/               # Return management factories
 ├── Helper/                              # Action helpers
 │   ├── OrderHelper.php
 │   ├── CartHelper.php
@@ -332,6 +371,7 @@ src/
 │   ├── StateManager.php
 │   └── ...
 ├── Traits/                              # Reusable behaviors
+│   ├── HelperAccessor.php              # Access all helpers
 │   ├── DatabaseHelpers.php
 │   ├── CacheHelpers.php
 │   ├── TimeHelpers.php

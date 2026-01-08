@@ -2,26 +2,22 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\Subscription;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Commercial\Subscription\Entity\SubscriptionPlan\SubscriptionPlanEntity;
-use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class SubscriptionPlanFactory
+class SubscriptionPlanFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->faker = Factory::create();
 
         $this->data = [
@@ -33,34 +29,8 @@ class SubscriptionPlanFactory
         ];
     }
 
-    public function withName(string $name): self
+    protected function getRepositoryName(): string
     {
-        $this->data['name'] = $name;
-
-        return $this;
-    }
-
-    public function withDiscount(float $percentage): self
-    {
-        $this->data['discountPercentage'] = $percentage;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): SubscriptionPlanEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<SubscriptionPlanEntity> $repository */
-        $repository = $this->container->get('subscription_plan.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var SubscriptionPlanEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'subscription_plan.repository';
     }
 }

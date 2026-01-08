@@ -17,17 +17,14 @@ use Shopware\Core\System\Salutation\SalutationEntity;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class CustomerFactory
+class CustomerFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->faker = Factory::create();
 
         $addressId = Uuid::randomHex();
@@ -61,34 +58,9 @@ class CustomerFactory
         ];
     }
 
-    public function withEmail(string $email): self
+    protected function getRepositoryName(): string
     {
-        $this->data['email'] = $email;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): CustomerEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        // Ensure SalesChannel exists if using default placeholder
-        // In real implementation, fetch a valid SalesChannel ID
-        if ($this->data['salesChannelId'] === Defaults::SALES_CHANNEL_TYPE_STOREFRONT) {
-            $this->data['salesChannelId'] = $this->getSalesChannelId();
-        }
-
-        /** @var EntityRepository<CustomerEntity> $repository */
-        $repository = $this->container->get('customer.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var CustomerEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'customer.repository';
     }
 
     private function getSalutationId(): string

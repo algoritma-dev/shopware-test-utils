@@ -72,19 +72,29 @@ class CartFactory
     }
 
     /**
+     * Add a custom line item directly (advanced usage)
+     */
+    public function withLineItem(LineItem $lineItem): self
+    {
+        $this->cart = $this->cartService->add($this->cart, $lineItem, $this->context);
+
+        return $this;
+    }
+
+    /**
+     * Get the current cart object for advanced manipulation
+     */
+    public function getCart(): Cart
+    {
+        return $this->cart;
+    }
+
+    /**
      * Creates and returns the fully calculated cart.
      * This is the final method to call after building the cart.
      */
     public function create(): Cart
     {
         return $this->cart;
-    }
-
-    /**
-     * Alias for create() for backward compatibility.
-     */
-    public function getCart(): Cart
-    {
-        return $this->create();
     }
 }

@@ -18,17 +18,13 @@ use Shopware\Core\System\SalesChannel\SalesChannelEntity;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class SalesChannelFactory
+class SalesChannelFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     private readonly Generator $faker;
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
+        parent::__construct($container);
         $this->faker = Factory::create();
 
         $this->data = [
@@ -48,28 +44,9 @@ class SalesChannelFactory
         ];
     }
 
-    public function withName(string $name): self
+    protected function getRepositoryName(): string
     {
-        $this->data['name'] = $name;
-
-        return $this;
-    }
-
-    public function create(?Context $context = null): SalesChannelEntity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository<SalesChannelEntity> $repository */
-        $repository = $this->container->get('sales_channel.repository');
-
-        $repository->create([$this->data], $context);
-
-        /** @var SalesChannelEntity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
+        return 'sales_channel.repository';
     }
 
     private function getDefaultPaymentMethodId(): string
