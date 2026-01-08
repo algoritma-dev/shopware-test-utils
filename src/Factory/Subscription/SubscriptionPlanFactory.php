@@ -5,8 +5,6 @@ namespace Algoritma\ShopwareTestUtils\Factory\Subscription;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\Subscription\Entity\SubscriptionPlan\SubscriptionPlanEntity;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

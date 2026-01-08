@@ -5,7 +5,6 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -28,16 +27,6 @@ class EmployeeFactory extends AbstractFactory
             'password' => 'shopware',
             'active' => true,
         ];
-    }
-
-    protected function getRepositoryName(): string
-    {
-        return 'b2b_employee.repository';
-    }
-
-    protected function getRepository(): EntityRepository
-    {
-        return $this->container->get($this->getRepositoryName());
     }
 
     public function withName(string $firstName, string $lastName): self
@@ -67,5 +56,15 @@ class EmployeeFactory extends AbstractFactory
         $this->data['roleId'] = $roleId;
 
         return $this;
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'b2b_employee.repository';
+    }
+
+    protected function getRepository(): EntityRepository
+    {
+        return $this->container->get($this->getRepositoryName());
     }
 }

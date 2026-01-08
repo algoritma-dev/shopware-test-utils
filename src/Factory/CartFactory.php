@@ -72,7 +72,7 @@ class CartFactory
     }
 
     /**
-     * Add a custom line item directly (advanced usage)
+     * Add a custom line item directly (advanced usage).
      */
     public function withLineItem(LineItem $lineItem): self
     {
@@ -82,7 +82,7 @@ class CartFactory
     }
 
     /**
-     * Get the current cart object for advanced manipulation
+     * Get the current cart object for advanced manipulation.
      */
     public function getCart(): Cart
     {

@@ -10,7 +10,6 @@ use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
 use Shopware\Core\Checkout\Cart\Tax\Struct\CalculatedTaxCollection;
 use Shopware\Core\Checkout\Cart\Tax\Struct\TaxRuleCollection;
-use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -60,11 +59,6 @@ class OrderFactory extends AbstractFactory
                 ],
             ],
         ];
-    }
-
-    protected function getRepositoryName(): string
-    {
-        return 'order.repository';
     }
 
     public function withCustomer(string $customerId): self
@@ -175,6 +169,11 @@ class OrderFactory extends AbstractFactory
         );
 
         return $this;
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'order.repository';
     }
 
     private function getSalesChannelId(): string

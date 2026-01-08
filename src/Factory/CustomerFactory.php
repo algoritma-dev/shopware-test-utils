@@ -5,7 +5,6 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 use Doctrine\DBAL\Connection;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;

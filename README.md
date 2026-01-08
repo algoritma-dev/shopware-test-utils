@@ -275,7 +275,8 @@ Base class for **integration tests** (database, repositories, services).
 - Mail capturing
 - Queue testing support
 - Custom assertions
-- **Fixture Loading**: Load fixtures with automatic dependency resolution and container injection.
+- **Fixture Loading**: Load fixtures with automatic dependency resolution and container injection
+- **Reference Management**: Retrieve entities created by fixtures anywhere in your test with `getReference()` and `hasReference()`
 
 ### `AbstractFunctionalTestCase`
 
@@ -390,18 +391,33 @@ src/
 
 ### Testing with Fixtures
 
+Fixtures allow you to load reusable test data with automatic dependency resolution. You can reference entities created by fixtures anywhere in your test while maintaining test isolation.
+
 ```php
 use Algoritma\ShopwareTestUtils\Fixture\AbstractFixture;
 use Algoritma\ShopwareTestUtils\Fixture\ReferenceRepository;
 
-class MyFixture extends AbstractFixture
+class ProductFixture extends AbstractFixture
 {
     public function load(ReferenceRepository $references): void
     {
         // Access container
-        $repo = $this->getContainer()->get('product.repository');
-        
-        // Create data...
+        $factory = $this->getContainer()->get('product.repository');
+
+        // Create a product
+        $productId = Uuid::randomHex();
+        $factory->create([
+            ['id' => $productId, 'name' => 'Test Product', 'price' => [/* ... */]]
+        ], $this->getContext());
+
+        // Store reference for later use
+        $references->set('main-product', $productId);
+    }
+
+    // Optional: Define dependencies
+    public function getDependencies(): array
+    {
+        return [CategoryFixture::class];
     }
 }
 
@@ -409,12 +425,33 @@ class MyTest extends AbstractIntegrationTestCase
 {
     public function testWithFixture(): void
     {
-        $this->loadFixtures(new MyFixture());
-        
-        // ...
+        // Load fixtures
+        $this->loadFixtures(new ProductFixture());
+
+        // Retrieve reference anywhere in the test
+        $productId = $this->getReference('main-product');
+
+        // Check if reference exists
+        if ($this->hasReference('optional-product')) {
+            $optionalProductId = $this->getReference('optional-product');
+        }
+
+        // Use the entities
+        $product = $this->getService('product.repository')->search(
+            new Criteria([$productId]),
+            $this->getContext()
+        )->first();
+
+        $this->assertNotNull($product);
     }
 }
 ```
+
+**Key Features:**
+- **Reference Management**: Store and retrieve entities by name using `getReference()` and `hasReference()`
+- **Test Isolation**: References are automatically cleared between tests via `tearDown()`
+- **Dependency Resolution**: Fixtures with dependencies are loaded in the correct order
+- **Container Access**: Fixtures have full access to the Shopware container
 
 ### Testing with Time Travel
 

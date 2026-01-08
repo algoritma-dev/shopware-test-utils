@@ -4,7 +4,6 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

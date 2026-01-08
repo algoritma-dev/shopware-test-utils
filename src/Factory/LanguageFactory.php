@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

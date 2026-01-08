@@ -4,9 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Content\Product\ProductEntity;
 use Shopware\Core\Defaults;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,11 +31,6 @@ class ProductFactory extends AbstractFactory
         ];
     }
 
-    protected function getRepositoryName(): string
-    {
-        return 'product.repository';
-    }
-
     public function withPrice(float $gross, ?float $net = null): self
     {
         if ($net === null) {
@@ -53,5 +46,10 @@ class ProductFactory extends AbstractFactory
         $this->data['active'] = $active;
 
         return $this;
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'product.repository';
     }
 }

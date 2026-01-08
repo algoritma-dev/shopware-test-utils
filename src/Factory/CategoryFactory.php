@@ -4,7 +4,6 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,15 +25,15 @@ class CategoryFactory extends AbstractFactory
         ];
     }
 
-    protected function getRepositoryName(): string
-    {
-        return 'category.repository';
-    }
-
     public function active(bool $active = true): self
     {
         $this->data['active'] = $active;
 
         return $this;
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'category.repository';
     }
 }

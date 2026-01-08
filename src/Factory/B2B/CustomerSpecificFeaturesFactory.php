@@ -3,8 +3,6 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Shopware\Commercial\B2B\QuickOrder\Entity\CustomerSpecificFeaturesEntity;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CustomerSpecificFeaturesFactory extends AbstractFactory

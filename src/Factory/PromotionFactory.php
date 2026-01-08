@@ -4,7 +4,6 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -26,16 +25,16 @@ class PromotionFactory extends AbstractFactory
         ];
     }
 
-    protected function getRepositoryName(): string
-    {
-        return 'promotion.repository';
-    }
-
     public function withCode(string $code): self
     {
         $this->data['useCodes'] = true;
         $this->data['code'] = $code;
 
         return $this;
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'promotion.repository';
     }
 }

@@ -6,7 +6,6 @@ use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

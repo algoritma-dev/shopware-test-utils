@@ -33,6 +33,18 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use MailHelpers;
     use QueueHelpers;
 
+    private ?FixtureManager $fixtureManager = null;
+
+    protected function tearDown(): void
+    {
+        if ($this->fixtureManager instanceof FixtureManager) {
+            $this->fixtureManager->clear();
+            $this->fixtureManager = null;
+        }
+
+        parent::tearDown();
+    }
+
     protected function getConnection(): Connection
     {
         return $this->getContainer()->get(Connection::class);
@@ -92,7 +104,31 @@ abstract class AbstractIntegrationTestCase extends TestCase
      */
     protected function loadFixtures(FixtureInterface|array $fixtures): void
     {
-        $fixtureManager = new FixtureManager($this->getContainer());
-        $fixtureManager->load($fixtures);
+        $this->getFixtureManager()->load($fixtures);
+    }
+
+    /**
+     * Get a reference to an entity created by a fixture.
+     */
+    protected function getReference(string $name): mixed
+    {
+        return $this->getFixtureManager()->getReferences()->get($name);
+    }
+
+    /**
+     * Check if a reference exists.
+     */
+    protected function hasReference(string $name): bool
+    {
+        return $this->getFixtureManager()->getReferences()->has($name);
+    }
+
+    private function getFixtureManager(): FixtureManager
+    {
+        if (! $this->fixtureManager instanceof FixtureManager) {
+            $this->fixtureManager = new FixtureManager($this->getContainer());
+        }
+
+        return $this->fixtureManager;
     }
 }

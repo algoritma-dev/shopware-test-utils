@@ -9,7 +9,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Base factory class with common functionality for all entity factories
+ * Base factory class with common functionality for all entity factories.
  */
 abstract class AbstractFactory
 {
@@ -21,12 +21,7 @@ abstract class AbstractFactory
     public function __construct(protected readonly ContainerInterface $container) {}
 
     /**
-     * Get the repository name (e.g., 'product.repository')
-     */
-    abstract protected function getRepositoryName(): string;
-
-    /**
-     * Magic method to handle dynamic with*() and set*() calls
+     * Magic method to handle dynamic with*() and set*() calls.
      *
      * Examples:
      * - withCustomerNumber('123') → sets 'customerNumber'
@@ -49,6 +44,7 @@ abstract class AbstractFactory
             }
 
             $this->data[$property] = $value;
+
             return $this;
         }
 
@@ -63,6 +59,7 @@ abstract class AbstractFactory
             }
 
             $this->data[$property] = $value;
+
             return $this;
         }
 
@@ -70,7 +67,42 @@ abstract class AbstractFactory
     }
 
     /**
-     * Determines if 'Id' suffix should be appended to a property name
+     * Get the raw data array (useful for debugging or custom modifications).
+     *
+     * @return array<string, mixed>
+     */
+    public function getData(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * Create and persist the entity.
+     */
+    public function create(?Context $context = null): Entity
+    {
+        if (! $context instanceof Context) {
+            $context = Context::createCLIContext();
+        }
+
+        /** @var EntityRepository $repository */
+        $repository = $this->container->get($this->getRepositoryName());
+
+        $repository->create([$this->data], $context);
+
+        /** @var Entity $entity */
+        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
+
+        return $entity;
+    }
+
+    /**
+     * Get the repository name (e.g., 'product.repository').
+     */
+    abstract protected function getRepositoryName(): string;
+
+    /**
+     * Determines if 'Id' suffix should be appended to a property name.
      *
      * Returns true if the value is a valid UUID and the property doesn't already end with 'Id'
      */
@@ -93,35 +125,5 @@ abstract class AbstractFactory
         $uuidPattern = '/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i';
 
         return preg_match($uuidPattern, $value) !== 1;
-    }
-
-    /**
-     * Get the raw data array (useful for debugging or custom modifications)
-     *
-     * @return array<string, mixed>
-     */
-    public function getData(): array
-    {
-        return $this->data;
-    }
-
-    /**
-     * Create and persist the entity
-     */
-    public function create(?Context $context = null): Entity
-    {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        /** @var EntityRepository $repository */
-        $repository = $this->container->get($this->getRepositoryName());
-
-        $repository->create([$this->data], $context);
-
-        /** @var Entity $entity */
-        $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
-
-        return $entity;
     }
 }

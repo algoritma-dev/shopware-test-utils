@@ -3,8 +3,6 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Shopware\Commercial\B2B\AdvancedProductCatalogs\Entity\AdvancedProductCatalogs\AdvancedProductCatalogsEntity;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class AdvancedProductCatalogFactory extends AbstractFactory
