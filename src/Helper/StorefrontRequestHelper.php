@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 use function assert;
 
@@ -84,6 +85,19 @@ class StorefrontRequestHelper
     public function getBrowser(): KernelBrowser
     {
         return $this->browser;
+    }
+
+    /**
+     * Generate a URL from a route name and parameters.
+     *
+     * @param array<string, mixed> $params
+     */
+    public function getUrl(string $routeName, array $params = []): string
+    {
+        $router = $this->browser->getContainer()->get('router');
+        assert($router instanceof UrlGeneratorInterface);
+
+        return $router->generate($routeName, $params);
     }
 
     // --- Response Status Assertions ---
