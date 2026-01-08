@@ -95,7 +95,7 @@ class StorefrontRequestHelper
     public function getUrl(string $routeName, array $params = []): string
     {
         $router = $this->browser->getContainer()->get('router');
-        assert($router instanceof UrlGeneratorInterface);
+        \assert($router instanceof UrlGeneratorInterface);
 
         return $router->generate($routeName, $params);
     }
