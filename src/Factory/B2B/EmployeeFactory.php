@@ -5,8 +5,10 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeStatus;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class EmployeeFactory extends AbstractFactory
@@ -24,8 +26,9 @@ class EmployeeFactory extends AbstractFactory
             'firstName' => $this->faker->firstName,
             'lastName' => $this->faker->lastName,
             'email' => $this->faker->unique()->safeEmail,
-            'password' => 'shopware',
+            'password' => TestDefaults::HASHED_PASSWORD,
             'active' => true,
+            'status' => EmployeeStatus::ACTIVE->value,
         ];
     }
 
