@@ -27,6 +27,6 @@ class RoleFactory extends AbstractFactory
 
     protected function getRepositoryName(): string
     {
-        return 'b2b_role.repository';
+        return 'b2b_components_role.repository';
     }
 }

@@ -20,7 +20,7 @@ class RolePermissionFactoryTest extends TestCase
         $role = new RoleEntity();
 
         $container->method('get')->willReturnMap([
-            ['b2b_role.repository', 1, $repository],
+            ['b2b_components_role.repository', 1, $repository],
             ['b2b_permission.repository', 1, $repository],
         ]);
 
@@ -52,7 +52,7 @@ class RolePermissionFactoryTest extends TestCase
         $role = new RoleEntity();
 
         $container->method('get')->willReturnMap([
-            ['b2b_role.repository', 1, $repository],
+            ['b2b_components_role.repository', 1, $repository],
             ['b2b_permission.repository', 1, $repository],
         ]);
 

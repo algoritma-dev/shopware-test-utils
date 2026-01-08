@@ -184,7 +184,7 @@ class RolePermissionFactory
         $context ??= Context::createCLIContext();
 
         /** @var EntityRepository<RoleEntity> $repository */
-        $repository = $this->container->get('b2b_role.repository');
+        $repository = $this->container->get('b2b_components_role.repository');
 
         // Resolve permission IDs
         $permissionIds = $this->resolvePermissionIds($context);
@@ -271,7 +271,7 @@ class RolePermissionFactory
     private function load(string $id, Context $context): RoleEntity
     {
         /** @var EntityRepository<RoleEntity> $repository */
-        $repository = $this->container->get('b2b_role.repository');
+        $repository = $this->container->get('b2b_components_role.repository');
 
         $criteria = new Criteria([$id]);
         $criteria->addAssociation('permissions');

@@ -124,6 +124,6 @@ abstract class AbstractFactory
         // - 550e8400e29b41d4a716446655440000 (without dashes)
         $uuidPattern = '/^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i';
 
-        return preg_match($uuidPattern, $value) !== 1;
+        return \preg_match($uuidPattern, $value) === 1;
     }
 }
