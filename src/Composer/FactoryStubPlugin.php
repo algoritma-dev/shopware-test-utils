@@ -38,31 +38,35 @@ class FactoryStubPlugin implements PluginInterface, EventSubscriberInterface
     public static function getSubscribedEvents(): array
     {
         return [
-            ScriptEvents::POST_INSTALL_CMD => 'generateStubs',
-            ScriptEvents::POST_UPDATE_CMD => 'generateStubs',
+            ScriptEvents::POST_INSTALL_CMD => 'onPostInstall',
+            ScriptEvents::POST_UPDATE_CMD => 'onPostUpdate',
         ];
     }
 
-    public function generateStubs(Event $event): void
+    public function onPostInstall(Event $event): void
+    {
+        $this->generateStubs();
+    }
+
+    public function onPostUpdate(Event $event): void
+    {
+        $this->generateStubs();
+    }
+
+    private function generateStubs(): void
     {
         $vendorDir = $this->composer->getConfig()->get('vendor-dir');
         $projectRoot = dirname((string) $vendorDir);
-        $cacheDir = $projectRoot . '/var/cache';
 
-        // Check if we're in the package itself or if it's installed as a dependency
-        $packagePath = $vendorDir . '/algoritma/shopware-test-utils';
-        if (is_dir($packagePath)) {
-            // Package is installed as a dependency
-            $packageRoot = $packagePath;
-        } else {
-            // We're inside the package itself
-            $packageRoot = $projectRoot;
-        }
+        // Package is in vendor when installed as dependency
+        $packageRoot = $vendorDir . '/algoritma/shopware-test-utils';
 
         // Only generate if the package Factory directory exists
         if (! is_dir($packageRoot . '/src/Factory')) {
             return;
         }
+
+        $cacheDir = $projectRoot . '/var/cache';
 
         $this->io->write('<info>Generating factory stubs for IDE autocomplete...</info>');
 

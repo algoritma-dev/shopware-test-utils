@@ -1,7 +1,7 @@
 {
     "name": "algoritma/shopware-test-utils",
     "description": "A collection of helpers for Shopware 6 integration/functional tests.",
-    "type": "library",
+    "type": "composer-plugin",
     "authors": [
         {
             "name": "Algoritma srl",
@@ -44,8 +44,8 @@
             "symfony/runtime": true,
             "phpstan/extension-installer": true,
             "algoritma/php-coding-standards": true,
-            "algoritma/shopware-test-utils": true,
-            "algoritma/castor-recipes": true
+            "algoritma/castor-recipes": true,
+            "algoritma/shopware-test-utils": true
         }
     },
     "require-dev": {
