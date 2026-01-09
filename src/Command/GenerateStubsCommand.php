@@ -10,6 +10,7 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'alg:sw-test-util:generate-stubs',
@@ -28,21 +29,16 @@ class GenerateStubsCommand extends Command
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->metadataService);
 
-        echo "Generating factory stubs...\n";
+        $io = new SymfonyStyle($input, $output);
 
+        $io->writeln("Generating factory stubs...");
         try {
             $result = $generator->generate();
-            echo "✓ Factory stubs generated successfully:\n";
-            echo "  - PHPStan stub: {$result['stub']}\n";
-            echo "  - PhpStorm meta: {$result['meta']}\n";
-            echo "\nTo use with PHPStan (already configured):\n";
-            echo "    stubFiles:\n";
-            echo "        - var/cache/factory-stubs.php\n";
-            echo "\nTo use with PhpStorm:\n";
-            echo "    Copy var/cache/.phpstorm.meta.php to your project root\n";
-            echo "    Or merge its contents into your existing .phpstorm.meta.php\n";
+            $io->success("Factory stubs generated successfully");
+            $output->writeln("  - PHPStan stub: {$result['stub']}");
+            $output->writeln("  - PhpStorm meta: {$result['meta']}");
         } catch (\Exception $e) {
-            fwrite(STDERR, "✗ Error generating stubs: {$e->getMessage()}\n");
+            $output->writeln("<error>Error generating stubs: {$e->getMessage()}</error>");
 
             return Command::FAILURE;
         }

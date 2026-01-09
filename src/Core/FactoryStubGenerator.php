@@ -125,7 +125,7 @@ class FactoryStubGenerator
 
         $metaContent .= "}\n";
 
-        $metaPath = $this->projectRoot . '/' . self::META_FILE;
+        $metaPath = $this->projectRoot . '/tests/' . self::META_FILE;
         file_put_contents($metaPath, $metaContent);
 
         return $metaPath;
