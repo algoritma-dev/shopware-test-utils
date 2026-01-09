@@ -9,6 +9,7 @@ use Composer\IO\IOInterface;
 use Composer\Plugin\PluginInterface;
 use Composer\Script\Event;
 use Composer\Script\ScriptEvents;
+use function exec;
 
 /**
  * Composer plugin that automatically generates factory stubs after install/update.
@@ -55,33 +56,10 @@ class FactoryStubPlugin implements PluginInterface, EventSubscriberInterface
 
     private function generateStubs(): void
     {
-        $vendorDir = $this->composer->getConfig()->get('vendor-dir');
-        $projectRoot = dirname((string) $vendorDir);
+        $binDir = $this->composer->getConfig()->get('bin-dir');
 
-        // Package is in vendor when installed as dependency
-        $packageRoot = $vendorDir . '/algoritma/shopware-test-utils';
+        exec($binDir . '/generate-factory-stubs');
 
-        // Only generate if the package Factory directory exists
-        if (! is_dir($packageRoot . '/src/Factory')) {
-            return;
-        }
-
-        $cacheDir = $projectRoot . '/var/cache';
-
-        $this->io->write('<info>Generating factory stubs for IDE autocomplete...</info>');
-
-        try {
-            $generator = new FactoryStubGenerator($packageRoot, $cacheDir);
-            $result = $generator->generate();
-
-            $this->io->write(sprintf('  <comment>✓</comment> PHPStan stub: %s', $result['stub']));
-            $this->io->write(sprintf('  <comment>✓</comment> PhpStorm meta: %s', $result['meta']));
-            $this->io->write('');
-            $this->io->write('<comment>To enable PhpStorm autocomplete:</comment>');
-            $this->io->write('  Copy var/cache/.phpstorm.meta.php to your project root');
-            $this->io->write('  Or merge its contents into your existing .phpstorm.meta.php');
-        } catch (\Exception $e) {
-            $this->io->writeError(sprintf('<error>Failed to generate stubs: %s</error>', $e->getMessage()));
-        }
+        exit(0);
     }
 }
