@@ -17,9 +17,14 @@
     "require": {
         "php": ">=8.2",
         "shopware/core": "^6.7",
-        "fakerphp/faker": "^1.24"
+        "fakerphp/faker": "^1.24",
+        "composer-plugin-api": "^2.0",
+        "symfony/finder": "^7.0"
     },
     "license": "MIT",
+    "extra": {
+        "class": "Algoritma\\ShopwareTestUtils\\Composer\\FactoryStubPlugin"
+    },
     "autoload": {
         "psr-4": {
             "Algoritma\\ShopwareTestUtils\\": "src/"
@@ -38,7 +43,9 @@
         "allow-plugins": {
             "symfony/runtime": true,
             "phpstan/extension-installer": true,
-            "algoritma/php-coding-standards": true
+            "algoritma/php-coding-standards": true,
+            "algoritma/shopware-test-utils": true,
+            "algoritma/castor-recipes": true
         }
     },
     "require-dev": {
@@ -47,7 +54,7 @@
         "frosh/shopware-rector": "^0.5.8",
         "symfony/browser-kit": "^8.0",
         "phpstan/phpstan-phpunit": "^2.0",
-        "symfony/finder": "^7.0"
+        "algoritma/castor-recipes": "dev-main"
     },
     "scripts": {
         "cs-check": "php-cs-fixer fix --dry-run --diff",
@@ -55,8 +62,6 @@
         "rector-check": "rector process --dry-run",
         "rector-fix": "rector process",
         "phpstan": "phpstan analyze --memory-limit=-1",
-        "generate-stubs": "bin/generate-factory-stubs",
-        "post-install-cmd": "@generate-stubs",
-        "post-update-cmd": "@generate-stubs"
+        "generate-stubs": "bin/generate-factory-stubs"
     }
 }
