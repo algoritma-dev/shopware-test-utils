@@ -10,4 +10,9 @@ class CustomerSpecificFeaturesFactory extends AbstractFactory
     {
         return 'b2b_customer_specific_features.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\CustomerSpecificFeatures\Entity\CustomerSpecificFeatures\CustomerSpecificFeaturesEntity::class;
+    }
 }

@@ -20,4 +20,9 @@ class LanguageFactory extends AbstractFactory
     {
         return 'language.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\System\Language\LanguageEntity::class;
+    }
 }

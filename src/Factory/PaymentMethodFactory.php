@@ -35,6 +35,11 @@ class PaymentMethodFactory extends AbstractFactory
         return 'payment_method.repository';
     }
 
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Checkout\Payment\PaymentMethodEntity::class;
+    }
+
     private function getAvailabilityRuleId(): string
     {
         /** @var EntityRepository<RuleEntity> $repo */

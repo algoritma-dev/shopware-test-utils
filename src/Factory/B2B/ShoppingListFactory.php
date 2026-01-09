@@ -29,4 +29,9 @@ class ShoppingListFactory extends AbstractFactory
     {
         return 'b2b_shopping_list.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity::class;
+    }
 }

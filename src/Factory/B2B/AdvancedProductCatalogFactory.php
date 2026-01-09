@@ -10,4 +10,9 @@ class AdvancedProductCatalogFactory extends AbstractFactory
     {
         return 'b2b_advanced_product_catalogs.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\AdvancedProductCatalog\Entity\AdvancedProductCatalog\AdvancedProductCatalogEntity::class;
+    }
 }

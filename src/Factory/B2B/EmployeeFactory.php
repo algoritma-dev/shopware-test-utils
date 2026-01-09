@@ -66,6 +66,11 @@ class EmployeeFactory extends AbstractFactory
         return 'b2b_employee.repository';
     }
 
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity::class;
+    }
+
     protected function getRepository(): EntityRepository
     {
         return $this->container->get($this->getRepositoryName());

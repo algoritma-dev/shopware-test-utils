@@ -29,4 +29,9 @@ class RoleFactory extends AbstractFactory
     {
         return 'b2b_components_role.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\Common\Entity\Role\RoleEntity::class;
+    }
 }

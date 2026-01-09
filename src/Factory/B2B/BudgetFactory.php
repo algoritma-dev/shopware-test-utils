@@ -38,4 +38,9 @@ class BudgetFactory extends AbstractFactory
     {
         return 'b2b_budget.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\Budget\Entity\Budget\BudgetEntity::class;
+    }
 }

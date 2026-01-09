@@ -31,4 +31,9 @@ class ApprovalRuleFactory extends AbstractFactory
     {
         return 'b2b_approval_rule.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\OrderApproval\Entity\ApprovalRule\ApprovalRuleEntity::class;
+    }
 }

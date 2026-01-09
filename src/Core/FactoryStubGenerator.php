@@ -189,41 +189,38 @@ class FactoryStubGenerator
     }
 
     /**
-     * Extract property names from factory's default data array.
+     * Extract property names from entity class using reflection.
      *
      * @return array<string>
      */
     private function extractFactoryProperties(\ReflectionClass $reflection): array
     {
-        // Create temporary instance to read $data property
         try {
-            $constructor = $reflection->getConstructor();
+            // Get entity class from factory
+            $factory = $reflection->newInstanceWithoutConstructor();
+            $method = $reflection->getMethod('getEntityClass');
+            $entityClass = $method->invoke($factory);
 
-            if (! $constructor) {
+            if (! $entityClass || ! class_exists($entityClass)) {
                 return [];
             }
 
-            // Parse constructor code to find property assignments
-            $fileName = $reflection->getFileName();
-            if (! $fileName) {
-                return [];
+            // Use reflection on entity to get properties
+            $entityReflection = new \ReflectionClass($entityClass);
+            $properties = [];
+
+            foreach ($entityReflection->getProperties() as $property) {
+                // Skip static and inherited properties from base classes
+                if ($property->isStatic()) {
+                    continue;
+                }
+                if ($property->getDeclaringClass()->getName() !== $entityClass) {
+                    continue;
+                }
+                $properties[] = $property->getName();
             }
 
-            $content = file_get_contents($fileName);
-
-            // Extract properties from $this->data assignments
-            preg_match_all('/\$this->data\s*=\s*\[(.*?)\];/s', $content, $matches);
-
-            if (empty($matches[1])) {
-                return [];
-            }
-
-            $dataContent = $matches[1][0];
-
-            // Extract property keys
-            preg_match_all('/[\'"](\w+)[\'"]\s*=>/s', $dataContent, $propertyMatches);
-
-            return array_unique($propertyMatches[1]);
+            return array_unique($properties);
         } catch (\Exception) {
             return [];
         }

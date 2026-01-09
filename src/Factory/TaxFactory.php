@@ -28,4 +28,9 @@ class TaxFactory extends AbstractFactory
     {
         return 'tax.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\System\Tax\TaxEntity::class;
+    }
 }

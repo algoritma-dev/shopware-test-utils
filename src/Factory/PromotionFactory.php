@@ -37,4 +37,9 @@ class PromotionFactory extends AbstractFactory
     {
         return 'promotion.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Checkout\Promotion\PromotionEntity::class;
+    }
 }

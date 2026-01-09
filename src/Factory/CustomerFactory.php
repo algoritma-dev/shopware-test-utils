@@ -62,6 +62,11 @@ class CustomerFactory extends AbstractFactory
         return 'customer.repository';
     }
 
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Checkout\Customer\CustomerEntity::class;
+    }
+
     private function getSalutationId(): string
     {
         /** @var EntityRepository<SalutationEntity> $repo */

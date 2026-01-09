@@ -44,6 +44,11 @@ class ShippingMethodFactory extends AbstractFactory
         return 'shipping_method.repository';
     }
 
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Checkout\Shipping\ShippingMethodEntity::class;
+    }
+
     private function getAvailabilityRuleId(): string
     {
         // Fetch any rule, or create a simple "always valid" one if none exist (simplified here)

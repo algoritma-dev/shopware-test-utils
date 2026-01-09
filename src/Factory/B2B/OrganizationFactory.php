@@ -28,4 +28,9 @@ class OrganizationFactory extends AbstractFactory
     {
         return 'b2b_components_organization.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Commercial\B2B\Common\Entity\Organization\OrganizationEntity::class;
+    }
 }

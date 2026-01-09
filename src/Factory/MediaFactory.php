@@ -29,4 +29,9 @@ class MediaFactory extends AbstractFactory
     {
         return 'media.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Content\Media\MediaEntity::class;
+    }
 }

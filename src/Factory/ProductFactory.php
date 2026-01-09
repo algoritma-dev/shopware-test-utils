@@ -52,4 +52,9 @@ class ProductFactory extends AbstractFactory
     {
         return 'product.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Content\Product\ProductEntity::class;
+    }
 }

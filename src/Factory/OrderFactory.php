@@ -176,6 +176,11 @@ class OrderFactory extends AbstractFactory
         return 'order.repository';
     }
 
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Checkout\Order\OrderEntity::class;
+    }
+
     private function getSalesChannelId(): string
     {
         $connection = $this->container->get(Connection::class);

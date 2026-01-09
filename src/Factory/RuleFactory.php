@@ -32,4 +32,9 @@ class RuleFactory extends AbstractFactory
     {
         return 'rule.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Content\Rule\RuleEntity::class;
+    }
 }

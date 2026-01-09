@@ -102,6 +102,13 @@ abstract class AbstractFactory
     abstract protected function getRepositoryName(): string;
 
     /**
+     * Get the entity class name (e.g., 'Shopware\Core\Content\Product\ProductEntity').
+     *
+     * @return class-string
+     */
+    abstract protected function getEntityClass(): string;
+
+    /**
      * Determines if 'Id' suffix should be appended to a property name.
      *
      * Returns true if the value is a valid UUID and the property doesn't already end with 'Id'

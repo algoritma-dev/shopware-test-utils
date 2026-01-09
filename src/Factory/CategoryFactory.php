@@ -36,4 +36,9 @@ class CategoryFactory extends AbstractFactory
     {
         return 'category.repository';
     }
+
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\Content\Category\CategoryEntity::class;
+    }
 }

@@ -48,6 +48,11 @@ class SalesChannelFactory extends AbstractFactory
         return 'sales_channel.repository';
     }
 
+    protected function getEntityClass(): string
+    {
+        return \Shopware\Core\System\SalesChannel\SalesChannelEntity::class;
+    }
+
     private function getDefaultPaymentMethodId(): string
     {
         /** @var EntityRepository<PaymentMethodEntity> $repo */
