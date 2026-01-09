@@ -193,19 +193,8 @@ class FactoryStubGenerator
         try {
             // Get entity class from factory
             $factory = $reflection->newInstanceWithoutConstructor();
-            $method = $reflection->getMethod('getEntityClass');
-            $entityClass = $method->invoke($factory);
-
-            if (! $entityClass || ! class_exists($entityClass)) {
-                return [];
-            }
-
-            // NUOVA IMPLEMENTAZIONE: Usa DalMetadataService
-            // Ottieni l'entity name dalla entity class
-            $reflectionEntity = new \ReflectionClass($entityClass);
-            $entityName = strtolower(
-                (string) preg_replace('/(?<!^)[A-Z]/', '_$0', str_replace(['\\', 'Entity'], ['', ''], $reflectionEntity->getShortName()))
-            );
+            $method = $reflection->getMethod('getEntityName');
+            $entityName = $method->invoke($factory);
 
             // Recupera properties + relations
             $properties = $this->metadataService->getEntityProperties($entityName);
