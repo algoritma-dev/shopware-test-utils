@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -31,8 +31,8 @@ class RoleFactory extends AbstractFactory
         return 'b2b_components_role.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return RoleEntity::class;
+        return RoleDefinition::ENTITY_NAME;
     }
 }

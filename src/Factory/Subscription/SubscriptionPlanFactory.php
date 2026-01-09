@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\Subscription;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\Subscription\Entity\SubscriptionPlan\SubscriptionPlanEntity;
+use Shopware\Commercial\Subscription\Entity\SubscriptionPlan\SubscriptionPlanDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,8 +33,8 @@ class SubscriptionPlanFactory extends AbstractFactory
         return 'subscription_plan.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return SubscriptionPlanEntity::class;
+        return SubscriptionPlanDefinition::ENTITY_NAME;
     }
 }

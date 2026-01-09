@@ -4,7 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Content\Rule\RuleEntity;
+use Shopware\Core\Content\Rule\RuleDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -34,8 +34,8 @@ class RuleFactory extends AbstractFactory
         return 'rule.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return RuleEntity::class;
+        return RuleDefinition::ENTITY_NAME;
     }
 }

@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\B2B\OrderApproval\Entity\ApprovalRule\ApprovalRuleEntity;
+use Shopware\Commercial\B2B\OrderApproval\Entity\ApprovalRule\ApprovalRuleDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -33,8 +33,8 @@ class ApprovalRuleFactory extends AbstractFactory
         return 'b2b_approval_rule.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return ApprovalRuleEntity::class;
+        return ApprovalRuleDefinition::ENTITY_NAME;
     }
 }

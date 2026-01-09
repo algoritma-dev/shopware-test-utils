@@ -106,7 +106,7 @@ abstract class AbstractFactory
      *
      * @return class-string
      */
-    abstract protected function getEntityClass(): string;
+    abstract protected function getEntityName(): string;
 
     /**
      * Determines if 'Id' suffix should be appended to a property name.

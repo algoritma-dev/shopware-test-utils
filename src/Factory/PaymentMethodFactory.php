@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\DefaultPayment;
-use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
+use Shopware\Core\Checkout\Payment\PaymentMethodDefinition;
 use Shopware\Core\Content\Rule\RuleEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -36,9 +36,9 @@ class PaymentMethodFactory extends AbstractFactory
         return 'payment_method.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return PaymentMethodEntity::class;
+        return PaymentMethodDefinition::ENTITY_NAME;
     }
 
     private function getAvailabilityRuleId(): string

@@ -4,7 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Checkout\Shipping\ShippingMethodEntity;
+use Shopware\Core\Checkout\Shipping\ShippingMethodDefinition;
 use Shopware\Core\Content\Rule\RuleEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
@@ -45,9 +45,9 @@ class ShippingMethodFactory extends AbstractFactory
         return 'shipping_method.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return ShippingMethodEntity::class;
+        return ShippingMethodDefinition::ENTITY_NAME;
     }
 
     private function getAvailabilityRuleId(): string

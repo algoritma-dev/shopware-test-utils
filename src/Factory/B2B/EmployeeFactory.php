@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeDefinition;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeStatus;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
@@ -67,9 +67,9 @@ class EmployeeFactory extends AbstractFactory
         return 'b2b_employee.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return EmployeeEntity::class;
+        return EmployeeDefinition::ENTITY_NAME;
     }
 
     protected function getRepository(): EntityRepository

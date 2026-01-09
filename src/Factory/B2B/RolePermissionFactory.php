@@ -3,7 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Shopware\Commercial\B2B\EmployeeManagement\Entity\Permission\PermissionEntity;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Permission\PermissionDefinition;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Uuid\Uuid;
@@ -218,8 +218,8 @@ class RolePermissionFactory extends AbstractFactory
         return 'b2b_permission';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return PermissionEntity::class;
+        return PermissionDefinition::ENTITY_NAME;
     }
 }

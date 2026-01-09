@@ -3,7 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Factory\Subscription;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Shopware\Commercial\Subscription\Entity\SubscriptionInterval\SubscriptionIntervalEntity;
+use Shopware\Commercial\Subscription\Entity\SubscriptionInterval\SubscriptionIntervalDefinition;
 
 class SubscriptionIntervalFactory extends AbstractFactory
 {
@@ -12,8 +12,8 @@ class SubscriptionIntervalFactory extends AbstractFactory
         return 'subscription_interval.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return SubscriptionIntervalEntity::class;
+        return SubscriptionIntervalDefinition::ENTITY_NAME;
     }
 }

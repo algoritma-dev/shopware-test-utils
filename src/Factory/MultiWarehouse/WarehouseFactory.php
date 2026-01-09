@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\MultiWarehouse;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\MultiWarehouse\Entity\Warehouse\WarehouseEntity;
+use Shopware\Commercial\MultiWarehouse\Entity\Warehouse\WarehouseDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -31,8 +31,8 @@ class WarehouseFactory extends AbstractFactory
         return 'warehouse.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return WarehouseEntity::class;
+        return WarehouseDefinition::ENTITY_NAME;
     }
 }

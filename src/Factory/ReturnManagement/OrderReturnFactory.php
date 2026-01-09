@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\ReturnManagement;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\ReturnManagement\Entity\OrderReturn\OrderReturnEntity;
+use Shopware\Commercial\ReturnManagement\Entity\OrderReturn\OrderReturnDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -31,8 +31,8 @@ class OrderReturnFactory extends AbstractFactory
         return 'order_return.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return OrderReturnEntity::class;
+        return OrderReturnDefinition::ENTITY_NAME;
     }
 }

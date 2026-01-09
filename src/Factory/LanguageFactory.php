@@ -3,7 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\Language\LanguageEntity;
+use Shopware\Core\System\Language\LanguageDefinition;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class LanguageFactory extends AbstractFactory
@@ -22,8 +22,8 @@ class LanguageFactory extends AbstractFactory
         return 'language.repository';
     }
 
-    protected function getEntityClass(): string
+    protected function getEntityName(): string
     {
-        return LanguageEntity::class;
+        return LanguageDefinition::ENTITY_NAME;
     }
 }
