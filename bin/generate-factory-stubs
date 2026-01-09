@@ -1,47 +1,73 @@
 #!/usr/bin/env php
 <?php
 
-use Algoritma\ShopwareTestUtils\Core\FactoryStubGenerator;
+use Shopware\Core\Framework\Adapter\Kernel\KernelFactory;
+use Shopware\Core\Framework\Plugin\KernelPluginLoader\ComposerPluginLoader;
+use Shopware\Core\Framework\Plugin\KernelPluginLoader\DbalKernelPluginLoader;
+use Shopware\Core\Framework\Plugin\KernelPluginLoader\StaticKernelPluginLoader;
+use Shopware\Core\Kernel;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArgvInput;
 
-$autoloadFiles = [
-    __DIR__ . '/../vendor/autoload.php',
-    __DIR__ . '/../../../autoload.php',
-];
+$envFile = __DIR__ . '/../../../../.env';
 
-$autoloadFound = false;
-foreach ($autoloadFiles as $autoloadFile) {
-    if (file_exists($autoloadFile)) {
-        require_once $autoloadFile;
-        $autoloadFound = true;
-        break;
+if (!file_exists(__DIR__ . '/../.env') && !file_exists(__DIR__ . '/../.env.dist') && !file_exists(__DIR__ . '/../.env.local.php')) {
+    $_SERVER['APP_RUNTIME_OPTIONS']['disable_dotenv'] = true;
+}
+
+require_once __DIR__ . '/../../../../vendor/autoload_runtime.php';
+
+return static function (array &$context) {
+    set_time_limit(0);
+
+    $classLoader = require __DIR__ . '/../../../../vendor/autoload.php';
+
+    if (!class_exists(Application::class)) {
+        throw new RuntimeException('You need to add "symfony/framework-bundle" as a Composer dependency.');
     }
-}
 
-if (!$autoloadFound) {
-    fwrite(STDERR, "Could not find autoload.php. Please run 'composer install'.\n");
-    exit(1);
-}
+    if (!isset($context['PROJECT_ROOT'])) {
+        $context['PROJECT_ROOT'] = dirname(__DIR__);
+    }
 
-$projectRoot = dirname(__DIR__);
-$cacheDir = $projectRoot . '/var/cache';
+    $input = new ArgvInput();
+    $env = $input->getParameterOption(['--env', '-e'], $context['APP_ENV'] ?? 'prod', true);
+    $debug = ($context['APP_DEBUG'] ?? ($env !== 'prod')) && !$input->hasParameterOption('--no-debug', true);
 
-$generator = new FactoryStubGenerator($projectRoot, $cacheDir);
+    $pluginLoader = new StaticKernelPluginLoader($classLoader, null);
 
-echo "Generating factory stubs...\n";
+    if ($input->getFirstArgument() === 'system:install') {
+        $context['INSTALL'] = true;
+    }
 
-try {
-    $result = $generator->generate();
-    echo "✓ Factory stubs generated successfully:\n";
-    echo "  - PHPStan stub: {$result['stub']}\n";
-    echo "  - PhpStorm meta: {$result['meta']}\n";
-    echo "\nTo use with PHPStan (already configured):\n";
-    echo "    stubFiles:\n";
-    echo "        - var/cache/factory-stubs.php\n";
-    echo "\nTo use with PhpStorm:\n";
-    echo "    Copy var/cache/.phpstorm.meta.php to your project root\n";
-    echo "    Or merge its contents into your existing .phpstorm.meta.php\n";
-    exit(0);
-} catch (Exception $e) {
-    fwrite(STDERR, "✗ Error generating stubs: {$e->getMessage()}\n");
-    exit(1);
-}
+    if (!isset($context['INSTALL'])) {
+        $useComposerPluginLoader = (bool)($context['COMPOSER_PLUGIN_LOADER'] ?? false);
+        if ($useComposerPluginLoader) {
+            $pluginLoader = new ComposerPluginLoader($classLoader, null);
+        } elseif (trim($context['DATABASE_URL'] ?? '') !== '') {
+            $pluginLoader = new DbalKernelPluginLoader($classLoader, null, Kernel::getConnection());
+        }
+    }
+
+    $kernel = KernelFactory::create(
+        environment: $env,
+        debug: $debug,
+        classLoader: $classLoader,
+        pluginLoader: $pluginLoader,
+    );
+
+    $application = new Application($kernel);
+    $kernel->boot();
+
+    $application->setName('ShopwareTestUtils');
+
+    $metatadaService = new \Algoritma\ShopwareTestUtils\Core\DalMetadataService($kernel->getContainer()->get(\Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry::class));
+
+    $application->add(new \Algoritma\ShopwareTestUtils\Command\GenerateStubsCommand(
+        $kernel->getContainer()->getParameter('kernel.project_dir'),
+        $metatadaService
+    ));
+    $application->setDefaultCommand('alg:sw-test-util:generate-stubs', true);
+
+    return $application;
+};

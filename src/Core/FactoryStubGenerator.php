@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Symfony\Component\Finder\Finder;
+use function dump;
 
 /**
  * Generates PHPDoc stub files for factories to enable IDE autocomplete.
@@ -19,7 +20,7 @@ class FactoryStubGenerator
 
     public function __construct(
         private readonly string $projectRoot,
-        private readonly string $cacheDir
+        private readonly DalMetadataService $metadataService,
     ) {}
 
     /**
@@ -29,12 +30,8 @@ class FactoryStubGenerator
      */
     public function generate(): array
     {
-        $factoryDir = $this->projectRoot . '/src/Factory';
+        $factoryDir = __DIR__ . '/../Factory';
         $factories = $this->findFactories($factoryDir);
-
-        if (! is_dir($this->cacheDir) && (! mkdir($this->cacheDir, 0o755, true) && ! is_dir($this->cacheDir))) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->cacheDir));
-        }
 
         // Generate PHPStan stub file
         $stubPath = $this->generateStubFile($factories);
@@ -67,7 +64,7 @@ class FactoryStubGenerator
 
         $stubContent .= "}\n";
 
-        $stubPath = $this->cacheDir . '/' . self::STUB_FILE;
+        $stubPath = $this->projectRoot . '/tests/' . self::STUB_FILE;
         file_put_contents($stubPath, $stubContent);
 
         return $stubPath;
@@ -99,7 +96,7 @@ class FactoryStubGenerator
                 $properties = $this->extractFactoryProperties($reflection);
                 foreach ($properties as $property) {
                     // Removes Id suffix from property name
-                    $property = \preg_replace('/Id$/i', '', $property);
+                    $property = \preg_replace('/Id$/i', '', $property['name']);
                     $capitalizedProperty = ucfirst((string) $property);
                     $allMethods[] = "with{$capitalizedProperty}";
                     $allMethods[] = "set{$capitalizedProperty}";
@@ -108,6 +105,7 @@ class FactoryStubGenerator
                 continue;
             }
         }
+
         $allMethods = array_unique($allMethods);
         sort($allMethods);
 
@@ -127,7 +125,7 @@ class FactoryStubGenerator
 
         $metaContent .= "}\n";
 
-        $metaPath = $this->cacheDir . '/' . self::META_FILE;
+        $metaPath = $this->projectRoot . '/' . self::META_FILE;
         file_put_contents($metaPath, $metaContent);
 
         return $metaPath;
@@ -146,9 +144,8 @@ class FactoryStubGenerator
         $factories = [];
 
         foreach ($finder as $file) {
-            $relativePath = str_replace([$this->projectRoot . '/src/', '.php', '/'], ['', '', '\\'], $file->getRealPath());
+            $relativePath = str_replace([__DIR__ . '/../', '.php', '/'], ['', '', '\\'], $file->getPathname());
             $className = 'Algoritma\ShopwareTestUtils\\' . $relativePath;
-
             if (class_exists($className) && $className !== AbstractFactory::class) {
                 $factories[] = $className;
             }
@@ -171,14 +168,13 @@ class FactoryStubGenerator
             }
 
             $shortClassName = $reflection->getShortName();
-            $methods = $this->generateMethodAnnotations($properties);
-
             $stub = "    /**\n";
-            foreach ($methods as $method) {
-                // Removes Id suffix from method name
-                $method = \preg_replace('/Id$/i', '', $method);
-                $stub .= "     * @method self with{$method}(mixed \$value)\n";
-                $stub .= "     * @method self set{$method}(mixed \$value)\n";
+            foreach ($properties as $property) {
+                $name = ucfirst($property['name']);
+                $type = $property['type'];
+
+                $stub .= "     * @method self with{$name}({$type} \$value)\n";
+                $stub .= "     * @method self set{$name}({$type} \$value)\n";
             }
             $stub .= "     */\n";
 
@@ -201,40 +197,42 @@ class FactoryStubGenerator
             $method = $reflection->getMethod('getEntityClass');
             $entityClass = $method->invoke($factory);
 
-            if (! $entityClass || ! class_exists($entityClass)) {
+            if (!$entityClass || !class_exists($entityClass)) {
                 return [];
             }
 
-            // Use reflection on entity to get properties
-            $entityReflection = new \ReflectionClass($entityClass);
-            $properties = [];
+            // NUOVA IMPLEMENTAZIONE: Usa DalMetadataService
+            // Ottieni l'entity name dalla entity class
+            $reflectionEntity = new \ReflectionClass($entityClass);
+            $entityName = strtolower(
+                preg_replace('/(?<!^)[A-Z]/', '_$0', str_replace(['\\', 'Entity'], ['', ''], $reflectionEntity->getShortName()))
+            );
 
-            foreach ($entityReflection->getProperties() as $property) {
-                // Skip static and inherited properties from base classes
-                if ($property->isStatic()) {
-                    continue;
-                }
-                if ($property->getDeclaringClass()->getName() !== $entityClass) {
-                    continue;
-                }
-                $properties[] = $property->getName();
+            // Recupera properties + relations
+            $properties = $this->metadataService->getEntityProperties($entityName);
+            $relations = $this->metadataService->getEntityRelations($entityName);
+
+            $result = [];
+
+            // Aggiungi properties
+            foreach ($properties as $prop) {
+                $result[] = [
+                    'name' => $prop['name'],
+                    'type' => $prop['php_type'],  // Tipo PHP già mappato
+                ];
             }
 
-            return array_unique($properties);
+            // Aggiungi relations
+            foreach ($relations as $rel) {
+                $result[] = [
+                    'name' => $rel['name'],
+                    'type' => $rel['reference_class'],  // Classe dell'entità collegata
+                ];
+            }
+
+            return $result;
         } catch (\Exception) {
             return [];
         }
-    }
-
-    /**
-     * Generate method names from property names (capitalize first letter).
-     *
-     * @param array<string> $properties
-     *
-     * @return array<string>
-     */
-    private function generateMethodAnnotations(array $properties): array
-    {
-        return array_map(ucfirst(...), $properties);
     }
 }
