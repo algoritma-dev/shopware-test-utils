@@ -2,7 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
-use ReflectionClass;
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -14,6 +14,7 @@ use Symfony\Component\Finder\Finder;
 class FactoryStubGenerator
 {
     private const STUB_FILE = 'factory-stubs.php';
+
     private const META_FILE = '.phpstorm.meta.php';
 
     public function __construct(
@@ -31,10 +32,8 @@ class FactoryStubGenerator
         $factoryDir = $this->projectRoot . '/src/Factory';
         $factories = $this->findFactories($factoryDir);
 
-        if (!is_dir($this->cacheDir)) {
-            if (!mkdir($this->cacheDir, 0755, true) && !is_dir($this->cacheDir)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->cacheDir));
-            }
+        if (! is_dir($this->cacheDir) && (! mkdir($this->cacheDir, 0o755, true) && ! is_dir($this->cacheDir))) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $this->cacheDir));
         }
 
         // Generate PHPStan stub file
@@ -96,14 +95,14 @@ class FactoryStubGenerator
         $allMethods = [];
         foreach ($factories as $factoryClass) {
             try {
-                $reflection = new ReflectionClass($factoryClass);
+                $reflection = new \ReflectionClass($factoryClass);
                 $properties = $this->extractFactoryProperties($reflection);
                 foreach ($properties as $property) {
                     $capitalizedProperty = ucfirst($property);
                     $allMethods[] = "with{$capitalizedProperty}";
                     $allMethods[] = "set{$capitalizedProperty}";
                 }
-            } catch (\ReflectionException $e) {
+            } catch (\ReflectionException) {
                 continue;
             }
         }
@@ -111,7 +110,7 @@ class FactoryStubGenerator
         sort($allMethods);
 
         // Add expectedArguments for autocomplete suggestions
-        if (!empty($allMethods)) {
+        if ($allMethods !== []) {
             $metaContent .= "    // Autocomplete for factory method names\n";
             $metaContent .= "    expectedArguments(\n";
             $metaContent .= "        \\Algoritma\\ShopwareTestUtils\\Factory\\AbstractFactory::__call(),\n";
@@ -146,9 +145,9 @@ class FactoryStubGenerator
 
         foreach ($finder as $file) {
             $relativePath = str_replace([$this->projectRoot . '/src/', '.php', '/'], ['', '', '\\'], $file->getRealPath());
-            $className = 'Algoritma\\ShopwareTestUtils\\' . $relativePath;
+            $className = 'Algoritma\ShopwareTestUtils\\' . $relativePath;
 
-            if (class_exists($className) && $className !== 'Algoritma\\ShopwareTestUtils\\Factory\\AbstractFactory') {
+            if (class_exists($className) && $className !== AbstractFactory::class) {
                 $factories[] = $className;
             }
         }
@@ -162,10 +161,10 @@ class FactoryStubGenerator
     private function generateFactoryStub(string $factoryClass): string
     {
         try {
-            $reflection = new ReflectionClass($factoryClass);
+            $reflection = new \ReflectionClass($factoryClass);
             $properties = $this->extractFactoryProperties($reflection);
 
-            if (empty($properties)) {
+            if ($properties === []) {
                 return '';
             }
 
@@ -178,11 +177,9 @@ class FactoryStubGenerator
                 $stub .= "     * @method static set{$method}(mixed \$value)\n";
             }
             $stub .= "     */\n";
-            $stub .= "    abstract class {$shortClassName} {}\n\n";
 
-            return $stub;
-
-        } catch (\ReflectionException $e) {
+            return $stub . "    abstract class {$shortClassName} {}\n\n";
+        } catch (\ReflectionException) {
             return '';
         }
     }
@@ -192,19 +189,19 @@ class FactoryStubGenerator
      *
      * @return array<string>
      */
-    private function extractFactoryProperties(ReflectionClass $reflection): array
+    private function extractFactoryProperties(\ReflectionClass $reflection): array
     {
         // Create temporary instance to read $data property
         try {
             $constructor = $reflection->getConstructor();
 
-            if (!$constructor) {
+            if (! $constructor) {
                 return [];
             }
 
             // Parse constructor code to find property assignments
             $fileName = $reflection->getFileName();
-            if (!$fileName) {
+            if (! $fileName) {
                 return [];
             }
 
@@ -223,8 +220,7 @@ class FactoryStubGenerator
             preg_match_all('/[\'"](\w+)[\'"]\s*=>/s', $dataContent, $propertyMatches);
 
             return array_unique($propertyMatches[1]);
-
-        } catch (\Exception $e) {
+        } catch (\Exception) {
             return [];
         }
     }
@@ -233,10 +229,11 @@ class FactoryStubGenerator
      * Generate method names from property names (capitalize first letter).
      *
      * @param array<string> $properties
+     *
      * @return array<string>
      */
     private function generateMethodAnnotations(array $properties): array
     {
-        return array_map(fn($prop) => ucfirst($prop), $properties);
+        return array_map(ucfirst(...), $properties);
     }
 }

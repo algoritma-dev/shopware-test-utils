@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 class FactoryStubGeneratorTest extends TestCase
 {
     private string $testCacheDir;
+
     private string $projectRoot;
 
     protected function setUp(): void
@@ -16,21 +17,21 @@ class FactoryStubGeneratorTest extends TestCase
         $this->projectRoot = dirname(__DIR__, 2);
         $this->testCacheDir = sys_get_temp_dir() . '/factory-stub-test-' . uniqid();
 
-        if (!is_dir($this->testCacheDir)) {
-            mkdir($this->testCacheDir, 0755, true);
+        if (! is_dir($this->testCacheDir)) {
+            mkdir($this->testCacheDir, 0o755, true);
         }
     }
 
     protected function tearDown(): void
     {
         if (is_dir($this->testCacheDir)) {
-            array_map('unlink', glob($this->testCacheDir . '/*') ?: []);
+            array_map(unlink(...), glob($this->testCacheDir . '/*') ?: []);
             rmdir($this->testCacheDir);
         }
     }
 
     #[Test]
-    public function it_generates_stub_and_meta_files(): void
+    public function itGeneratesStubAndMetaFiles(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -46,7 +47,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function stub_file_contains_valid_php(): void
+    public function stubFileContainsValidPhp(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -58,7 +59,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function meta_file_contains_valid_phpstorm_metadata(): void
+    public function metaFileContainsValidPhpstormMetadata(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -72,7 +73,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function meta_file_contains_expected_arguments(): void
+    public function metaFileContainsExpectedArguments(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -86,7 +87,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function stub_file_contains_customer_factory_methods(): void
+    public function stubFileContainsCustomerFactoryMethods(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -104,7 +105,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function stub_file_contains_product_factory_methods(): void
+    public function stubFileContainsProductFactoryMethods(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -122,7 +123,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function stub_file_contains_both_with_and_set_methods(): void
+    public function stubFileContainsBothWithAndSetMethods(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -135,7 +136,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function stub_file_does_not_contain_abstract_factory(): void
+    public function stubFileDoesNotContainAbstractFactory(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -147,7 +148,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function creates_cache_directory_if_not_exists(): void
+    public function createsCacheDirectoryIfNotExists(): void
     {
         $nonExistentDir = $this->testCacheDir . '/nested/dir';
 
@@ -160,7 +161,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function stub_file_has_proper_phpdoc_format(): void
+    public function stubFileHasProperPhpdocFormat(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -173,7 +174,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function regenerating_overwrites_existing_files(): void
+    public function regeneratingOverwritesExistingFiles(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -203,7 +204,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function stub_methods_have_correct_capitalization(): void
+    public function stubMethodsHaveCorrectCapitalization(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -221,7 +222,7 @@ class FactoryStubGeneratorTest extends TestCase
     }
 
     #[Test]
-    public function meta_methods_are_sorted_alphabetically(): void
+    public function metaMethodsAreSortedAlphabetically(): void
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->testCacheDir);
 
@@ -229,7 +230,7 @@ class FactoryStubGeneratorTest extends TestCase
         $content = file_get_contents($result['meta']);
 
         // Extract all method names from the meta file
-        preg_match_all("/'(with\w+|set\w+)'/", $content, $matches);
+        preg_match_all("/'(with\\w+|set\\w+)'/", $content, $matches);
         $methods = $matches[1];
 
         // Verify they are sorted
