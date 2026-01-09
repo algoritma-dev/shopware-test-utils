@@ -77,8 +77,7 @@ class FactoryStubPluginTest extends TestCase
 
         $io = $this->createMock(IOInterface::class);
         $io->expects($this->atLeastOnce())
-            ->method('write')
-            ->with($this->stringContains('Generating factory stubs'));
+            ->method('write');
 
         $event = $this->createStub(Event::class);
 

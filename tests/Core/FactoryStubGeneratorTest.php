@@ -25,8 +25,7 @@ class FactoryStubGeneratorTest extends TestCase
     protected function tearDown(): void
     {
         if (is_dir($this->testCacheDir)) {
-            array_map(unlink(...), glob($this->testCacheDir . '/*') ?: []);
-            rmdir($this->testCacheDir);
+            $this->removeDirectory($this->testCacheDir);
         }
     }
 
@@ -238,5 +237,30 @@ class FactoryStubGeneratorTest extends TestCase
         sort($sortedMethods);
 
         $this->assertEquals($sortedMethods, $methods);
+    }
+
+    private function removeDirectory(string $dir): void
+    {
+        if (! is_dir($dir)) {
+            return;
+        }
+
+        $items = scandir($dir);
+        foreach ($items as $item) {
+            if ($item === '.') {
+                continue;
+            }
+            if ($item === '..') {
+                continue;
+            }
+            $path = $dir . '/' . $item;
+            if (is_dir($path)) {
+                $this->removeDirectory($path);
+            } else {
+                unlink($path);
+            }
+        }
+
+        rmdir($dir);
     }
 }
