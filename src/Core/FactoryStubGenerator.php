@@ -99,7 +99,7 @@ class FactoryStubGenerator
                 $properties = $this->extractFactoryProperties($reflection);
                 foreach ($properties as $property) {
                     // Removes Id suffix from property name
-                    $property = preg_replace('/Id$/i', '', $property);
+                    $property = \preg_replace('/Id$/i', '', $property);
                     $capitalizedProperty = ucfirst((string) $property);
                     $allMethods[] = "with{$capitalizedProperty}";
                     $allMethods[] = "set{$capitalizedProperty}";
@@ -175,6 +175,8 @@ class FactoryStubGenerator
 
             $stub = "    /**\n";
             foreach ($methods as $method) {
+                // Removes Id suffix from method name
+                $method = \preg_replace('/Id$/i', '', $method);
                 $stub .= "     * @method self with{$method}(mixed \$value)\n";
                 $stub .= "     * @method self set{$method}(mixed \$value)\n";
             }

@@ -169,6 +169,9 @@ class FactoryStubGeneratorTest extends TestCase
         $content = file_get_contents($result['stub']);
 
         // Check for proper PHPDoc structure with self return type
+        self::assertStringContainsString('withSalesChannel', $content);
+        // method name 'withSalesChannelId' should become 'withSalesChannel' (without an Id suffix)
+        self::assertStringNotContainsString('withSalesChannelId', $content);
         $this->assertMatchesRegularExpression('/\/\*\*\s+\*\s+@method/', $content);
         $this->assertMatchesRegularExpression('/@method\s+self\s+with\w+\(mixed\s+\$value\)/', $content);
     }
