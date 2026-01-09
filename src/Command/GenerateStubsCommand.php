@@ -31,10 +31,10 @@ class GenerateStubsCommand extends Command
 
         $io = new SymfonyStyle($input, $output);
 
-        $io->writeln("Generating factory stubs...");
+        $io->writeln('Generating factory stubs...');
         try {
             $result = $generator->generate();
-            $io->success("Factory stubs generated successfully");
+            $io->success('Factory stubs generated successfully');
             $output->writeln("  - PHPStan stub: {$result['stub']}");
             $output->writeln("  - PhpStorm meta: {$result['meta']}");
         } catch (\Exception $e) {

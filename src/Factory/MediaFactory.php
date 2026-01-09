@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
+use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,6 +33,6 @@ class MediaFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Core\Content\Media\MediaEntity::class;
+        return MediaEntity::class;
     }
 }

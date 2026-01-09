@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
+use Shopware\Commercial\B2B\Common\Entity\Organization\OrganizationEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -31,6 +32,6 @@ class OrganizationFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Commercial\B2B\Common\Entity\Organization\OrganizationEntity::class;
+        return OrganizationEntity::class;
     }
 }

@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
+use Shopware\Core\Content\Category\CategoryEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -39,6 +40,6 @@ class CategoryFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Core\Content\Category\CategoryEntity::class;
+        return CategoryEntity::class;
     }
 }

@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
+use Shopware\Core\Checkout\Promotion\PromotionEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -40,6 +41,6 @@ class PromotionFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Core\Checkout\Promotion\PromotionEntity::class;
+        return PromotionEntity::class;
     }
 }

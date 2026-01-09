@@ -4,7 +4,6 @@ namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Symfony\Component\Finder\Finder;
-use function dump;
 
 /**
  * Generates PHPDoc stub files for factories to enable IDE autocomplete.
@@ -96,7 +95,7 @@ class FactoryStubGenerator
                 $properties = $this->extractFactoryProperties($reflection);
                 foreach ($properties as $property) {
                     // Removes Id suffix from property name
-                    $property = \preg_replace('/Id$/i', '', $property['name']);
+                    $property = \preg_replace('/Id$/i', '', (string) $property['name']);
                     $capitalizedProperty = ucfirst((string) $property);
                     $allMethods[] = "with{$capitalizedProperty}";
                     $allMethods[] = "set{$capitalizedProperty}";
@@ -170,7 +169,7 @@ class FactoryStubGenerator
             $shortClassName = $reflection->getShortName();
             $stub = "    /**\n";
             foreach ($properties as $property) {
-                $name = ucfirst($property['name']);
+                $name = ucfirst((string) $property['name']);
                 $type = $property['type'];
 
                 $stub .= "     * @method self with{$name}({$type} \$value)\n";
@@ -197,7 +196,7 @@ class FactoryStubGenerator
             $method = $reflection->getMethod('getEntityClass');
             $entityClass = $method->invoke($factory);
 
-            if (!$entityClass || !class_exists($entityClass)) {
+            if (! $entityClass || ! class_exists($entityClass)) {
                 return [];
             }
 
@@ -205,7 +204,7 @@ class FactoryStubGenerator
             // Ottieni l'entity name dalla entity class
             $reflectionEntity = new \ReflectionClass($entityClass);
             $entityName = strtolower(
-                preg_replace('/(?<!^)[A-Z]/', '_$0', str_replace(['\\', 'Entity'], ['', ''], $reflectionEntity->getShortName()))
+                (string) preg_replace('/(?<!^)[A-Z]/', '_$0', str_replace(['\\', 'Entity'], ['', ''], $reflectionEntity->getShortName()))
             );
 
             // Recupera properties + relations

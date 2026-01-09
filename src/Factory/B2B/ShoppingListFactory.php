@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
+use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,6 +33,6 @@ class ShoppingListFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity::class;
+        return ShoppingListEntity::class;
     }
 }

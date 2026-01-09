@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
+use Shopware\Commercial\B2B\CustomerSpecificFeatures\Entity\CustomerSpecificFeatures\CustomerSpecificFeaturesEntity;
 
 class CustomerSpecificFeaturesFactory extends AbstractFactory
 {
@@ -13,6 +14,6 @@ class CustomerSpecificFeaturesFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Commercial\B2B\CustomerSpecificFeatures\Entity\CustomerSpecificFeatures\CustomerSpecificFeaturesEntity::class;
+        return CustomerSpecificFeaturesEntity::class;
     }
 }

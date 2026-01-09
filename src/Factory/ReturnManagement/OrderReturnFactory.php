@@ -5,7 +5,8 @@ namespace Algoritma\ShopwareTestUtils\Factory\ReturnManagement;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\ReturnManagement\Entity\OrderReturn\OrderReturnEntity;use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Commercial\ReturnManagement\Entity\OrderReturn\OrderReturnEntity;
+use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class OrderReturnFactory extends AbstractFactory

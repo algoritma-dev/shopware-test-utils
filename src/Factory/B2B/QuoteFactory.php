@@ -34,6 +34,6 @@ class QuoteFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity::class;
+        return QuoteEntity::class;
     }
 }

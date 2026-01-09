@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\Tax\TaxEntity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class TaxFactory extends AbstractFactory
@@ -31,6 +32,6 @@ class TaxFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return \Shopware\Core\System\Tax\TaxEntity::class;
+        return TaxEntity::class;
     }
 }
