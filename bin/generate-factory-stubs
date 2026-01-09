@@ -1,0 +1,47 @@
+#!/usr/bin/env php
+<?php
+
+use Algoritma\ShopwareTestUtils\Core\FactoryStubGenerator;
+
+$autoloadFiles = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+];
+
+$autoloadFound = false;
+foreach ($autoloadFiles as $autoloadFile) {
+    if (file_exists($autoloadFile)) {
+        require_once $autoloadFile;
+        $autoloadFound = true;
+        break;
+    }
+}
+
+if (!$autoloadFound) {
+    fwrite(STDERR, "Could not find autoload.php. Please run 'composer install'.\n");
+    exit(1);
+}
+
+$projectRoot = dirname(__DIR__);
+$cacheDir = $projectRoot . '/var/cache';
+
+$generator = new FactoryStubGenerator($projectRoot, $cacheDir);
+
+echo "Generating factory stubs...\n";
+
+try {
+    $result = $generator->generate();
+    echo "✓ Factory stubs generated successfully:\n";
+    echo "  - PHPStan stub: {$result['stub']}\n";
+    echo "  - PhpStorm meta: {$result['meta']}\n";
+    echo "\nTo use with PHPStan (already configured):\n";
+    echo "    stubFiles:\n";
+    echo "        - var/cache/factory-stubs.php\n";
+    echo "\nTo use with PhpStorm:\n";
+    echo "    Copy var/cache/.phpstorm.meta.php to your project root\n";
+    echo "    Or merge its contents into your existing .phpstorm.meta.php\n";
+    exit(0);
+} catch (Exception $e) {
+    fwrite(STDERR, "✗ Error generating stubs: {$e->getMessage()}\n");
+    exit(1);
+}

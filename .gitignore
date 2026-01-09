@@ -5,3 +5,4 @@ composer.lock
 *.log
 *.cache
 auth.json
+/var/
