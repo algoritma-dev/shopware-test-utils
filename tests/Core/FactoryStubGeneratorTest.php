@@ -94,13 +94,14 @@ class FactoryStubGeneratorTest extends TestCase
         $content = file_get_contents($result['stub']);
 
         // Check for CustomerFactory stub
-        $this->assertStringContainsString('abstract class CustomerFactory', $content);
+        $this->assertStringContainsString('class CustomerFactory', $content);
+        $this->assertStringContainsString('extends', $content);
 
-        // Check for expected methods based on CustomerFactory properties
-        $this->assertStringContainsString('@method static withCustomerNumber', $content);
-        $this->assertStringContainsString('@method static withEmail', $content);
-        $this->assertStringContainsString('@method static withFirstName', $content);
-        $this->assertStringContainsString('@method static withLastName', $content);
+        // Check for expected methods with self return type for chaining
+        $this->assertStringContainsString('@method self withCustomerNumber', $content);
+        $this->assertStringContainsString('@method self withEmail', $content);
+        $this->assertStringContainsString('@method self withFirstName', $content);
+        $this->assertStringContainsString('@method self withLastName', $content);
     }
 
     #[Test]
@@ -112,13 +113,13 @@ class FactoryStubGeneratorTest extends TestCase
         $content = file_get_contents($result['stub']);
 
         // Check for ProductFactory stub
-        $this->assertStringContainsString('abstract class ProductFactory', $content);
+        $this->assertStringContainsString('class ProductFactory', $content);
 
-        // Check for expected methods
-        $this->assertStringContainsString('@method static withProductNumber', $content);
-        $this->assertStringContainsString('@method static withStock', $content);
-        $this->assertStringContainsString('@method static withName', $content);
-        $this->assertStringContainsString('@method static withDescription', $content);
+        // Check for expected methods with self return type
+        $this->assertStringContainsString('@method self withProductNumber', $content);
+        $this->assertStringContainsString('@method self withStock', $content);
+        $this->assertStringContainsString('@method self withName', $content);
+        $this->assertStringContainsString('@method self withDescription', $content);
     }
 
     #[Test]
@@ -129,9 +130,9 @@ class FactoryStubGeneratorTest extends TestCase
         $result = $generator->generate();
         $content = file_get_contents($result['stub']);
 
-        // Verify both with* and set* methods are generated
-        $this->assertStringContainsString('@method static withEmail', $content);
-        $this->assertStringContainsString('@method static setEmail', $content);
+        // Verify both with* and set* methods are generated with self return type
+        $this->assertStringContainsString('@method self withEmail', $content);
+        $this->assertStringContainsString('@method self setEmail', $content);
     }
 
     #[Test]
@@ -143,7 +144,7 @@ class FactoryStubGeneratorTest extends TestCase
         $content = file_get_contents($result['stub']);
 
         // AbstractFactory itself should not be in the stub
-        $this->assertStringNotContainsString('abstract class AbstractFactory', $content);
+        $this->assertStringNotContainsString('class AbstractFactory', $content);
     }
 
     #[Test]
@@ -167,9 +168,9 @@ class FactoryStubGeneratorTest extends TestCase
         $result = $generator->generate();
         $content = file_get_contents($result['stub']);
 
-        // Check for proper PHPDoc structure
+        // Check for proper PHPDoc structure with self return type
         $this->assertMatchesRegularExpression('/\/\*\*\s+\*\s+@method/', $content);
-        $this->assertMatchesRegularExpression('/@method\s+static\s+with\w+\(mixed\s+\$value\)/', $content);
+        $this->assertMatchesRegularExpression('/@method\s+self\s+with\w+\(mixed\s+\$value\)/', $content);
     }
 
     #[Test]
@@ -209,6 +210,9 @@ class FactoryStubGeneratorTest extends TestCase
 
         $result = $generator->generate();
         $content = file_get_contents($result['stub']);
+
+        // Property 'salesChannelId' should become 'withSalesChannel' (capital C, without an Id suffix)
+        $this->assertStringContainsString('withSalesChannel', $content);
 
         // Property 'customerNumber' should become 'withCustomerNumber' (capital C, capital N)
         $this->assertStringContainsString('withCustomerNumber', $content);

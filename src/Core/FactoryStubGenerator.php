@@ -98,7 +98,9 @@ class FactoryStubGenerator
                 $reflection = new \ReflectionClass($factoryClass);
                 $properties = $this->extractFactoryProperties($reflection);
                 foreach ($properties as $property) {
-                    $capitalizedProperty = ucfirst($property);
+                    // Removes Id suffix from property name
+                    $property = preg_replace('/Id$/i', '', $property);
+                    $capitalizedProperty = ucfirst((string) $property);
                     $allMethods[] = "with{$capitalizedProperty}";
                     $allMethods[] = "set{$capitalizedProperty}";
                 }
@@ -173,12 +175,12 @@ class FactoryStubGenerator
 
             $stub = "    /**\n";
             foreach ($methods as $method) {
-                $stub .= "     * @method static with{$method}(mixed \$value)\n";
-                $stub .= "     * @method static set{$method}(mixed \$value)\n";
+                $stub .= "     * @method self with{$method}(mixed \$value)\n";
+                $stub .= "     * @method self set{$method}(mixed \$value)\n";
             }
             $stub .= "     */\n";
 
-            return $stub . "    abstract class {$shortClassName} {}\n\n";
+            return $stub . "    class {$shortClassName} extends \\Algoritma\\ShopwareTestUtils\\Factory\\AbstractFactory {}\n\n";
         } catch (\ReflectionException) {
             return '';
         }
