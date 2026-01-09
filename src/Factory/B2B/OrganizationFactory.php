@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\B2B\Common\Entity\Organization\OrganizationEntity;
+use Shopware\Commercial\B2B\OrganizationUnit\Entity\OrganizationEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

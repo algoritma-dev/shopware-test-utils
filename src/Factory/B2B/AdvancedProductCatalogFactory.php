@@ -3,7 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Shopware\Commercial\B2B\AdvancedProductCatalog\Entity\AdvancedProductCatalog\AdvancedProductCatalogEntity;
+use Shopware\Commercial\B2B\AdvancedProductCatalogs\Entity\AdvancedProductCatalogs\AdvancedProductCatalogsEntity;
 
 class AdvancedProductCatalogFactory extends AbstractFactory
 {
@@ -14,6 +14,6 @@ class AdvancedProductCatalogFactory extends AbstractFactory
 
     protected function getEntityClass(): string
     {
-        return AdvancedProductCatalogEntity::class;
+        return AdvancedProductCatalogsEntity::class;
     }
 }

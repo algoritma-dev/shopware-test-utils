@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Commercial\B2B\Common\Entity\Role\RoleEntity;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 

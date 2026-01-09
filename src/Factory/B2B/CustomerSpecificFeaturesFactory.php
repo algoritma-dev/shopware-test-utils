@@ -3,7 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Shopware\Commercial\B2B\CustomerSpecificFeatures\Entity\CustomerSpecificFeatures\CustomerSpecificFeaturesEntity;
+use Shopware\Commercial\B2B\QuickOrder\Entity\CustomerSpecificFeaturesEntity;
 
 class CustomerSpecificFeaturesFactory extends AbstractFactory
 {

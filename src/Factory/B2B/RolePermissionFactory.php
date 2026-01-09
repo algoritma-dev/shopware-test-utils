@@ -2,12 +2,10 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Permission\PermissionEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\Entity;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsAnyFilter;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -15,33 +13,20 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Factory for creating roles with permission sets.
  * Pure factory: only creates roles, no business logic.
  */
-class RolePermissionFactory
+class RolePermissionFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
     /**
      * @var array<string>
      */
     private array $permissions = [];
 
-    public function __construct(private readonly ContainerInterface $container)
+    public function __construct(protected readonly ContainerInterface $container)
     {
+        parent::__construct($container);
+
         $this->data = [
             'id' => Uuid::randomHex(),
         ];
-    }
-
-    /**
-     * Set role name.
-     */
-    public function withName(string $name): self
-    {
-        $this->data['name'] = $name;
-
-        return $this;
     }
 
     /**
@@ -177,26 +162,6 @@ class RolePermissionFactory
     }
 
     /**
-     * Create the role with permissions.
-     */
-    public function create(?Context $context = null): RoleEntity
-    {
-        $context ??= Context::createCLIContext();
-
-        /** @var EntityRepository<RoleEntity> $repository */
-        $repository = $this->container->get('b2b_components_role.repository');
-
-        // Resolve permission IDs
-        $permissionIds = $this->resolvePermissionIds($context);
-
-        $this->data['permissions'] = array_map(fn (string $id): array => ['id' => $id], $permissionIds);
-
-        $repository->create([$this->data], $context);
-
-        return $this->load($this->data['id'], $context);
-    }
-
-    /**
      * Create predefined role: Admin.
      */
     public static function createAdmin(ContainerInterface $container, ?Context $context = null): RoleEntity
@@ -248,41 +213,13 @@ class RolePermissionFactory
             ->create($context);
     }
 
-    /**
-     * @return array<string>
-     */
-    private function resolvePermissionIds(Context $context): array
+    protected function getRepositoryName(): string
     {
-        if ($this->permissions === []) {
-            return [];
-        }
-
-        /** @var EntityRepository<Entity> $repository */
-        $repository = $this->container->get('b2b_permission.repository');
-
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsAnyFilter('code', $this->permissions));
-
-        $result = $repository->search($criteria, $context);
-
-        return array_map(fn (Entity $permission) => $permission->getId(), array_values($result->getElements()));
+        return 'b2b_permission';
     }
 
-    private function load(string $id, Context $context): RoleEntity
+    protected function getEntityClass(): string
     {
-        /** @var EntityRepository<RoleEntity> $repository */
-        $repository = $this->container->get('b2b_components_role.repository');
-
-        $criteria = new Criteria([$id]);
-        $criteria->addAssociation('permissions');
-
-        /** @var RoleEntity|null $role */
-        $role = $repository->search($criteria, $context)->first();
-
-        if (! $role) {
-            throw new \RuntimeException(sprintf('Role with ID "%s" not found', $id));
-        }
-
-        return $role;
+        return PermissionEntity::class;
     }
 }
