@@ -608,6 +608,79 @@ For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
+## 🧩 PHPStorm IDE Support
+
+### Generating Factory Stubs and Metadata
+
+This library provides IDE support for factory magic methods through auto-generated PHPStorm metadata and PHPStan stubs.
+
+#### Generate Stubs
+
+Run the following command to generate IDE autocomplete metadata:
+
+```bash
+composer generate-stubs
+```
+
+Or use the binary directly:
+
+```bash
+vendor/bin/generate-factory-stubs
+```
+
+This command generates two files:
+
+1. **`.phpstorm.meta.php`** - PHPStorm metadata for autocomplete support
+2. **`tests/factory-stubs.php`** - PHPStan stub file with DAL entity definitions
+
+#### PHPStan Configuration
+
+To enable PHPStan support, add the stub file to your `phpstan.neon`:
+
+```neon
+parameters:
+    stubFiles:
+        - tests/factory-stubs.php
+```
+
+This allows PHPStan to understand the factory magic methods and provide proper type analysis.
+
+#### What It Does
+
+The stub generator:
+- Uses `ComposerPluginLoader` to load Shopware plugins
+- Analyzes all DAL entity definitions via `DalMetadataService`
+- Generates type hints for factory magic methods (`with*()` and `set*()`)
+- Enables full IDE autocomplete for entity properties in factories
+
+#### IDE Integration
+
+After generation, PHPStorm will provide:
+- Autocomplete for all entity properties in factory methods
+- Type checking for method parameters
+- Quick navigation to property definitions
+
+**Example:**
+
+```php
+// PHPStorm will autocomplete these magic methods
+$product = (new ProductFactory($container))
+    ->withName('Test')           // ✓ Autocomplete available
+    ->withPrice(99.99)           // ✓ Type checking enabled
+    ->withManufacturerNumber('') // ✓ Navigation to definition
+    ->create();
+```
+
+#### When to Regenerate
+
+Run `composer generate-stubs` after:
+- Adding new entity definitions
+- Installing/updating Shopware plugins
+- Modifying entity properties
+- Installing this library for the first time
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please follow these guidelines:
