@@ -178,10 +178,9 @@ class FactoryStubGenerator
             $stub = "    /**\n";
             foreach ($properties as $property) {
                 $name = ucfirst((string) $property['name']);
-                $type = $property['type'];
 
-                $stub .= "     * @method self with{$name}({$type} \$value)\n";
-                $stub .= "     * @method self set{$name}({$type} \$value)\n";
+                $stub .= "     * @method self with{$name}(mixed \$value)\n";
+                $stub .= "     * @method self set{$name}(mixed \$value)\n";
             }
             $stub .= "     */\n";
 
