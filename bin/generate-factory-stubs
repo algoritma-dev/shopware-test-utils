@@ -2,18 +2,14 @@
 <?php
 
 use Shopware\Core\Framework\Adapter\Kernel\KernelFactory;
-use Shopware\Core\Framework\Plugin\KernelPluginLoader\ComposerPluginLoader;
-use Shopware\Core\Framework\Plugin\KernelPluginLoader\DbalKernelPluginLoader;
 use Shopware\Core\Framework\Plugin\KernelPluginLoader\StaticKernelPluginLoader;
-use Shopware\Core\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
+use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
+use Algoritma\ShopwareTestUtils\Command\GenerateStubsCommand;
+use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 
 $envFile = __DIR__ . '/../../../../.env';
-
-if (!file_exists(__DIR__ . '/../.env') && !file_exists(__DIR__ . '/../.env.dist') && !file_exists(__DIR__ . '/../.env.local.php')) {
-    $_SERVER['APP_RUNTIME_OPTIONS']['disable_dotenv'] = true;
-}
 
 require_once __DIR__ . '/../../../../vendor/autoload_runtime.php';
 
@@ -22,12 +18,8 @@ return static function (array &$context) {
 
     $classLoader = require __DIR__ . '/../../../../vendor/autoload.php';
 
-    if (!class_exists(Application::class)) {
-        throw new RuntimeException('You need to add "symfony/framework-bundle" as a Composer dependency.');
-    }
-
     if (!isset($context['PROJECT_ROOT'])) {
-        $context['PROJECT_ROOT'] = dirname(__DIR__);
+        $context['PROJECT_ROOT'] = dirname(__DIR__, 4);
     }
 
     $input = new ArgvInput();
@@ -35,19 +27,6 @@ return static function (array &$context) {
     $debug = ($context['APP_DEBUG'] ?? ($env !== 'prod')) && !$input->hasParameterOption('--no-debug', true);
 
     $pluginLoader = new StaticKernelPluginLoader($classLoader, null);
-
-    if ($input->getFirstArgument() === 'system:install') {
-        $context['INSTALL'] = true;
-    }
-
-    if (!isset($context['INSTALL'])) {
-        $useComposerPluginLoader = (bool)($context['COMPOSER_PLUGIN_LOADER'] ?? false);
-        if ($useComposerPluginLoader) {
-            $pluginLoader = new ComposerPluginLoader($classLoader, null);
-        } elseif (trim($context['DATABASE_URL'] ?? '') !== '') {
-            $pluginLoader = new DbalKernelPluginLoader($classLoader, null, Kernel::getConnection());
-        }
-    }
 
     $kernel = KernelFactory::create(
         environment: $env,
@@ -61,9 +40,9 @@ return static function (array &$context) {
 
     $application->setName('ShopwareTestUtils');
 
-    $metatadaService = new \Algoritma\ShopwareTestUtils\Core\DalMetadataService($kernel->getContainer()->get(\Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry::class));
+    $metatadaService = new DalMetadataService($kernel->getContainer()->get(DefinitionInstanceRegistry::class));
 
-    $application->add(new \Algoritma\ShopwareTestUtils\Command\GenerateStubsCommand(
+    $application->add(new GenerateStubsCommand(
         $kernel->getContainer()->getParameter('kernel.project_dir'),
         $metatadaService
     ));

@@ -20,7 +20,7 @@ class RolePermissionFactory extends AbstractFactory
      */
     private array $permissions = [];
 
-    public function __construct(protected readonly ContainerInterface $container)
+    public function __construct(ContainerInterface $container)
     {
         parent::__construct($container);
 
@@ -215,7 +215,7 @@ class RolePermissionFactory extends AbstractFactory
 
     protected function getRepositoryName(): string
     {
-        return 'b2b_permission';
+        return 'b2b_permission.repository';
     }
 
     protected function getEntityName(): string

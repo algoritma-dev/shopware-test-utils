@@ -17,8 +17,8 @@ use Shopware\Core\Framework\DataAbstractionLayer\Field\OneToOneAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\MappingEntityDefinition;
 
 /**
- * Servizio per analizzare i metadati della DAL di Shopware
- * Ricostruisce tutte le proprietà e relazioni di un'entità.
+ * Service to analyze Shopware DAL metadata
+ * Reconstructs all properties and relations of an entity.
  */
 class DalMetadataService
 {
@@ -27,8 +27,8 @@ class DalMetadataService
     ) {}
 
     /**
-     * Ottiene tutti i metadati di un'entità (campi + relazioni)
-     * Include automaticamente tutto ciò che è stato aggiunto via Extension.
+     * Gets all metadata of an entity (fields + relations)
+     * Automatically includes everything that has been added via Extension.
      */
     public function getEntityMetadata(string $entityName): ?array
     {
@@ -42,7 +42,7 @@ class DalMetadataService
             return null;
         }
 
-        // Ottieni TUTTI i campi (nativi + da extension)
+        // Get ALL fields (native + from extension)
         $fields = $definition->getFields();
 
         return [
@@ -57,7 +57,7 @@ class DalMetadataService
     }
 
     /**
-     * Ottiene solo le relazioni di un'entità.
+     * Gets only the relations of an entity.
      */
     public function getEntityRelations(string $entityName): array
     {
@@ -67,7 +67,7 @@ class DalMetadataService
     }
 
     /**
-     * Ottiene solo le proprietà (campi non relazionali).
+     * Gets only the properties (non-relational fields).
      */
     public function getEntityProperties(string $entityName): array
     {
@@ -77,7 +77,7 @@ class DalMetadataService
     }
 
     /**
-     * Genera i metodi getter/setter per una proprietà.
+     * Generates getter/setter methods for a property.
      */
     public function getPropertyMethods(string $entityName, string $propertyName): ?array
     {
@@ -130,7 +130,7 @@ class DalMetadataService
                 'entity_class' => $referenceEntityClass,
             ];
         }
-        // Campo normale
+        // Normal field
         $phpType = $this->getPhpType($field);
 
         return [
@@ -145,7 +145,7 @@ class DalMetadataService
     }
 
     /**
-     * Trova il percorso per caricare una relazione con Criteria.
+     * Finds the path to load a relation with Criteria.
      */
     public function getAssociationPath(string $entityName, string $targetPropertyName): ?string
     {
@@ -161,12 +161,11 @@ class DalMetadataService
             return null;
         }
 
-        // Per relazioni dirette, il path è semplicemente il nome della proprietà
         return $targetPropertyName;
     }
 
     /**
-     * Genera codice di esempio per caricare un'entità con le sue relazioni.
+     * Generates example code to load an entity with its relations.
      */
     public function generateLoadExample(string $entityName, array $associations = []): string
     {
@@ -179,7 +178,7 @@ class DalMetadataService
         $repoVar = '$' . $entityName . 'Repository';
         $entityVar = '$' . $entityName;
 
-        $code = "// Carica {$entityName} con associazioni\n";
+        $code = "// Load {$entityName} with associations\n";
         $code .= "\$criteria = new Criteria([\$id]);\n";
 
         foreach ($associations as $association) {
@@ -187,13 +186,13 @@ class DalMetadataService
         }
 
         $code .= "\n{$entityVar} = {$repoVar}->search(\$criteria, \$context)->first();\n";
-        $code .= "\n// Accesso alle relazioni\n";
+        $code .= "\n// Access relations\n";
 
         foreach ($associations as $association) {
             $field = $definition->getFields()->get($association);
             if ($field instanceof AssociationField) {
                 $getter = 'get' . ucfirst((string) $association);
-                $code .= "{$entityVar}->{$getter}(); // Accesso a {$association}\n";
+                $code .= "{$entityVar}->{$getter}(); // Access {$association}\n";
             }
         }
 
@@ -201,7 +200,7 @@ class DalMetadataService
     }
 
     /**
-     * Lista tutte le entità disponibili.
+     * Lists all available entities.
      */
     public function getAllEntities(): array
     {
@@ -219,15 +218,13 @@ class DalMetadataService
         return $entities;
     }
 
-    // --- Metodi privati di supporto ---
-
     private function extractProperties(iterable $fields): array
     {
         $properties = [];
 
         foreach ($fields as $field) {
             if ($field instanceof AssociationField || $field instanceof FkField) {
-                continue; // Skip relazioni e FK
+                continue; // Skip relations and FKs
             }
 
             $propertyName = $field->getPropertyName();
@@ -235,8 +232,6 @@ class DalMetadataService
                 'name' => $propertyName,
                 'type' => $this->getFieldType($field),
                 'php_type' => $this->getPhpType($field),
-                //                'storage_name' => $field->getStorageName(),
-                //                'flags' => $this->extractFlags($field),
             ];
         }
 
@@ -274,7 +269,6 @@ class DalMetadataService
                 'setter' => 'set' . ucfirst($propertyName),
             ];
 
-            // Aggiungi dettagli specifici per tipo
             if ($field instanceof ManyToOneAssociationField) {
                 $relationData['foreign_key'] = $field->getStorageName();
                 $relationData['reference_field'] = $field->getReferenceField();
@@ -358,7 +352,7 @@ class DalMetadataService
             }
         }
 
-        // Prova anche con ricerca parziale sul nome della classe
+        // Also try with partial search on the class name
         foreach ($this->definitionRegistry->getDefinitions() as $definition) {
             if (str_contains(strtolower($definition::class), strtolower($entityName))) {
                 return $definition;

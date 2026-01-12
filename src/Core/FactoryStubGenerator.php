@@ -64,7 +64,11 @@ class FactoryStubGenerator
         $stubContent .= "}\n";
 
         $stubPath = $this->projectRoot . '/tests/' . self::STUB_FILE;
-        file_put_contents($stubPath, $stubContent);
+        $result = @file_put_contents($stubPath, $stubContent);
+
+        if ($result === false) {
+            throw new \RuntimeException("Failed to write stub file to {$stubPath}");
+        }
 
         return $stubPath;
     }
@@ -125,7 +129,11 @@ class FactoryStubGenerator
         $metaContent .= "}\n";
 
         $metaPath = $this->projectRoot . '/tests/' . self::META_FILE;
-        file_put_contents($metaPath, $metaContent);
+        $result = @file_put_contents($metaPath, $metaContent);
+
+        if ($result === false) {
+            throw new \RuntimeException("Failed to write meta file to {$metaPath}");
+        }
 
         return $metaPath;
     }
@@ -196,25 +204,25 @@ class FactoryStubGenerator
             $method = $reflection->getMethod('getEntityName');
             $entityName = $method->invoke($factory);
 
-            // Recupera properties + relations
+            // Retrieve properties + relations
             $properties = $this->metadataService->getEntityProperties($entityName);
             $relations = $this->metadataService->getEntityRelations($entityName);
 
             $result = [];
 
-            // Aggiungi properties
+            // Add properties
             foreach ($properties as $prop) {
                 $result[] = [
                     'name' => $prop['name'],
-                    'type' => $prop['php_type'],  // Tipo PHP già mappato
+                    'type' => $prop['php_type'],  // Already mapped PHP type
                 ];
             }
 
-            // Aggiungi relations
+            // Add relations
             foreach ($relations as $rel) {
                 $result[] = [
                     'name' => $rel['name'],
-                    'type' => $rel['reference_class'],  // Classe dell'entità collegata
+                    'type' => $rel['reference_class'],  // Linked entity class
                 ];
             }
 

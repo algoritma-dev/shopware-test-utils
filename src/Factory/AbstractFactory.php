@@ -116,7 +116,8 @@ abstract class AbstractFactory
     private function shouldAppendIdSuffix(string $property, mixed $value): bool
     {
         // Don't append if property already ends with 'Id' or 'Ids'
-        if (str_ends_with($property, 'Id') || str_ends_with($property, 'Ids')) {
+        // Also don't append if property is exactly 'id'
+        if (str_ends_with($property, 'Id') || str_ends_with($property, 'Ids') || $property === 'id') {
             return false;
         }
 
