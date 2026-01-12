@@ -2,12 +2,12 @@
 <?php
 
 use Shopware\Core\Framework\Adapter\Kernel\KernelFactory;
-use Shopware\Core\Framework\Plugin\KernelPluginLoader\StaticKernelPluginLoader;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
 use Algoritma\ShopwareTestUtils\Command\GenerateStubsCommand;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
+use Shopware\Core\Framework\Plugin\KernelPluginLoader\ComposerPluginLoader;
 
 $envFile = __DIR__ . '/../../../../.env';
 
@@ -26,7 +26,7 @@ return static function (array &$context) {
     $env = $input->getParameterOption(['--env', '-e'], $context['APP_ENV'] ?? 'prod', true);
     $debug = ($context['APP_DEBUG'] ?? ($env !== 'prod')) && !$input->hasParameterOption('--no-debug', true);
 
-    $pluginLoader = new StaticKernelPluginLoader($classLoader, null);
+    $pluginLoader = new ComposerPluginLoader($classLoader, null);
 
     $kernel = KernelFactory::create(
         environment: $env,
