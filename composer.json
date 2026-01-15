@@ -50,7 +50,9 @@
         "frosh/shopware-rector": "^0.5.8",
         "symfony/browser-kit": "^8.0",
         "phpstan/phpstan-phpunit": "^2.0",
-        "algoritma/castor-recipes": "dev-main"
+        "algoritma/castor-recipes": "dev-main",
+        "symfony/panther": "^2.0",
+        "dbrekelmans/bdi": "^1.4"
     },
     "bin": ["bin/generate-factory-stubs"],
     "scripts": {

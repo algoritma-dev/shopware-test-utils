@@ -9,7 +9,7 @@ This test suite is designed to transform Shopware testing from a bottleneck into
 ## 2. Architecture & Components
 
 ### 2.1 Base Classes
-The suite provides two base classes located in `src/TestUtils/Core/`:
+The suite provides three base classes located in `src/TestUtils/Core/`:
 
 *   **`AbstractIntegrationTestCase`**: The foundation for service-level integration tests.
     *   **Features:**
@@ -22,6 +22,16 @@ The suite provides two base classes located in `src/TestUtils/Core/`:
     *   **Features:**
         *   Includes `SalesChannelFunctionalTestBehaviour`.
         *   Provides `StorefrontRequestHelper` for simulating user actions (Login, Add to Cart, Checkout).
+*   **`AbstractAcceptanceTestCase`**: Extends `AbstractIntegrationTestCase` for end-to-end browser automation tests.
+    *   **Features:**
+        *   Automatic Panther client initialization (`$this->client` available in setUp).
+        *   Real browser automation (Chrome/Firefox via WebDriver).
+        *   JavaScript execution support.
+        *   Automatic screenshot capture on test failure.
+        *   Automatic browser driver installation via `dbrekelmans/bdi`.
+        *   Built-in wait helpers (`waitForElementVisible`, `waitForText`, `waitForAjaxComplete`).
+        *   Integrated `AcceptanceAssertions` trait.
+        *   Inherits all IntegrationTestCase features (factories, helpers, transactions).
 
 ### 2.2 Fluent Factories (`src/TestUtils/Factory/`)
 Replace manual array creation with fluent, object-oriented builders backed by `Faker`.
@@ -72,6 +82,14 @@ Utilities to orchestrate complex business flows.
 *   **`CheckoutRunner`**: Converts a `Cart` into an `OrderEntity`.
 *   **`StorefrontRequestHelper`**: (Functional Tests) Simulates browser actions.
     *   `login()`, `addToCart()`, `proceedToCheckout()`, `submitOrder()`.
+*   **`ShopwarePantherHelper`**: (Acceptance Tests) Real browser automation for Shopware storefront.
+    *   **Authentication**: `loginToStorefront()`, `logout()`.
+    *   **Navigation**: `navigateToProduct()`, `navigateToCategory()`, `navigateToCart()`.
+    *   **Cart Operations**: `addProductToCartViaButton()`, `removeLineItemFromCart()`, `updateLineItemQuantity()`.
+    *   **Checkout**: `proceedToCheckoutPage()`, `fillCheckoutForm()`, `completeOrder()`.
+    *   **Search & Filters**: `searchProduct()`, `filterProducts()`.
+    *   **Assertions**: `assertProductVisibleInListing()`, `assertCartTotal()`, `assertCartContainsProduct()`, `assertCheckoutStepVisible()`, `verifySuccessMessage()`.
+    *   **Low-Level**: `clickElement()`, `fillField()`, `waitForPageLoad()`, `waitForAjaxComplete()`.
 *   **B2B Helpers (`src/TestUtils/Helper/B2B/`):**
     *   **Context & Authentication:**
         *   `EmployeeContextHelper`: Creates authenticated employee contexts (delegates to B2BContextFactory).
@@ -115,7 +133,23 @@ Traits integrated into the base classes to simplify assertions.
 *   **`ShopwareAssertions`**:
     *   `assertEntityExists()`, `assertPriceEquals()`, `assertCustomerHasRole()`.
     *   `assertMailTemplateExists()`, `assertMailTemplateSubjectContains()`, `assertMailTemplateContentContains()`.
-*   **`B2BAssertions`**:
+*   **`AcceptanceAssertions`**: (Acceptance Tests) Browser-level assertions for Panther tests.
+    *   **Content**: `assertPageContainsText()`, `assertPageNotContainsText()`, `assertPageTitleContains()`.
+    *   **Elements**: `assertElementVisible()`, `assertElementNotVisible()`, `assertElementExists()`, `assertElementNotExists()`, `assertElementContainsText()`.
+    *   **Attributes**: `assertElementHasClass()`, `assertElementNotHasClass()`, `assertElementAttributeEquals()`.
+    *   **Forms**: `assertFieldValue()`, `assertElementEnabled()`, `assertElementDisabled()`.
+    *   **Navigation**: `assertCurrentUrlMatches()`, `assertCurrentUrlContains()`.
+    *   **Utilities**: `assertElementCount()`, `assertAlertPresent()`, `assertNoJavaScriptErrors()`.
+*   **`B2BPantherHelpers`**: (Acceptance Tests) B2B browser automation actions.
+    *   **Authentication**: `loginAsEmployee()`, `logoutEmployee()`.
+    *   **Organization**: `switchOrganizationUnit()`.
+    *   **Quotes**: `requestQuoteFromCart()`, `accessQuoteManagement()`, `addCommentToQuote()`, `acceptQuoteInStorefront()`, `declineQuoteInStorefront()`.
+    *   **Approvals**: `submitOrderForApproval()`, `accessApprovalQueue()`, `approveOrderAsManager()`, `declineOrderAsManager()`.
+    *   **Shopping Lists**: `addProductToShoppingList()`, `accessShoppingLists()`, `addShoppingListToCart()`.
+    *   **Budget**: `checkBudgetStatus()`, `accessBudgetOverview()`.
+    *   **Navigation**: `navigateToEmployeeDashboard()`, `navigateToEmployeeAccount()`.
+    *   **Assertions**: `assertEmployeeLoggedIn()`, `assertOrganizationSwitched()`, `assertQuoteRequestSuccess()`, `assertOrderInApprovalQueue()`, `assertBudgetLimitWarningVisible()`, `assertQuoteStatusVisible()`, `assertEmployeeHasAccessToFeature()`, `assertShoppingListContainsProduct()`.
+*   **`B2BAssertions`**: (Integration/Service-Level Tests) B2B entity-level assertions.
     *   `assertQuoteInState()`: Verifies quote state machine state.
     *   `assertBudgetExceeded()` / `assertBudgetNotExceeded()`: Budget limit checks.
     *   `assertEmployeeHasPermission()`: Verifies employee permissions.
@@ -191,6 +225,35 @@ class CheckoutFlowTest extends AbstractFunctionalTestCase
         $helper->addToCart($product->getId());
         $helper->proceedToCheckout();
         // ...
+    }
+}
+```
+
+### Acceptance Test (Real Browser Automation)
+```php
+class CheckoutAcceptanceTest extends AbstractAcceptanceTestCase
+{
+    public function testGuestCheckoutFlow(): void
+    {
+        // $this->client is automatically initialized
+        $helper = new ShopwarePantherHelper($this->client, $this->getContainer());
+
+        // 1. Create test data
+        $product = $this->getContainer()->get(ProductFactory::class)
+            ->withName('Test Product')
+            ->withPrice(99.99)
+            ->create();
+
+        // 2. Execute browser actions
+        $helper->navigateToProduct($product->getId());
+        $this->assertPageContainsText('Test Product');
+
+        $helper->addProductToCartViaButton($product->getId());
+        $helper->proceedToCheckoutPage();
+        $helper->completeOrder();
+
+        // 3. Assertions
+        $this->assertPageContainsText('Thank you');
     }
 }
 ```
@@ -320,10 +383,64 @@ class BudgetExceededApprovalTest extends AbstractIntegrationTestCase
 }
 ```
 
-## 5. Implementation Status
+### B2B Acceptance Test (Browser Automation with Trait)
+```php
+class B2BQuoteAcceptanceTest extends AbstractAcceptanceTestCase
+{
+    use B2BPantherHelpers;  // Adds B2B browser methods
+
+    public function testEmployeeRequestsQuote(): void
+    {
+        // 1. Setup B2B structure
+        $customer = $this->getContainer()->get(CustomerFactory::class)->create();
+        $employee = $this->getContainer()->get(EmployeeFactory::class)
+            ->withEmail('employee@test.com')
+            ->withPassword('shopware')
+            ->withBusinessPartner($customer->getId())
+            ->create();
+
+        $product = $this->getContainer()->get(ProductFactory::class)
+            ->withName('Business Product')
+            ->withPrice(1500.00)
+            ->create();
+
+        // 2. Login as employee (trait method)
+        $this->loginAsEmployee('employee@test.com', 'shopware');
+        $this->assertEmployeeLoggedIn($employee->getFirstName());
+
+        // 3. Add to cart and request quote
+        $helper = new ShopwarePantherHelper($this->client, $this->getContainer());
+        $helper->navigateToProduct($product->getId());
+        $helper->addProductToCartViaButton($product->getId());
+
+        $this->requestQuoteFromCart();  // B2B trait method
+        $this->assertQuoteRequestSuccess();  // B2B trait assertion
+    }
+}
+```
+
+## 5. Setup & Configuration
+
+### Installing Browser Drivers
+Run once to install ChromeDriver and GeckoDriver automatically:
+```bash
+vendor/bin/bdi detect
+```
+
+Or let the test suite auto-install drivers on first run.
+
+### Environment Variables
+Configure acceptance tests via environment variables:
+- `PANTHER_NO_HEADLESS=1` - Disable headless mode (show browser window)
+- `PANTHER_CHROME_DRIVER_BINARY=/path/to/chromedriver` - Custom driver path
+- `PANTHER_SCREENSHOT_DIR=/path/to/screenshots` - Screenshot output directory
+- `PANTHER_WEB_SERVER_PORT=9080` - Custom port for test server
+
+## 6. Implementation Status
 - [x] **Transaction Management:** Replaced custom manager with Shopware's native `DatabaseTransactionBehaviour`.
 - [x] **Factories:** Implemented for all major entities using `Faker`.
 - [x] **Helpers:** `CartBuilder`, `CheckoutRunner`, `StorefrontRequestHelper` implemented.
+- [x] **Acceptance Testing:** `AbstractAcceptanceTestCase`, `ShopwarePantherHelper`, `B2BPantherHelpers` trait, `AcceptanceAssertions` trait.
 - [x] **Traits:** Event, Queue, and Mail helpers integrated and conflict-free.
 - [x] **Base Classes:** `AbstractIntegrationTestCase` and `AbstractFunctionalTestCase` ready.
 - [x] **B2B Integration:** Comprehensive B2B testing support with clear separation of concerns:
