@@ -178,7 +178,7 @@ abstract class AbstractAcceptanceTestCase extends AbstractIntegrationTestCase
 
         // Also wait for jQuery.active if jQuery is present
         $script = 'return typeof jQuery !== "undefined" ? jQuery.active === 0 : true;';
-        $this->client->waitFor(fn () => $this->executeJavaScript($script) === true, $timeout);
+        $this->client->waitFor(fn (): bool => $this->executeJavaScript($script) === true, $timeout);
     }
 
     /**

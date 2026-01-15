@@ -4,6 +4,8 @@ namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
+use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
@@ -17,11 +19,11 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     {
         // createCustomSalesChannelBrowser is provided by SalesChannelFunctionalTestBehaviour
         // It creates a browser with a specific SalesChannel context.
-
-        // If no specific options, it creates a default one.
         $browser = $this->createCustomSalesChannelBrowser($options);
 
-        return new StorefrontRequestHelper($browser);
+        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), $options['id'], $options);
+
+        return new StorefrontRequestHelper($browser, $salesChannelContext);
     }
 
     /**

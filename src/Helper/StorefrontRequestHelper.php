@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper;
 
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
@@ -11,7 +12,10 @@ use function assert;
 
 class StorefrontRequestHelper
 {
-    public function __construct(private readonly KernelBrowser $browser) {}
+    public function __construct(
+        private readonly KernelBrowser $browser,
+        private readonly SalesChannelContext $salesChannelContext
+    ) {}
 
     public function login(string $email, string $password = 'shopware'): void
     {
@@ -84,6 +88,11 @@ class StorefrontRequestHelper
     public function getBrowser(): KernelBrowser
     {
         return $this->browser;
+    }
+
+    public function getSalesChannelContext(): SalesChannelContext
+    {
+        return $this->salesChannelContext;
     }
 
     // --- Response Status Assertions ---

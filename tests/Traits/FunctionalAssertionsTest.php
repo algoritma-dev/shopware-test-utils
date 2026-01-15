@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
 use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,7 +16,8 @@ class FunctionalAssertionsTest extends TestCase
     protected function setUp(): void
     {
         $browser = $this->createStub(KernelBrowser::class);
-        $this->helper = new StorefrontRequestHelper($browser);
+        $salesChannelContext = $this->createStub(SalesChannelContext::class);
+        $this->helper = new StorefrontRequestHelper($browser, $salesChannelContext);
     }
 
     public function testAssertResponseOk(): void

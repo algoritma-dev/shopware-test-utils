@@ -369,10 +369,10 @@ class ShopwarePantherHelper
         // Wait for loading indicators to disappear
         $script = 'return document.querySelectorAll(".ajax-loading, .loading-indicator, [data-loading]").length === 0;';
 
-        $this->client->waitFor(fn () => $this->client->executeScript($script) === true, $timeout);
+        $this->client->waitFor(fn (): bool => $this->client->executeScript($script) === true, $timeout);
 
         // Also wait for jQuery if present
         $jQueryScript = 'return typeof jQuery !== "undefined" ? jQuery.active === 0 : true;';
-        $this->client->waitFor(fn () => $this->client->executeScript($jQueryScript) === true, $timeout);
+        $this->client->waitFor(fn (): bool => $this->client->executeScript($jQueryScript) === true, $timeout);
     }
 }

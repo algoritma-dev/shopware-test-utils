@@ -459,7 +459,7 @@ trait B2BPantherHelpers
 
         // Wait for B2B-specific loading indicators
         $script = 'return document.querySelectorAll(".b2b-loading, [data-b2b-loading]").length === 0;';
-        $this->client->waitFor(fn () => $this->client->executeScript($script) === true, $timeout);
+        $this->client->waitFor(fn (): bool => $this->client->executeScript($script) === true, $timeout);
     }
 
     /**
@@ -470,10 +470,10 @@ trait B2BPantherHelpers
         // Wait for B2B loading indicators
         $script = 'return document.querySelectorAll(".b2b-loading, .ajax-loading, [data-loading]").length === 0;';
 
-        $this->client->waitFor(fn () => $this->client->executeScript($script) === true, $timeout);
+        $this->client->waitFor(fn (): bool => $this->client->executeScript($script) === true, $timeout);
 
         // Wait for jQuery if present
         $jQueryScript = 'return typeof jQuery !== "undefined" ? jQuery.active === 0 : true;';
-        $this->client->waitFor(fn () => $this->client->executeScript($jQueryScript) === true, $timeout);
+        $this->client->waitFor(fn (): bool => $this->client->executeScript($jQueryScript) === true, $timeout);
     }
 }
