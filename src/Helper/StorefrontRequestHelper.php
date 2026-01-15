@@ -87,19 +87,6 @@ class StorefrontRequestHelper
         return $this->browser;
     }
 
-    /**
-     * Generate a URL from a route name and parameters.
-     *
-     * @param array<string, mixed> $params
-     */
-    public function getUrl(string $routeName, array $params = []): string
-    {
-        $router = $this->browser->getContainer()->get('router');
-        \assert($router instanceof UrlGeneratorInterface);
-
-        return $router->generate($routeName, $params);
-    }
-
     // --- Response Status Assertions ---
 
     /**

@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
 {
@@ -21,5 +22,18 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
         $browser = $this->createCustomSalesChannelBrowser($options);
 
         return new StorefrontRequestHelper($browser);
+    }
+
+    /**
+     * Generate a URL from a route name and parameters.
+     *
+     * @param array<string, mixed> $params
+     */
+    protected function getUrl(string $routeName, array $params = []): string
+    {
+        $router = $this->getContainer()->get('router');
+        \assert($router instanceof UrlGeneratorInterface);
+
+        return $router->generate($routeName, $params);
     }
 }
