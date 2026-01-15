@@ -4,8 +4,11 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper;
 
 use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\PlatformRequest;
+use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\HttpFoundation\Response;
 
 class StorefrontRequestHelperTest extends TestCase
@@ -14,16 +17,20 @@ class StorefrontRequestHelperTest extends TestCase
     {
         $browser = $this->createMock(KernelBrowser::class);
         $salesChannelContext = $this->createMock(SalesChannelContext::class);
-        $response = $this->createStub(Response::class);
+        $response = new Response('', 302);
+        $response->headers->set(PlatformRequest::HEADER_CONTEXT_TOKEN, 'test-token');
 
         $browser->expects($this->once())->method('request')->with(
             'POST',
-            '/account/login',
+            '/store-api/account/login',
             $this->anything()
         );
 
+        $container = $this->createStub(ContainerInterface::class);
+        $container->method('get')->willReturn(self::createStub(SalesChannelContextFactory::class));
+
         $browser->method('getResponse')->willReturn($response);
-        $response->method('getStatusCode')->willReturn(302);
+        $browser->method('getContainer')->willReturn($container);
 
         $helper = new StorefrontRequestHelper($browser, $salesChannelContext);
         $helper->login('test@example.com', 'password');
