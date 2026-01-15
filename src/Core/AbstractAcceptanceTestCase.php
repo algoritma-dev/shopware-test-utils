@@ -103,10 +103,8 @@ abstract class AbstractAcceptanceTestCase extends AbstractIntegrationTestCase
     {
         $screenshotDir = $this->getScreenshotDirectory();
 
-        if (! is_dir($screenshotDir)) {
-            if (!mkdir($screenshotDir, 0777, true) && !is_dir($screenshotDir)) {
-                throw new \RuntimeException(sprintf('Directory "%s" was not created', $screenshotDir));
-            }
+        if (! is_dir($screenshotDir) && (! mkdir($screenshotDir, 0o777, true) && ! is_dir($screenshotDir))) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $screenshotDir));
         }
 
         $filename = sprintf(
@@ -156,8 +154,6 @@ abstract class AbstractAcceptanceTestCase extends AbstractIntegrationTestCase
 
     /**
      * Execute JavaScript in the browser.
-     *
-     * @return mixed
      */
     protected function executeJavaScript(string $script)
     {
@@ -182,9 +178,7 @@ abstract class AbstractAcceptanceTestCase extends AbstractIntegrationTestCase
 
         // Also wait for jQuery.active if jQuery is present
         $script = 'return typeof jQuery !== "undefined" ? jQuery.active === 0 : true;';
-        $this->client->waitFor(function () use ($script) {
-            return $this->executeJavaScript($script) === true;
-        }, $timeout);
+        $this->client->waitFor(fn () => $this->executeJavaScript($script) === true, $timeout);
     }
 
     /**
@@ -195,7 +189,7 @@ abstract class AbstractAcceptanceTestCase extends AbstractIntegrationTestCase
         $dir = getenv('PANTHER_SCREENSHOT_DIR');
 
         if ($dir === false || $dir === '') {
-            $dir = dirname(__DIR__, 2) . '/var/screenshots';
+            return dirname(__DIR__, 2) . '/var/screenshots';
         }
 
         return $dir;
@@ -206,7 +200,11 @@ abstract class AbstractAcceptanceTestCase extends AbstractIntegrationTestCase
      */
     private function hasFailed(): bool
     {
-        return $this->status()->isFailure() || $this->status()->isError();
+        if ($this->status()->isFailure()) {
+            return true;
+        }
+
+        return $this->status()->isError();
     }
 
     /**

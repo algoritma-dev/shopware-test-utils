@@ -188,7 +188,7 @@ trait B2BPantherHelpers
     {
         $this->accessApprovalQueue();
 
-        if ($reason) {
+        if ($reason !== '' && $reason !== '0') {
             $this->fillB2BField(sprintf('textarea[name="declineReason"][data-order-id="%s"]', $orderId), $reason);
         }
 
@@ -293,7 +293,7 @@ trait B2BPantherHelpers
 
         $found = false;
         foreach ($userInfo as $element) {
-            if (str_contains($element->textContent, $employeeName)) {
+            if (str_contains((string) $element->textContent, $employeeName)) {
                 $found = true;
 
                 break;
@@ -341,7 +341,7 @@ trait B2BPantherHelpers
 
         $found = false;
         foreach ($orders as $order) {
-            if (str_contains($order->textContent, $orderNumber)) {
+            if (str_contains((string) $order->textContent, $orderNumber)) {
                 $found = true;
 
                 break;
@@ -387,7 +387,7 @@ trait B2BPantherHelpers
 
         $found = false;
         foreach ($navigation as $nav) {
-            if (str_contains($nav->textContent, $featureName)) {
+            if (str_contains((string) $nav->textContent, $featureName)) {
                 $found = true;
 
                 break;
@@ -412,7 +412,7 @@ trait B2BPantherHelpers
 
         $found = false;
         foreach ($products as $product) {
-            if (str_contains($product->textContent, $productName)) {
+            if (str_contains((string) $product->textContent, $productName)) {
                 $found = true;
 
                 break;
@@ -459,9 +459,7 @@ trait B2BPantherHelpers
 
         // Wait for B2B-specific loading indicators
         $script = 'return document.querySelectorAll(".b2b-loading, [data-b2b-loading]").length === 0;';
-        $this->client->waitFor(function () use ($script) {
-            return $this->client->executeScript($script) === true;
-        }, $timeout);
+        $this->client->waitFor(fn () => $this->client->executeScript($script) === true, $timeout);
     }
 
     /**
@@ -472,14 +470,10 @@ trait B2BPantherHelpers
         // Wait for B2B loading indicators
         $script = 'return document.querySelectorAll(".b2b-loading, .ajax-loading, [data-loading]").length === 0;';
 
-        $this->client->waitFor(function () use ($script) {
-            return $this->client->executeScript($script) === true;
-        }, $timeout);
+        $this->client->waitFor(fn () => $this->client->executeScript($script) === true, $timeout);
 
         // Wait for jQuery if present
         $jQueryScript = 'return typeof jQuery !== "undefined" ? jQuery.active === 0 : true;';
-        $this->client->waitFor(function () use ($jQueryScript) {
-            return $this->client->executeScript($jQueryScript) === true;
-        }, $timeout);
+        $this->client->waitFor(fn () => $this->client->executeScript($jQueryScript) === true, $timeout);
     }
 }

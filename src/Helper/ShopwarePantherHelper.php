@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper;
 
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Panther\Client;
 
 /**
@@ -26,8 +25,7 @@ use Symfony\Component\Panther\Client;
 class ShopwarePantherHelper
 {
     public function __construct(
-        private readonly Client $client,
-        private readonly ContainerInterface $container
+        private readonly Client $client
     ) {}
 
     // --- Authentication ---
@@ -148,7 +146,7 @@ class ShopwarePantherHelper
      */
     public function fillCheckoutForm(array $data): void
     {
-        $crawler = $this->client->getCrawler();
+        $this->client->getCrawler();
 
         // Fill billing address fields
         if (isset($data['billingAddress'])) {
@@ -223,7 +221,7 @@ class ShopwarePantherHelper
 
         $found = false;
         foreach ($productElements as $element) {
-            if (str_contains($element->textContent, $productName)) {
+            if (str_contains((string) $element->textContent, $productName)) {
                 $found = true;
 
                 break;
@@ -266,7 +264,7 @@ class ShopwarePantherHelper
 
         $found = false;
         foreach ($lineItems as $item) {
-            if (str_contains($item->textContent, $productName)) {
+            if (str_contains((string) $item->textContent, $productName)) {
                 $found = true;
 
                 break;
@@ -297,7 +295,7 @@ class ShopwarePantherHelper
 
         $found = false;
         foreach ($messages as $message) {
-            if (str_contains($message->textContent, $expectedText)) {
+            if (str_contains((string) $message->textContent, $expectedText)) {
                 $found = true;
 
                 break;
@@ -371,14 +369,10 @@ class ShopwarePantherHelper
         // Wait for loading indicators to disappear
         $script = 'return document.querySelectorAll(".ajax-loading, .loading-indicator, [data-loading]").length === 0;';
 
-        $this->client->waitFor(function () use ($script) {
-            return $this->client->executeScript($script) === true;
-        }, $timeout);
+        $this->client->waitFor(fn () => $this->client->executeScript($script) === true, $timeout);
 
         // Also wait for jQuery if present
         $jQueryScript = 'return typeof jQuery !== "undefined" ? jQuery.active === 0 : true;';
-        $this->client->waitFor(function () use ($jQueryScript) {
-            return $this->client->executeScript($jQueryScript) === true;
-        }, $timeout);
+        $this->client->waitFor(fn () => $this->client->executeScript($jQueryScript) === true, $timeout);
     }
 }
