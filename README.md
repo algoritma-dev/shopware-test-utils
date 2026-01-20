@@ -190,11 +190,11 @@ Helpers perform operations on existing entities. Use the `HelperAccessor` trait 
 **Example:**
 
 ```php
-use Algoritma\ShopwareTestUtils\Traits\HelperAccessor;
+use Algoritma\ShopwareTestUtils\Traits\HelperAccessorTrait;
 
 class MyTest extends AbstractIntegrationTestCase
 {
-    use HelperAccessor;
+    use HelperAccessorTrait;
 
     public function testOrderFlow(): void
     {
@@ -219,7 +219,8 @@ Traits provide assertion methods for test verification. **Note:** Actions have b
 |-------|-------------|
 | `HelperAccessor` | **Provides easy access to all Helper classes** |
 | `DatabaseHelpers` | Database assertions (table exists, row count, etc.) |
-| `CacheHelpers` | Cache assertions (key exists, cache cleared) |
+| `CacheTrait` | Cache assertions (key exists, cache cleared) |
+| `ContextTrait` | Context management (create default context, sales channel context) |
 | `TimeHelpers` | Time-related assertions (date in future/past, timestamp validity) |
 | `LogHelpers` | Log assertions (error logged, warning count, log contains) |
 | `MailHelpers` | Mail assertions (email sent, recipient correct) |
@@ -230,15 +231,15 @@ Traits provide assertion methods for test verification. **Note:** Actions have b
 **Example:**
 
 ```php
-use Algoritma\ShopwareTestUtils\Traits\HelperAccessor;
-use Algoritma\ShopwareTestUtils\Traits\TimeHelpers;
-use Algoritma\ShopwareTestUtils\Traits\MailHelpers;
+use Algoritma\ShopwareTestUtils\Traits\HelperAccessorTrait;
+use Algoritma\ShopwareTestUtils\Traits\TimeTrait;
+use Algoritma\ShopwareTestUtils\Traits\MailTrait;
 
 class SubscriptionTest extends AbstractIntegrationTestCase
 {
-    use HelperAccessor;  // Access to all helpers
-    use TimeHelpers;     // Time assertions
-    use MailHelpers;     // Mail assertions
+    use HelperAccessorTrait;  // Access to all helpers
+    use TimeTrait;     // Time assertions
+    use MailTrait;     // Mail assertions
 
     public function testSubscriptionRenewal(): void
     {
@@ -253,7 +254,7 @@ class SubscriptionTest extends AbstractIntegrationTestCase
         // Run renewal process
         $this->runScheduledTask(RenewalTask::class);
 
-        // Use MailHelpers trait for assertions
+        // Use MailTrait trait for assertions
         $this->assertMailSent(1);
         $this->assertMailWasSent();
     }
@@ -374,7 +375,8 @@ src/
 ├── Traits/                              # Reusable behaviors
 │   ├── HelperAccessor.php              # Access all helpers
 │   ├── DatabaseHelpers.php
-│   ├── CacheHelpers.php
+│   ├── CacheTrait.php
+│   ├── ContextTrait.php
 │   ├── TimeHelpers.php
 │   ├── EventHelpers.php
 │   └── ...
@@ -456,11 +458,11 @@ class MyTest extends AbstractIntegrationTestCase
 ### Testing with Time Travel
 
 ```php
-use Algoritma\ShopwareTestUtils\Traits\TimeHelpers;
+use Algoritma\ShopwareTestUtils\Traits\TimeTrait;
 
 class CouponExpirationTest extends AbstractIntegrationTestCase
 {
-    use TimeHelpers;
+    use TimeTrait;
 
     public function testCouponExpires(): void
     {
@@ -480,11 +482,11 @@ class CouponExpirationTest extends AbstractIntegrationTestCase
 ### Testing with Event Capture
 
 ```php
-use Algoritma\ShopwareTestUtils\Traits\EventHelpers;
+use Algoritma\ShopwareTestUtils\Traits\EventTrait;
 
 class ProductEventTest extends AbstractIntegrationTestCase
 {
-    use EventHelpers;
+    use EventTrait;
 
     public function testProductCreationDispatchesEvent(): void
     {
@@ -504,11 +506,11 @@ class ProductEventTest extends AbstractIntegrationTestCase
 
 ```php
 use Algoritma\ShopwareTestUtils\Core\MigrationTestCase;
-use Algoritma\ShopwareTestUtils\Traits\MigrationHelpers;
+use Algoritma\ShopwareTestUtils\Traits\MigrationTrait;
 
 class Migration1234567890Test extends MigrationTestCase
 {
-    use MigrationHelpers;
+    use MigrationTrait;
 
     public function testMigrationCreatesTable(): void
     {
@@ -541,11 +543,11 @@ class Migration1234567890Test extends MigrationTestCase
 ### Testing with Database Snapshots
 
 ```php
-use Algoritma\ShopwareTestUtils\Traits\DatabaseHelpers;
+use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
 
 class BulkOperationTest extends AbstractIntegrationTestCase
 {
-    use DatabaseHelpers;
+    use DatabaseTrait;
 
     public function testBulkImport(): void
     {

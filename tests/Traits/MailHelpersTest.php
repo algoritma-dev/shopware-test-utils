@@ -2,7 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
-use Algoritma\ShopwareTestUtils\Traits\MailHelpers;
+use Algoritma\ShopwareTestUtils\Traits\MailTrait;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -13,7 +13,7 @@ use Symfony\Component\Mime\Email;
 
 class MailHelpersTest extends TestCase
 {
-    use MailHelpers;
+    use MailTrait;
 
     private static Stub&ContainerInterface $container;
 

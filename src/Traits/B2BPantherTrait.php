@@ -12,7 +12,7 @@ namespace Algoritma\ShopwareTestUtils\Traits;
  * ```php
  * class MyB2BTest extends AbstractAcceptanceTestCase
  * {
- *     use B2BPantherHelpers;
+ *     use B2BPantherTrait;
  *
  *     public function testEmployeeQuote(): void
  *     {
@@ -28,7 +28,7 @@ namespace Algoritma\ShopwareTestUtils\Traits;
  * - Test class must have `getContainer()` method
  * - Shopware Commercial B2B plugin must be installed
  */
-trait B2BPantherHelpers
+trait B2BPantherTrait
 {
     // --- Employee Authentication ---
 

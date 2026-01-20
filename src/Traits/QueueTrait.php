@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Traits;
 use PHPUnit\Framework\Assert;
 use Symfony\Component\Messenger\TraceableMessageBus;
 
-trait QueueHelpers
+trait QueueTrait
 {
     protected function getTraceableBus(): TraceableMessageBus
     {

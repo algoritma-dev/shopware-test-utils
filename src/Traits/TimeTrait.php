@@ -7,7 +7,7 @@ use PHPUnit\Framework\Assert;
 /**
  * Trait for time-related assertions in tests.
  */
-trait TimeHelpers
+trait TimeTrait
 {
     /**
      * Asserts that a timestamp is within a specific range.

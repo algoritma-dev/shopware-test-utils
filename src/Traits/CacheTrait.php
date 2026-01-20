@@ -7,7 +7,7 @@ use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
 
-trait CacheHelpers
+trait CacheTrait
 {
     use KernelTestBehaviour;
 

@@ -5,7 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Traits;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Assert;
 
-trait MigrationHelpers
+trait MigrationTrait
 {
     /**
      * Asserts that a migration is idempotent (can be run multiple times without errors).

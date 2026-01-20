@@ -8,7 +8,7 @@ use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Mailer\Event\MessageEvent;
 use Symfony\Component\Mime\Email;
 
-trait MailHelpers
+trait MailTrait
 {
     use KernelTestBehaviour;
     use EventDispatcherBehaviour;

@@ -24,7 +24,7 @@ use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelApiTestBehaviour;
  * Provides easy access to helper classes in test cases.
  * Manages lazy initialization and caching of helper instances.
  */
-trait HelperAccessor
+trait HelperAccessorTrait
 {
     use KernelTestBehaviour;
     use SalesChannelApiTestBehaviour;

@@ -2,7 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
-use Algoritma\ShopwareTestUtils\Traits\EventHelpers;
+use Algoritma\ShopwareTestUtils\Traits\EventTrait;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -12,7 +12,7 @@ use Symfony\Contracts\EventDispatcher\Event;
 
 class EventHelpersTest extends TestCase
 {
-    use EventHelpers;
+    use EventTrait;
 
     private Stub&ContainerInterface $container;
 

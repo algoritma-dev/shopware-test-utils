@@ -10,7 +10,7 @@ use Symfony\Component\Panther\Client;
  * This trait provides high-level assertions for Panther-based acceptance tests.
  * It expects the test class to have a `$client` property of type `Client`.
  */
-trait AcceptanceAssertions
+trait AcceptanceAssertionsTrait
 {
     /**
      * Assert that the page contains specific text.

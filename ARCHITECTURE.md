@@ -30,12 +30,13 @@ $product = (new ProductFactory($container))
 - **Access**: Use `HelperAccessor` trait for convenient access
 
 **Example:**
+
 ```php
-use Algoritma\ShopwareTestUtils\Traits\HelperAccessor;
+use Algoritma\ShopwareTestUtils\Traits\HelperAccessorTrait;
 
 class MyTest extends AbstractIntegrationTestCase
 {
-    use HelperAccessor;
+    use HelperAccessorTrait;
 
     public function test(): void
     {
@@ -60,14 +61,15 @@ class MyTest extends AbstractIntegrationTestCase
 - **Examples**: assertDatabaseHas, assertMailSent, assertDateInFuture
 
 **Example:**
+
 ```php
-use Algoritma\ShopwareTestUtils\Traits\DatabaseHelpers;
-use Algoritma\ShopwareTestUtils\Traits\TimeHelpers;
+use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
+use Algoritma\ShopwareTestUtils\Traits\TimeTrait;
 
 class MyTest extends AbstractIntegrationTestCase
 {
-    use DatabaseHelpers;
-    use TimeHelpers;
+    use DatabaseTrait;
+    use TimeTrait;
 
     public function test(): void
     {
@@ -112,7 +114,8 @@ src/TestUtils/
 └── Traits/                              # ASSERTIONS & TEST UTILITIES
     ├── HelperAccessor.php              # Convenient access to all helpers
     ├── DatabaseHelpers.php             # DB assertions (table exists, row count)
-    ├── CacheHelpers.php                # Cache assertions (key exists, cleared)
+    ├── CacheTrait.php                  # Cache assertions (key exists, cleared)
+    ├── ContextTrait.php                # Context management assertions
     ├── TimeHelpers.php                 # Time assertions (date in future/past)
     ├── LogHelpers.php                  # Log assertions (error logged, contains)
     ├── MailHelpers.php                 # Mail assertions (email sent, recipient)
@@ -165,7 +168,7 @@ class TimeHelper
     public function travelForward(string $interval): void { ... }
 }
 
-// Usage with HelperAccessor:
+// Usage with HelperAccessorTrait:
 class MyTest extends AbstractIntegrationTestCase
 {
     use HelperAccessor;
@@ -241,7 +244,7 @@ trait ConfigHelpers
     protected function setSystemConfig(string $key, $value): void { ... }  // NO!
 }
 
-// ✅ CORRECT - Actions go in Helper, accessed via HelperAccessor
+// ✅ CORRECT - Actions go in Helper, accessed via HelperAccessorTrait
 class ConfigHelper
 {
     public function set(string $key, $value): void { ... }  // OK!

@@ -2,14 +2,14 @@
 
 namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
-use Algoritma\ShopwareTestUtils\Traits\DatabaseHelpers;
+use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class DatabaseHelpersTest extends TestCase
 {
-    use DatabaseHelpers;
+    use DatabaseTrait;
 
     private MockObject $connection;
 

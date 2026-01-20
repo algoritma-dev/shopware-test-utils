@@ -4,7 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Doctrine\DBAL\Connection;
 
-trait DatabaseHelpers
+trait DatabaseTrait
 {
     private array $databaseSnapshots = [];
 

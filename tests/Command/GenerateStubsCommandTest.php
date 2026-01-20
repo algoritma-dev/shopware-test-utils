@@ -37,7 +37,7 @@ class GenerateStubsCommandTest extends TestCase
         $command = new GenerateStubsCommand($this->tempDir, $metadataService);
         $commandTester = new CommandTester($command);
 
-        $exitCode = $commandTester->execute([]);
+        $exitCode = $commandTester->execute([], ['interactive' => false, 'decorated' => false]);
 
         $this->assertSame(0, $exitCode);
         $this->assertStringContainsString('Factory stubs generated successfully', $commandTester->getDisplay());
@@ -52,7 +52,7 @@ class GenerateStubsCommandTest extends TestCase
         $command = new GenerateStubsCommand($this->tempDir, $metadataService);
         $commandTester = new CommandTester($command);
 
-        $commandTester->execute([]);
+        $commandTester->execute([], ['interactive' => false, 'decorated' => false]);
 
         $stubPath = $this->tempDir . '/tests/factory-stubs.php';
         $metaPath = $this->tempDir . '/tests/.phpstorm.meta.php';
@@ -63,20 +63,12 @@ class GenerateStubsCommandTest extends TestCase
 
     public function testExecuteFailure(): void
     {
-        // Make the tests directory non-writable to trigger file write failure
-        chmod($this->tempDir . '/tests', 0o555);
-
-        $metadataService = $this->createMock(DalMetadataService::class);
-        $metadataService->method('getEntityProperties')->willReturn([]);
-        $metadataService->method('getEntityRelations')->willReturn([]);
-
-        $command = new GenerateStubsCommand($this->tempDir, $metadataService);
+        // Use a file path that is definitely not writable
+        $nonExistentDir = '/non-existent-directory-' . uniqid();
+        $command = new GenerateStubsCommand($nonExistentDir, $this->createMock(DalMetadataService::class));
         $commandTester = new CommandTester($command);
 
-        $exitCode = $commandTester->execute([]);
-
-        // Restore permissions for cleanup
-        chmod($this->tempDir . '/tests', 0o777);
+        $exitCode = $commandTester->execute([], ['interactive' => false, 'decorated' => false]);
 
         $this->assertSame(1, $exitCode);
         $this->assertStringContainsString('Error generating stubs', $commandTester->getDisplay());

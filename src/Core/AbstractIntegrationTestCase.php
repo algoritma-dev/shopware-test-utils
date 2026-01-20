@@ -6,9 +6,9 @@ use Algoritma\ShopwareTestUtils\Factory\CartFactory;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
 use Algoritma\ShopwareTestUtils\Helper\OrderHelper;
-use Algoritma\ShopwareTestUtils\Traits\EventHelpers;
-use Algoritma\ShopwareTestUtils\Traits\MailHelpers;
-use Algoritma\ShopwareTestUtils\Traits\QueueHelpers;
+use Algoritma\ShopwareTestUtils\Traits\EventTrait;
+use Algoritma\ShopwareTestUtils\Traits\MailTrait;
+use Algoritma\ShopwareTestUtils\Traits\QueueTrait;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Cart\Cart;
@@ -29,9 +29,9 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use DatabaseTransactionBehaviour;
     use QueueTestBehaviour;
     use EventDispatcherBehaviour;
-    use EventHelpers;
-    use MailHelpers;
-    use QueueHelpers;
+    use EventTrait;
+    use MailTrait;
+    use QueueTrait;
 
     private ?FixtureManager $fixtureManager = null;
 

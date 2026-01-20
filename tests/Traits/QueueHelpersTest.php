@@ -2,7 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Tests\Traits;
 
-use Algoritma\ShopwareTestUtils\Traits\QueueHelpers;
+use Algoritma\ShopwareTestUtils\Traits\QueueTrait;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -10,7 +10,7 @@ use Symfony\Component\Messenger\TraceableMessageBus;
 
 class QueueHelpersTest extends TestCase
 {
-    use QueueHelpers;
+    use QueueTrait;
 
     private static Stub&ContainerInterface $container;
 

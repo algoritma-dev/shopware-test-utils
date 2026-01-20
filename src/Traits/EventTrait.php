@@ -6,7 +6,7 @@ use PHPUnit\Framework\Assert;
 use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
 use Symfony\Contracts\EventDispatcher\Event;
 
-trait EventHelpers
+trait EventTrait
 {
     use EventDispatcherBehaviour;
 

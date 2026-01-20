@@ -10,7 +10,6 @@ use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 #[AsCommand(
     name: 'alg:sw-test-util:generate-stubs',
@@ -29,16 +28,13 @@ class GenerateStubsCommand extends Command
     {
         $generator = new FactoryStubGenerator($this->projectRoot, $this->metadataService);
 
-        $io = new SymfonyStyle($input, $output);
-
-        $io->writeln('Generating factory stubs...');
         try {
             $result = $generator->generate();
-            $io->success('Factory stubs generated successfully');
-            $output->writeln("  - PHPStan stub: {$result['stub']}");
-            $output->writeln("  - PhpStorm meta: {$result['meta']}");
+            $output->write("Factory stubs generated successfully\n", false, OutputInterface::OUTPUT_RAW);
+            $output->write("  - PHPStan stub: {$result['stub']}\n", false, OutputInterface::OUTPUT_RAW);
+            $output->write("  - PhpStorm meta: {$result['meta']}\n", false, OutputInterface::OUTPUT_RAW);
         } catch (\Exception $e) {
-            $output->writeln("<error>Error generating stubs: {$e->getMessage()}</error>");
+            $output->write("Error generating stubs: {$e->getMessage()}\n", false, OutputInterface::OUTPUT_RAW);
 
             return Command::FAILURE;
         }

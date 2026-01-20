@@ -2,7 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
-use Algoritma\ShopwareTestUtils\Traits\AcceptanceAssertions;
+use Algoritma\ShopwareTestUtils\Traits\AcceptanceAssertionsTrait;
 use Symfony\Component\Panther\Client;
 use Symfony\Component\Panther\PantherTestCase;
 use Symfony\Component\Panther\PantherTestCaseTrait;
@@ -33,7 +33,7 @@ use Symfony\Component\Panther\PantherTestCaseTrait;
 abstract class AbstractAcceptanceTestCase extends AbstractIntegrationTestCase
 {
     use PantherTestCaseTrait;
-    use AcceptanceAssertions;
+    use AcceptanceAssertionsTrait;
 
     protected Client $client;
 

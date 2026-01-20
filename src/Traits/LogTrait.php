@@ -9,7 +9,7 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 
-trait LogHelpers
+trait LogTrait
 {
     use KernelTestBehaviour;
 
