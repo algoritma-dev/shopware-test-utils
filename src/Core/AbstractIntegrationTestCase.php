@@ -11,6 +11,7 @@ use Algoritma\ShopwareTestUtils\Traits\MailTrait;
 use Algoritma\ShopwareTestUtils\Traits\QueueTrait;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
+use Shopware\Commercial\B2B\B2BSuiteMigration\Core\Domain\Traits\ContextTrait;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Checkout\Order\OrderEntity;
@@ -32,6 +33,7 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use EventTrait;
     use MailTrait;
     use QueueTrait;
+    use ContextTrait;
 
     private ?FixtureManager $fixtureManager = null;
 
