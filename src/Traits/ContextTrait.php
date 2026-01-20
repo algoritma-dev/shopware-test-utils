@@ -36,7 +36,7 @@ trait ContextTrait
      *
      * @param array<string, mixed> $options
      */
-    protected function createSalesChannelContext(?string $salesChannelId = null, array $options = []): SalesChannelContext
+    protected function createSalesChannelContextObject(?string $salesChannelId = null, array $options = []): SalesChannelContext
     {
         return $this->getContextFactory()->createSalesChannelContext($salesChannelId, $options);
     }
