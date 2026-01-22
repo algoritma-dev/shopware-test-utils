@@ -2,48 +2,33 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper;
 
-use Shopware\Core\PlatformRequest;
-use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
-use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
-use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
-use function assert;
-
 class StorefrontRequestHelper
 {
     public function __construct(
-        private readonly KernelBrowser $browser,
-        private SalesChannelContext $salesChannelContext
+        private readonly KernelBrowser $browser
     ) {}
 
+    /**
+     * Login to the storefront for using throught controller request, with given credentials.
+     *
+     * Usefull for testing storefront routes.
+     */
     public function login(string $email, string $password = 'shopware'): void
     {
         $this->browser
             ->request(
                 'POST',
-                '/store-api/account/login',
+                '/account/login',
                 [
                     'email' => $email,
                     'password' => $password,
                 ]
             );
-
-        $response = $this->browser->getResponse();
-
-        // After login successfully, the context token will be set in the header
-        $contextToken = $response->headers->get(PlatformRequest::HEADER_CONTEXT_TOKEN) ?? '';
-        if (empty($contextToken)) {
-            throw new \RuntimeException('Cannot login with the given credential account');
-        }
-
-        $this->browser->setServerParameter('HTTP_SW_CONTEXT_TOKEN', $contextToken);
-
-        // Reload the SalesChannelContext with the new context token
-        $this->reloadSalesChannelContext($contextToken);
     }
 
     public function addToCart(string $productId, int $quantity = 1): void
@@ -105,11 +90,6 @@ class StorefrontRequestHelper
     public function getBrowser(): KernelBrowser
     {
         return $this->browser;
-    }
-
-    public function getSalesChannelContext(): SalesChannelContext
-    {
-        return $this->salesChannelContext;
     }
 
     // --- Response Status Assertions ---
@@ -302,18 +282,6 @@ class StorefrontRequestHelper
         \assert(
             $request->query->has($key) || $request->request->has($key),
             $message ?: \sprintf('Expected request to have parameter "%s"', $key)
-        );
-    }
-
-    private function reloadSalesChannelContext(string $contextToken): void
-    {
-        $container = $this->browser->getContainer();
-        $contextFactory = $container->get(SalesChannelContextFactory::class);
-        \assert($contextFactory instanceof AbstractSalesChannelContextFactory);
-
-        $this->salesChannelContext = $contextFactory->create(
-            $contextToken,
-            $this->salesChannelContext->getSalesChannelId()
         );
     }
 

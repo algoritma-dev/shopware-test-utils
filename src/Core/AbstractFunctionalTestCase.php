@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
+use Algoritma\ShopwareTestUtils\Helper\StorefrontApiRequestHelper;
 use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
@@ -17,13 +18,21 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
      */
     protected function createStorefrontHelper(array $options = []): StorefrontRequestHelper
     {
-        // createCustomSalesChannelBrowser is provided by SalesChannelFunctionalTestBehaviour
-        // It creates a browser with a specific SalesChannel context.
         $browser = $this->createCustomSalesChannelBrowser($options);
 
-        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), $options['id'], $options);
+        return new StorefrontRequestHelper($browser);
+    }
 
-        return new StorefrontRequestHelper($browser, $salesChannelContext);
+    /**
+     * @param array<string, mixed> $options
+     */
+    protected function createStorefrontApiHelper(array $options = []): StorefrontApiRequestHelper
+    {
+        $browser = $this->createCustomSalesChannelBrowser($options);
+
+        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)?->create(Uuid::randomHex(), $options['id'], $options);
+
+        return new StorefrontApiRequestHelper($browser, $salesChannelContext);
     }
 
     /**

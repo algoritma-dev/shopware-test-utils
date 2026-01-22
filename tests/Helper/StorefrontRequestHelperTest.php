@@ -22,7 +22,7 @@ class StorefrontRequestHelperTest extends TestCase
 
         $browser->expects($this->once())->method('request')->with(
             'POST',
-            '/store-api/account/login',
+            '/account/login',
             $this->anything()
         );
 

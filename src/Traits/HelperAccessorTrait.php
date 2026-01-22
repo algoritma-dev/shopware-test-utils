@@ -100,6 +100,6 @@ trait HelperAccessorTrait
 
     protected function timeHelper(): TimeHelper
     {
-        return $this->helpers[TimeHelper::class] ??= new TimeHelper(static::getContainer());
+        return $this->helpers[TimeHelper::class] ??= new TimeHelper();
     }
 }
