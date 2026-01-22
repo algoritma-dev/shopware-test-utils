@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper;
 
 use Shopware\Core\PlatformRequest;
+use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
@@ -308,7 +309,7 @@ class StorefrontRequestHelper
     {
         $container = $this->browser->getContainer();
         $contextFactory = $container->get(SalesChannelContextFactory::class);
-        \assert($contextFactory instanceof SalesChannelContextFactory);
+        \assert($contextFactory instanceof AbstractSalesChannelContextFactory);
 
         $this->salesChannelContext = $contextFactory->create(
             $contextToken,
