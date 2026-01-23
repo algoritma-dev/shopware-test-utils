@@ -57,4 +57,9 @@ class StorefrontApiRequestHelper
             $this->salesChannelContext->getSalesChannelId()
         );
     }
+
+    public function getBrowser(): KernelBrowser
+    {
+        return $this->browser;
+    }
 }
