@@ -6,6 +6,24 @@ use PDO;
 use PDOException;
 use Shopware\Core\TestBootstrapper;
 use Symfony\Component\Dotenv\Dotenv;
+use function class_exists;
+use function dump;
+use function fclose;
+use function getenv;
+use function in_array;
+use function ltrim;
+use function parse_str;
+use function parse_url;
+use function preg_replace;
+use function preg_split;
+use function proc_close;
+use function proc_open;
+use function putenv;
+use function sprintf;
+use function str_replace;
+use function stream_get_contents;
+use function stripos;
+use function trim;
 
 class ParallelTestBootstrapper extends TestBootstrapper
 {
@@ -14,9 +32,8 @@ class ParallelTestBootstrapper extends TestBootstrapper
     /**
      * @var list<string>
      */
-    private array $postInstallCommands = [
-        'bin/ci system:install --drop-database --basic-setup --force --no-assign-theme',
-        'bin/console dal:refresh:index --only category.indexer --no-interaction',
+    private array $installCommands = [
+        'bin/console system:install --drop-database --basic-setup --force --no-assign-theme',
     ];
 
     private bool $shouldLoadEnvFile = true;
@@ -57,16 +74,16 @@ class ParallelTestBootstrapper extends TestBootstrapper
     /**
      * @param list<string> $commands
      */
-    public function setPostInstallCommands(array $commands): self
+    public function setInstallCommands(array $commands): self
     {
-        $this->postInstallCommands = $commands;
+        $this->installCommands = $commands;
 
         return $this;
     }
 
-    public function addPostInstallCommand(string $command): self
+    public function addInstallCommand(string $command): self
     {
-        $this->postInstallCommands[] = $command;
+        $this->installCommands[] = $command;
 
         return $this;
     }
@@ -102,10 +119,11 @@ class ParallelTestBootstrapper extends TestBootstrapper
         $databaseUrl = $this->getDatabaseUrl();
         $this->setDatabaseUrlEnv($databaseUrl);
 
-        $created = $this->ensureParallelDatabaseExists($databaseUrl);
-        if ($created) {
-            $this->runPostInstallCommands();
+        if ($this->databaseExists($databaseUrl)) {
+            return;
         }
+
+        $this->runInstallCommands();
     }
 
     private function loadEnvFileIfNeeded(): void
@@ -159,9 +177,7 @@ class ParallelTestBootstrapper extends TestBootstrapper
 
         $charset = isset($params['charset']) ? (string) $params['charset'] : 'utf8mb4';
 
-        if ($this->databaseExists($parts, $dbName, $charset, $params)) {
-            return false;
-        }
+
 
         $this->createDatabase($parts, $dbName, $charset, $params);
 
@@ -172,8 +188,31 @@ class ParallelTestBootstrapper extends TestBootstrapper
      * @param array<string, string|int> $parts
      * @param array<string, mixed> $params
      */
-    private function databaseExists(array $parts, string $dbName, string $charset, array $params): bool
+    private function databaseExists(string $databaseUrl): bool
     {
+        $parts = parse_url($databaseUrl);
+
+        if ($parts === false) {
+            return false;
+        }
+
+        $dbName = ltrim($parts['path'] ?? '', '/');
+        if ($dbName === '') {
+            return false;
+        }
+
+        $scheme = $parts['scheme'] ?? 'mysql';
+        if (!in_array($scheme, ['mysql', 'mariadb'], true)) {
+            return false;
+        }
+
+        $params = [];
+        if (isset($parts['query'])) {
+            parse_str($parts['query'], $params);
+        }
+
+        $charset = isset($params['charset']) ? (string) $params['charset'] : 'utf8mb4';
+
         $dsn = $this->buildDatabaseDsn($parts, $dbName, $charset, $params);
         if ($dsn === null) {
             return false;
@@ -219,9 +258,9 @@ class ParallelTestBootstrapper extends TestBootstrapper
         $pdo->exec('CREATE DATABASE IF NOT EXISTS `' . $escapedDbName . '`');
     }
 
-    private function runPostInstallCommands(): void
+    private function runInstallCommands(): void
     {
-        $commands = $this->getPostInstallCommands();
+        $commands = $this->getInstallCommands();
         if ($commands === []) {
             return;
         }
@@ -234,10 +273,10 @@ class ParallelTestBootstrapper extends TestBootstrapper
     /**
      * @return list<string>
      */
-    private function getPostInstallCommands(): array
+    private function getInstallCommands(): array
     {
-        $commands = $this->postInstallCommands;
-        $extra = getenv('SW_TEST_POST_INSTALL_COMMANDS');
+        $commands = $this->installCommands;
+        $extra = getenv('SW_TEST_INSTALL_COMMANDS');
 
         if ($extra === false || $extra === '') {
             return $commands;
@@ -385,19 +424,9 @@ class ParallelTestBootstrapper extends TestBootstrapper
             $token = 'worker';
         }
 
-        $parts['path'] = '/' . $databaseName . $this->getTokenPrefix() . $token;
+        $parts['path'] = '/' . $databaseName . '_' . $token;
 
         return $this->buildDatabaseUrl($parts);
-    }
-
-    private function getTokenPrefix(): string
-    {
-        $prefix = getenv('SW_TEST_DB_TOKEN_PREFIX');
-        if ($prefix === false) {
-            return '_';
-        }
-
-        return (string) $prefix;
     }
 
     /**

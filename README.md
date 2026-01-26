@@ -108,17 +108,17 @@ If the database does not exist, it is created and initialized once with:
 - `bin/console dal:refresh:index --only category.indexer --no-interaction`
 
 Custom setup commands can be injected via:
-- `SW_TEST_POST_INSTALL_COMMANDS` (separate commands with newline or `;`)
-- or programmatically: `ParallelTestBootstrapper::setPostInstallCommands()` / `addPostInstallCommand()`
+- `SW_TEST_INSTALL_COMMANDS` (separate commands with newline or `;`)
+- or programmatically: `ParallelTestBootstrapper::setInstallCommands()` / `addInstallCommand()`
 
-Notes:
-- Paratest runs a master process without `TEST_TOKEN`. The bootstrap skips heavy work in that case and only runs
-  per-worker when the token is available.
-- The default DB suffix is `_{token}`. You can override the token prefix via `SW_TEST_DB_TOKEN_PREFIX`
-  (e.g. `_p` to restore `shopware_test_p1`).
-- The per-worker bootstrap is also triggered in `AbstractIntegrationTestCase::setUpBeforeClass()`.
-  If your tests do not extend `AbstractIntegrationTestCase`/`AbstractFunctionalTestCase`, call
-  `ParallelTestBootstrapper::ensureParallelBootstrap()` in your own base class.
+To ensure CLI commands like `bin/console` pick the correct worker DB, set `TEST_TOKEN` in `.env.test`
+and include it in `DATABASE_URL`, for example:
+`DATABASE_URL=mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}_${TEST_TOKEN:-}?serverVersion=8.4`
+Use a default like `TEST_TOKEN=local` to avoid a trailing underscore in non-parallel runs.
+
+Note: The per-worker bootstrap is triggered in `AbstractIntegrationTestCase::setUpBeforeClass()`.
+If your tests do not extend `AbstractIntegrationTestCase`/`AbstractFunctionalTestCase`, call
+`ParallelTestBootstrapper::ensureParallelBootstrap()` in your own base class.
 
 ---
 
