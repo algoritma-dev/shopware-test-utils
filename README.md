@@ -100,6 +100,21 @@ class StorefrontCheckoutTest extends AbstractFunctionalTestCase
 }
 ```
 
+## ⚡ Parallel Tests (Paratest)
+
+When `TEST_TOKEN` is present (Paratest worker), the suite switches to a per-worker database suffix (`_p{token}`).
+If the database does not exist, it is created and initialized once with:
+- `bin/ci system:install --drop-database --basic-setup --force --no-assign-theme`
+- `bin/console dal:refresh:index --only category.indexer --no-interaction`
+
+Custom setup commands can be injected via:
+- `SW_TEST_POST_INSTALL_COMMANDS` (separate commands with newline or `;`)
+- or programmatically: `ParallelTestBootstrapper::setPostInstallCommands()` / `addPostInstallCommand()`
+
+Note: The per-worker bootstrap is triggered in `AbstractIntegrationTestCase::setUpBeforeClass()`.
+If your tests do not extend `AbstractIntegrationTestCase`/`AbstractFunctionalTestCase`, call
+`ParallelTestBootstrapper::ensureParallelBootstrap()` in your own base class.
+
 ---
 
 ## 📚 Available Components

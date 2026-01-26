@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
+use Algoritma\ShopwareTestUtils\Bootstrap\ParallelTestBootstrapper;
 use Algoritma\ShopwareTestUtils\Factory\CartFactory;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
@@ -36,6 +37,13 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use ContextTrait;
 
     private ?FixtureManager $fixtureManager = null;
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        ParallelTestBootstrapper::ensureParallelBootstrap();
+    }
 
     protected function tearDown(): void
     {
