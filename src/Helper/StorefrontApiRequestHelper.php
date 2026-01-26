@@ -58,6 +58,11 @@ class StorefrontApiRequestHelper
         );
     }
 
+    public function getSalesChannelContext(): SalesChannelContext
+    {
+        return $this->salesChannelContext;
+    }
+
     public function getBrowser(): KernelBrowser
     {
         return $this->browser;
