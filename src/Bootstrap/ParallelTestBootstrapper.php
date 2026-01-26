@@ -13,7 +13,6 @@ use function in_array;
 use function ltrim;
 use function parse_str;
 use function parse_url;
-use function preg_replace;
 use function preg_split;
 use function proc_close;
 use function proc_open;
@@ -138,37 +137,6 @@ class ParallelTestBootstrapper extends TestBootstrapper
         $_SERVER['DATABASE_URL'] = $databaseUrl;
         $_ENV['DATABASE_URL'] = $databaseUrl;
         putenv('DATABASE_URL=' . $databaseUrl);
-    }
-
-    private function ensureParallelDatabaseExists(string $databaseUrl): bool
-    {
-        $parts = parse_url($databaseUrl);
-        if ($parts === false) {
-            return false;
-        }
-
-        $dbName = ltrim($parts['path'] ?? '', '/');
-        if ($dbName === '') {
-            return false;
-        }
-
-        $scheme = $parts['scheme'] ?? 'mysql';
-        if (!in_array($scheme, ['mysql', 'mariadb'], true)) {
-            return false;
-        }
-
-        $params = [];
-        if (isset($parts['query'])) {
-            parse_str($parts['query'], $params);
-        }
-
-        $charset = isset($params['charset']) ? (string) $params['charset'] : 'utf8mb4';
-
-
-
-        $this->createDatabase($parts, $dbName, $charset, $params);
-
-        return true;
     }
 
     /**
