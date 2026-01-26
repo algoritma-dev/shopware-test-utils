@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Helper;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
+use Shopware\Core\System\SalesChannel\Context\SalesChannelContextPersister;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
@@ -62,12 +63,20 @@ class StorefrontApiRequestHelper
     private function reloadSalesChannelContext(string $contextToken): void
     {
         $container = $this->browser->getContainer();
+        $contextPersister = $container->get(SalesChannelContextPersister::class);
         $contextFactory = $container->get(SalesChannelContextFactory::class);
         \assert($contextFactory instanceof AbstractSalesChannelContextFactory);
 
+        $contextAsArray = $contextPersister->load($contextToken, $this->salesChannelContext->getSalesChannelId());
+
+        if($contextAsArray === []) {
+            return;
+        }
+
         $this->salesChannelContext = $contextFactory->create(
             $contextToken,
-            $this->salesChannelContext->getSalesChannelId()
+            $this->salesChannelContext->getSalesChannelId(),
+            $contextAsArray
         );
     }
 
