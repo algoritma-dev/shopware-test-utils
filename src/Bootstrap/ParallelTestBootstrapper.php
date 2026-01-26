@@ -7,7 +7,6 @@ use PDOException;
 use Shopware\Core\TestBootstrapper;
 use Symfony\Component\Dotenv\Dotenv;
 use function class_exists;
-use function dump;
 use function fclose;
 use function getenv;
 use function in_array;
@@ -93,18 +92,6 @@ class ParallelTestBootstrapper extends TestBootstrapper
         $this->shouldLoadEnvFile = $loadEnvFile;
 
         return parent::setLoadEnvFile($loadEnvFile);
-    }
-
-    public function getDatabaseUrl(): string
-    {
-        $databaseUrl = parent::getDatabaseUrl();
-        $token = getenv('TEST_TOKEN');
-
-        if ($token === false || $token === '') {
-            return $databaseUrl;
-        }
-
-        return $this->appendTokenToDatabaseName($databaseUrl, $token);
     }
 
     private function prepareParallelDatabase(): void
@@ -399,34 +386,6 @@ class ParallelTestBootstrapper extends TestBootstrapper
         }
 
         return $dsn;
-    }
-
-    private function appendTokenToDatabaseName(string $databaseUrl, string $token): string
-    {
-        $parts = parse_url($databaseUrl);
-        if ($parts === false) {
-            return $databaseUrl;
-        }
-
-        $path = $parts['path'] ?? '';
-        if ($path === '') {
-            return $databaseUrl;
-        }
-
-        $databaseName = ltrim($path, '/');
-        if ($databaseName === '') {
-            return $databaseUrl;
-        }
-
-        $token = preg_replace('/[^A-Za-z0-9_]+/', '_', $token) ?? '';
-        $token = trim($token, '_');
-        if ($token === '') {
-            $token = 'worker';
-        }
-
-        $parts['path'] = '/' . $databaseName . '_' . $token;
-
-        return $this->buildDatabaseUrl($parts);
     }
 
     /**
