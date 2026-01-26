@@ -111,9 +111,14 @@ Custom setup commands can be injected via:
 - `SW_TEST_POST_INSTALL_COMMANDS` (separate commands with newline or `;`)
 - or programmatically: `ParallelTestBootstrapper::setPostInstallCommands()` / `addPostInstallCommand()`
 
-Note: The per-worker bootstrap is triggered in `AbstractIntegrationTestCase::setUpBeforeClass()`.
-If your tests do not extend `AbstractIntegrationTestCase`/`AbstractFunctionalTestCase`, call
-`ParallelTestBootstrapper::ensureParallelBootstrap()` in your own base class.
+Notes:
+- Paratest runs a master process without `TEST_TOKEN`. The bootstrap skips heavy work in that case and only runs
+  per-worker when the token is available.
+- The default DB suffix is `_{token}`. You can override the token prefix via `SW_TEST_DB_TOKEN_PREFIX`
+  (e.g. `_p` to restore `shopware_test_p1`).
+- The per-worker bootstrap is also triggered in `AbstractIntegrationTestCase::setUpBeforeClass()`.
+  If your tests do not extend `AbstractIntegrationTestCase`/`AbstractFunctionalTestCase`, call
+  `ParallelTestBootstrapper::ensureParallelBootstrap()` in your own base class.
 
 ---
 

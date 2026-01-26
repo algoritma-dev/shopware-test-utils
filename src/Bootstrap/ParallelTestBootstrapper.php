@@ -27,6 +27,13 @@ class ParallelTestBootstrapper extends TestBootstrapper
             return $this;
         }
 
+        if ($this->shouldSkipBootstrapForParatestMaster()) {
+            self::$bootstrapped = true;
+            $this->getClassLoader();
+
+            return $this;
+        }
+
         self::$bootstrapped = true;
         $this->prepareParallelDatabase();
 
@@ -247,6 +254,28 @@ class ParallelTestBootstrapper extends TestBootstrapper
         return $commands;
     }
 
+    private function shouldSkipBootstrapForParatestMaster(): bool
+    {
+        $token = getenv('TEST_TOKEN');
+        if ($token !== false && $token !== '') {
+            return false;
+        }
+
+        $paratest = getenv('PARATEST');
+        if ($paratest !== false && $paratest !== '') {
+            return true;
+        }
+
+        $argv = $_SERVER['argv'] ?? [];
+        foreach ($argv as $arg) {
+            if (stripos((string) $arg, 'paratest') !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     private function runCommand(string $command): void
     {
         $descriptorSpec = [
@@ -356,9 +385,19 @@ class ParallelTestBootstrapper extends TestBootstrapper
             $token = 'worker';
         }
 
-        $parts['path'] = '/' . $databaseName . '_p' . $token;
+        $parts['path'] = '/' . $databaseName . $this->getTokenPrefix() . $token;
 
         return $this->buildDatabaseUrl($parts);
+    }
+
+    private function getTokenPrefix(): string
+    {
+        $prefix = getenv('SW_TEST_DB_TOKEN_PREFIX');
+        if ($prefix === false) {
+            return '_';
+        }
+
+        return (string) $prefix;
     }
 
     /**
