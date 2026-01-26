@@ -46,6 +46,19 @@ class StorefrontApiRequestHelper
         $this->reloadSalesChannelContext($contextToken);
     }
 
+    public function logout(): void
+    {
+        $this->browser
+            ->request(
+                'POST',
+                '/store-api/account/logout'
+            );
+
+        $this->browser->setServerParameter('HTTP_SW_CONTEXT_TOKEN', '');
+
+        $this->reloadSalesChannelContext('');
+    }
+
     private function reloadSalesChannelContext(string $contextToken): void
     {
         $container = $this->browser->getContainer();
