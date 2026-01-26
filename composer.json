@@ -18,9 +18,7 @@
         "php": ">=8.2",
         "shopware/core": "^6.7",
         "fakerphp/faker": "^1.24",
-        "symfony/finder": "^7.0",
-        "symfony/panther": "^2.0",
-        "dbrekelmans/bdi": "^1.4"
+        "symfony/finder": "^7.0"
     },
     "license": "MIT",
     "autoload": {
