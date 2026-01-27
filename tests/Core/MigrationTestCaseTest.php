@@ -13,10 +13,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[CoversClass(MigrationTestCase::class)]
 class MigrationTestCaseTest extends MigrationTestCase
 {
-    private MockObject $connection;
+    private Connection&MockObject $connection;
 
-    private static MockObject $container;
+    private static ContainerInterface&MockObject $container;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
     protected function setUp(): void
     {
         // Bypass parent::setUp() to avoid Kernel boot

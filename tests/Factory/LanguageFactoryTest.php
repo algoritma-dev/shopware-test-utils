@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class LanguageFactoryTest extends TestCase
 {
-    private MockObject $container;
+    private ContainerInterface&MockObject $container;
 
     private LanguageFactory $factory;
 

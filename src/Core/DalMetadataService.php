@@ -29,6 +29,16 @@ class DalMetadataService
     /**
      * Gets all metadata of an entity (fields + relations)
      * Automatically includes everything that has been added via Extension.
+     *
+     * @return array{
+     *     entity_name: string,
+     *     entity_class: class-string,
+     *     collection_class: class-string,
+     *     definition_class: class-string,
+     *     properties: array<string, array{name: string, type: string, php_type: string}>,
+     *     relations: array<string, array<string, mixed>>,
+     *     foreign_keys: array<string, array{name: string, storage_name: string, reference_definition: EntityDefinition}>
+     * }|null
      */
     public function getEntityMetadata(string $entityName): ?array
     {
@@ -58,6 +68,8 @@ class DalMetadataService
 
     /**
      * Gets only the relations of an entity.
+     *
+     * @return array<string, array<string, mixed>>
      */
     public function getEntityRelations(string $entityName): array
     {
@@ -68,6 +80,8 @@ class DalMetadataService
 
     /**
      * Gets only the properties (non-relational fields).
+     *
+     * @return array<string, array{name: string, type: string, php_type: string}>
      */
     public function getEntityProperties(string $entityName): array
     {
@@ -78,6 +92,8 @@ class DalMetadataService
 
     /**
      * Generates getter/setter methods for a property.
+     *
+     * @return array<string, string>|null
      */
     public function getPropertyMethods(string $entityName, string $propertyName): ?array
     {
@@ -166,6 +182,8 @@ class DalMetadataService
 
     /**
      * Generates example code to load an entity with its relations.
+     *
+     * @param list<string> $associations
      */
     public function generateLoadExample(string $entityName, array $associations = []): string
     {
@@ -201,6 +219,8 @@ class DalMetadataService
 
     /**
      * Lists all available entities.
+     *
+     * @return list<array{name: string, class: class-string, entity_class: class-string}>
      */
     public function getAllEntities(): array
     {
@@ -218,6 +238,11 @@ class DalMetadataService
         return $entities;
     }
 
+    /**
+     * @param iterable<Field> $fields
+     *
+     * @return array<string, array{name: string, type: string, php_type: string}>
+     */
     private function extractProperties(iterable $fields): array
     {
         $properties = [];
@@ -238,6 +263,11 @@ class DalMetadataService
         return $properties;
     }
 
+    /**
+     * @param iterable<Field> $fields
+     *
+     * @return array<string, array<string, mixed>>
+     */
     private function extractRelations(iterable $fields): array
     {
         $relations = [];
@@ -262,7 +292,7 @@ class DalMetadataService
             $relationData = [
                 'name' => $propertyName,
                 'type' => $relationType,
-                'reference_entity' => $referenceDefinition::ENTITY_NAME,
+                'reference_entity' => $referenceDefinition->getEntityName(),
                 'reference_class' => $referenceDefinition->getEntityClass(),
                 'reference_definition' => $referenceDefinition::class,
                 'getter' => 'get' . ucfirst($propertyName),
@@ -277,7 +307,7 @@ class DalMetadataService
                 $relationData['local_field'] = $field->getLocalField();
             } elseif ($field instanceof ManyToManyAssociationField) {
                 $mappingDef = $field->getMappingDefinition();
-                $relationData['mapping_entity'] = $mappingDef::ENTITY_NAME;
+                $relationData['mapping_entity'] = $mappingDef->getEntityName();
                 $relationData['mapping_definition'] = $mappingDef::class;
                 $relationData['mapping_local_column'] = $field->getMappingLocalColumn();
                 $relationData['mapping_reference_column'] = $field->getMappingReferenceColumn();
@@ -292,6 +322,11 @@ class DalMetadataService
         return $relations;
     }
 
+    /**
+     * @param iterable<Field> $fields
+     *
+     * @return array<string, array{name: string, storage_name: string, reference_definition: EntityDefinition}>
+     */
     private function extractForeignKeys(iterable $fields): array
     {
         $fks = [];

@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Algoritma\ShopwareTestUtils\Helper\CheckoutHelper;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteCollection;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteStates;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemCollection;
@@ -108,10 +109,6 @@ class QuoteToOrderConverter
     {
         $quote = $this->loadQuote($quoteId, $context);
 
-        if (! $quote->getPrice()) {
-            return 0.0;
-        }
-
         return $quote->getPrice()->getTotalPrice();
     }
 
@@ -136,7 +133,7 @@ class QuoteToOrderConverter
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<QuoteEntity> $repository */
+        /** @var EntityRepository<QuoteCollection> $repository */
         $repository = $this->container->get('quote.repository');
 
         $criteria = new Criteria([$quoteId]);
@@ -146,10 +143,9 @@ class QuoteToOrderConverter
         $criteria->addAssociation('customer');
         $criteria->addAssociation('price');
 
-        /** @var QuoteEntity|null $quote */
         $quote = $repository->search($criteria, $context)->first();
 
-        if (! $quote) {
+        if (! $quote instanceof QuoteEntity) {
             throw new \RuntimeException(sprintf('Quote with ID "%s" not found', $quoteId));
         }
 

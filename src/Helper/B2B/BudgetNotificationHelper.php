@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Core\Framework\Context;
@@ -81,7 +82,7 @@ class BudgetNotificationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -101,7 +102,7 @@ class BudgetNotificationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -205,7 +206,7 @@ class BudgetNotificationHelper
 
     private function updateBudgetUsage(string $budgetId, float $usedAmount, Context $context): void
     {
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -221,7 +222,7 @@ class BudgetNotificationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);

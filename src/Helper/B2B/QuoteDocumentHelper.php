@@ -2,8 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteDocument\QuoteDocumentCollection;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteDocument\QuoteDocumentEntity;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
@@ -31,7 +32,7 @@ class QuoteDocumentHelper
     ): string {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteDocumentCollection> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $documentId = Uuid::randomHex();
@@ -51,13 +52,13 @@ class QuoteDocumentHelper
     /**
      * Get all documents for a quote.
      *
-     * @return array<Entity>
+     * @return array<QuoteDocumentEntity>
      */
     public function getDocuments(string $quoteId, ?Context $context = null): array
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteDocumentCollection> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $criteria = new Criteria();
@@ -66,23 +67,28 @@ class QuoteDocumentHelper
 
         $result = $repository->search($criteria, $context);
 
-        return array_values($result->getElements());
+        /** @var array<string, QuoteDocumentEntity> $elements */
+        $elements = $result->getElements();
+
+        return array_values($elements);
     }
 
     /**
      * Get document by ID.
      */
-    public function getDocument(string $documentId, ?Context $context = null): ?Entity
+    public function getDocument(string $documentId, ?Context $context = null): ?QuoteDocumentEntity
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteDocumentCollection> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $criteria = new Criteria([$documentId]);
         $criteria->addAssociation('quote');
 
-        return $repository->search($criteria, $context)->first();
+        $entity = $repository->search($criteria, $context)->first();
+
+        return $entity instanceof QuoteDocumentEntity ? $entity : null;
     }
 
     /**
@@ -92,7 +98,7 @@ class QuoteDocumentHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteDocumentCollection> $repository */
         $repository = $this->container->get('quote_document.repository');
 
         $repository->delete([['id' => $documentId]], $context);
@@ -117,7 +123,7 @@ class QuoteDocumentHelper
     /**
      * Get latest document for a quote.
      */
-    public function getLatestDocument(string $quoteId, ?Context $context = null): ?Entity
+    public function getLatestDocument(string $quoteId, ?Context $context = null): ?QuoteDocumentEntity
     {
         $documents = $this->getDocuments($quoteId, $context);
 
@@ -126,7 +132,7 @@ class QuoteDocumentHelper
         }
 
         // Sort by created date descending
-        usort($documents, fn (Entity $a, Entity $b): int => $b->getCreatedAt() <=> $a->getCreatedAt());
+        usort($documents, fn (QuoteDocumentEntity $a, QuoteDocumentEntity $b): int => $b->getCreatedAt() <=> $a->getCreatedAt());
 
         return $documents[0];
     }

@@ -92,11 +92,12 @@ class ConfigHelperTest extends TestCase
         $matcher = $this->exactly(3);
         $this->configService->expects($matcher)
             ->method('set')
-            ->willReturnCallback(function ($key, $value, $salesChannelId) use ($matcher): void {
+            ->willReturnCallback(function (string $key, string $value, ?string $salesChannelId) use ($matcher): void {
                 match ($matcher->numberOfInvocations()) {
                     1 => $this->assertEquals(['key1', 'value1', null], [$key, $value, $salesChannelId]),
                     2 => $this->assertEquals(['key2', 'value2', null], [$key, $value, $salesChannelId]),
                     3 => $this->assertEquals(['key3', 'value3', null], [$key, $value, $salesChannelId]),
+                    default => $this->fail('Unexpected invocation count'),
                 };
             });
 
@@ -117,10 +118,11 @@ class ConfigHelperTest extends TestCase
         $matcher = $this->exactly(2);
         $this->configService->expects($matcher)
             ->method('set')
-            ->willReturnCallback(function ($key, $value, $salesChannelId) use ($matcher, $tempValue, $originalValue): void {
+            ->willReturnCallback(function (string $key, string $value, ?string $salesChannelId) use ($matcher, $tempValue, $originalValue): void {
                 match ($matcher->numberOfInvocations()) {
                     1 => $this->assertEquals(['test.key', $tempValue, null], [$key, $value, $salesChannelId]),
                     2 => $this->assertEquals(['test.key', $originalValue, null], [$key, $value, $salesChannelId]),
+                    default => $this->fail('Unexpected invocation count'),
                 };
             });
 

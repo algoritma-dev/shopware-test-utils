@@ -11,7 +11,7 @@ trait EventTrait
     use EventDispatcherBehaviour;
 
     /**
-     * @var Event
+     * @var array<string, array<int, Event>>
      */
     private array $caughtEvents = [];
 

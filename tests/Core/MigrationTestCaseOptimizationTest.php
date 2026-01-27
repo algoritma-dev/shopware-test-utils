@@ -11,10 +11,13 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 #[CoversClass(MigrationTestCase::class)]
 class MigrationTestCaseOptimizationTest extends MigrationTestCase
 {
-    private MockObject $connection;
+    private Connection&MockObject $connection;
 
-    private static MockObject $container;
+    private static ContainerInterface&MockObject $container;
 
+    /**
+     * @phpstan-ignore-next-line
+     */
     protected function setUp(): void
     {
         // Do NOT call parent::setUp() to avoid Kernel boot
@@ -55,9 +58,7 @@ class MigrationTestCaseOptimizationTest extends MigrationTestCase
             ->with($this->stringContains('CREATE TABLE'));
 
         // Manually trigger the logic that would be in setUp
-        if ($this->tablesToSnapshot !== []) {
-            $this->snapshotSpecificTables($this->tablesToSnapshot);
-        }
+        $this->snapshotSpecificTables($this->tablesToSnapshot);
     }
 
     public function testTransactionRollbackLogic(): void
@@ -68,17 +69,13 @@ class MigrationTestCaseOptimizationTest extends MigrationTestCase
             ->method('beginTransaction');
 
         // Simulate setUp logic
-        if ($this->useTransactionRollback) {
-            $this->beginTransaction();
-        }
+        $this->beginTransaction();
 
         // Simulate tearDown logic
         $this->connection->expects($this->once())
             ->method('rollBack');
 
-        if ($this->useTransactionRollback) {
-            $this->rollbackTransaction();
-        }
+        $this->rollbackTransaction();
     }
 
     protected static function getContainer(): ContainerInterface

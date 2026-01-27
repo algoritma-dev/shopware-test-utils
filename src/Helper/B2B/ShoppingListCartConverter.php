@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListCollection;
 use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity;
 use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingListLineItem\ShoppingListLineItemCollection;
 use Shopware\Core\Checkout\Cart\Cart;
@@ -102,7 +103,7 @@ class ShoppingListCartConverter
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<ShoppingListCollection> $repository */
         $repository = $this->container->get('shopping_list.repository');
 
         $criteria = new Criteria([$shoppingListId]);
@@ -111,7 +112,7 @@ class ShoppingListCartConverter
 
         $shoppingList = $repository->search($criteria, $context)->first();
 
-        if (! $shoppingList) {
+        if (! $shoppingList instanceof ShoppingListEntity) {
             throw new \RuntimeException(sprintf('ShoppingList with ID "%s" not found', $shoppingListId));
         }
 

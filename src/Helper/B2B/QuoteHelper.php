@@ -3,8 +3,11 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Commercial\B2B\QuoteManagement\Domain\QuoteToCart\QuoteToCartConverter;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteCollection;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteStates;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteComment\QuoteCommentCollection;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteComment\QuoteCommentEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemCollection;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Framework\Context;
@@ -82,28 +85,34 @@ class QuoteHelper
     private function loadQuoteEntity(string $quoteId, ?Context $context): QuoteEntity
     {
         $context ??= Context::createCLIContext();
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<QuoteCollection> $repository */
         $repository = $this->container->get('quote.repository');
         $criteria = new Criteria([$quoteId]);
         $criteria->addAssociation('stateMachineState');
         $criteria->addAssociation('lineItems');
 
         $quote = $repository->search($criteria, $context)->first();
-        if (! $quote) {
+        if (! $quote instanceof QuoteEntity) {
             throw new \RuntimeException(sprintf('Quote with ID "%s" not found', $quoteId));
         }
 
         return $quote;
     }
 
+    /**
+     * @return array<int, QuoteCommentEntity>
+     */
     private function loadQuoteComments(string $quoteId, ?Context $context): array
     {
         $context ??= Context::createCLIContext();
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<QuoteCommentCollection> $repository */
         $repository = $this->container->get('quote_comment.repository');
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('quoteId', $quoteId));
 
-        return array_values($repository->search($criteria, $context)->getElements());
+        /** @var array<string, QuoteCommentEntity> $elements */
+        $elements = $repository->search($criteria, $context)->getElements();
+
+        return array_values($elements);
     }
 }

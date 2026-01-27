@@ -28,6 +28,13 @@ class QuoteFactory extends AbstractFactory
         ];
     }
 
+    public function withCustomer(string $customerId): self
+    {
+        $this->data['customerId'] = $customerId;
+
+        return $this;
+    }
+
     protected function getRepositoryName(): string
     {
         return 'quote.repository';

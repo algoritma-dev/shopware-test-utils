@@ -2,11 +2,13 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteCollection;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteStates;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionEntity;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -120,7 +122,7 @@ class QuoteStateMachineHelper
     /**
      * Get available transitions for a quote.
      *
-     * @return array<int, array<string, mixed>>
+     * @return array<int, StateMachineTransitionEntity>
      */
     public function getAvailableTransitions(string $quoteId, ?Context $context = null): array
     {
@@ -168,17 +170,16 @@ class QuoteStateMachineHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<QuoteEntity> $repository */
+        /** @var EntityRepository<QuoteCollection> $repository */
         $repository = $this->container->get('quote.repository');
 
         $criteria = new Criteria([$quoteId]);
         $criteria->addAssociation('stateMachineState');
         $criteria->addAssociation('lineItems');
 
-        /** @var QuoteEntity|null $quote */
         $quote = $repository->search($criteria, $context)->first();
 
-        if (! $quote) {
+        if (! $quote instanceof QuoteEntity) {
             throw new \RuntimeException(sprintf('Quote with ID "%s" not found', $quoteId));
         }
 

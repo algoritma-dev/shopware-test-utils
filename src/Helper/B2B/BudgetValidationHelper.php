@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Framework\Context;
@@ -95,7 +96,7 @@ class BudgetValidationHelper
         $budget = $this->loadBudget($budgetId, $context);
         $newUsedAmount = $budget->getUsedAmount() + $amount;
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -115,7 +116,7 @@ class BudgetValidationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -137,7 +138,7 @@ class BudgetValidationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria();
@@ -147,7 +148,10 @@ class BudgetValidationHelper
 
         $result = $repository->search($criteria, $context);
 
-        return array_values($result->getElements());
+        /** @var array<string, BudgetEntity> $elements */
+        $elements = $result->getElements();
+
+        return array_values($elements);
     }
 
     /**
@@ -263,7 +267,7 @@ class BudgetValidationHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);

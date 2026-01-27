@@ -20,7 +20,7 @@ class ConfigHelper
     /**
      * Sets a system configuration value.
      */
-    public function set(string $key, $value, ?string $salesChannelId = null): void
+    public function set(string $key, string $value, ?string $salesChannelId = null): void
     {
         $this->configService->set($key, $value, $salesChannelId);
     }
@@ -28,7 +28,7 @@ class ConfigHelper
     /**
      * Gets a system configuration value.
      */
-    public function get(string $key, ?string $salesChannelId = null)
+    public function get(string $key, ?string $salesChannelId = null): mixed
     {
         return $this->configService->get($key, $salesChannelId);
     }
@@ -44,6 +44,9 @@ class ConfigHelper
     /**
      * Sets multiple configuration values at once.
      */
+    /**
+     * @param array<string, string> $configs
+     */
     public function setMultiple(array $configs, ?string $salesChannelId = null): void
     {
         foreach ($configs as $key => $value) {
@@ -54,7 +57,11 @@ class ConfigHelper
     /**
      * Executes a callback with temporary configuration, then restores original values.
      */
-    public function withConfig(array $config, callable $callback, ?string $salesChannelId = null)
+    /**
+     * @param array<string, string> $config
+     * @param callable(): mixed $callback
+     */
+    public function withConfig(array $config, callable $callback, ?string $salesChannelId = null): mixed
     {
         $original = [];
 
@@ -80,10 +87,15 @@ class ConfigHelper
 
     /**
      * Gets all configuration values for a domain.
+     *
+     * @return array<string, mixed>
      */
     public function getDomain(string $domain, ?string $salesChannelId = null): array
     {
-        return $this->configService->getDomain($domain, $salesChannelId, true);
+        /** @var array<string, mixed> $values */
+        $values = $this->configService->getDomain($domain, $salesChannelId, true);
+
+        return $values;
     }
 
     /**
@@ -107,7 +119,10 @@ class ConfigHelper
     /**
      * Executes a callback with a feature flag enabled, then restores.
      */
-    public function withFeatureFlag(string $flag, callable $callback)
+    /**
+     * @param callable(): mixed $callback
+     */
+    public function withFeatureFlag(string $flag, callable $callback): mixed
     {
         $originalServer = $_SERVER[$flag] ?? null;
         $originalEnv = $_ENV[$flag] ?? null;
@@ -145,7 +160,7 @@ class ConfigHelper
     /**
      * Sets a plugin configuration value.
      */
-    public function setPluginConfig(string $pluginName, string $key, $value, ?string $salesChannelId = null): void
+    public function setPluginConfig(string $pluginName, string $key, string $value, ?string $salesChannelId = null): void
     {
         $fullKey = $pluginName . '.config.' . $key;
         $this->set($fullKey, $value, $salesChannelId);
@@ -154,7 +169,7 @@ class ConfigHelper
     /**
      * Gets a plugin configuration value.
      */
-    public function getPluginConfig(string $pluginName, string $key, ?string $salesChannelId = null)
+    public function getPluginConfig(string $pluginName, string $key, ?string $salesChannelId = null): mixed
     {
         $fullKey = $pluginName . '.config.' . $key;
 

@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -30,7 +31,7 @@ class BudgetUsageTracker
 
         $newUsedAmount = $budget->getUsedAmount() + $amount;
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -136,7 +137,7 @@ class BudgetUsageTracker
 
     private function loadBudget(string $budgetId, Context $context): BudgetEntity
     {
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);

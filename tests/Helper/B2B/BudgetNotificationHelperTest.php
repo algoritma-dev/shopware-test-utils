@@ -26,7 +26,7 @@ class BudgetNotificationHelperTest extends TestCase
         $budget = new BudgetEntity();
         $budget->setNotify(true);
         $budget->setSent(false);
-        $budget->setNotificationConfig(['type' => 'percentage', 'value' => 80]);
+        $budget->setNotificationConfig(['type' => 'percentage', 'value' => '80']);
         $budget->setAmount(100.0);
         $budget->setUsedAmount(90.0);
 

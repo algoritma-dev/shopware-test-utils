@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Faker\Factory;
 use Faker\Generator;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeDefinition;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeStatus;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -72,6 +73,9 @@ class EmployeeFactory extends AbstractFactory
         return EmployeeDefinition::ENTITY_NAME;
     }
 
+    /**
+     * @return EntityRepository<EmployeeCollection>
+     */
     protected function getRepository(): EntityRepository
     {
         return $this->container->get($this->getRepositoryName());

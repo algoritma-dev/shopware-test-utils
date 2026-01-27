@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Commercial\B2B\OrderApproval\Domain\State\PendingOrderStates;
+use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderCollection;
 use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderEntity;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
@@ -132,7 +133,7 @@ class PendingOrderFactory
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<PendingOrderEntity> $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         if (! isset($this->data['id'])) {
@@ -180,7 +181,7 @@ class PendingOrderFactory
 
     private function load(string $id, Context $context): PendingOrderEntity
     {
-        /** @var EntityRepository<PendingOrderEntity> $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         $criteria = new Criteria([$id]);

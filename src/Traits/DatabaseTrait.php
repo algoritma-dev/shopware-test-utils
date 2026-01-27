@@ -3,9 +3,13 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 
 trait DatabaseTrait
 {
+    /**
+     * @var array<string, array<int, array{table: string, tempTable: string, columns: array<int, string>}>>
+     */
     private array $databaseSnapshots = [];
 
     /**
@@ -21,6 +25,8 @@ trait DatabaseTrait
 
     /**
      * Seeds a table with data.
+     *
+     * @param array<int, array<string, mixed>> $rows
      */
     protected function seedTable(string $table, array $rows): void
     {
@@ -45,11 +51,11 @@ trait DatabaseTrait
 
         $connection->executeStatement("CREATE TABLE `{$tempTable}` AS SELECT `{$columnList}` FROM `{$table}`");
 
-        $this->databaseSnapshots[$snapshotId] = [
+        $this->databaseSnapshots[$snapshotId] = [[
             'table' => $table,
             'tempTable' => $tempTable,
             'columns' => $columns,
-        ];
+        ]];
 
         return $snapshotId;
     }
@@ -64,7 +70,11 @@ trait DatabaseTrait
         }
 
         $connection = $this->getConnection();
-        $snapshot = $this->databaseSnapshots[$snapshotId];
+        $snapshot = $this->databaseSnapshots[$snapshotId][0] ?? null;
+
+        if (! is_array($snapshot)) {
+            throw new \RuntimeException("Snapshot {$snapshotId} not found");
+        }
 
         $columns = $snapshot['columns'] ?? $this->getInsertableColumns($snapshot['table']);
         $columnList = implode('`, `', $columns);
@@ -88,7 +98,11 @@ trait DatabaseTrait
         }
 
         $connection = $this->getConnection();
-        $snapshot = $this->databaseSnapshots[$snapshotId];
+        $snapshot = $this->databaseSnapshots[$snapshotId][0] ?? null;
+
+        if (! is_array($snapshot)) {
+            return;
+        }
 
         $connection->executeStatement("DROP TABLE IF EXISTS `{$snapshot['tempTable']}`");
         unset($this->databaseSnapshots[$snapshotId]);
@@ -194,6 +208,10 @@ trait DatabaseTrait
 
     /**
      * Executes a raw SQL query.
+     *
+     * @param array<string, mixed> $params
+     *
+     * @return array<int, array<string, mixed>>
      */
     protected function queryRaw(string $sql, array $params = []): array
     {
@@ -314,7 +332,7 @@ trait DatabaseTrait
         $columns = $schemaManager->listTableColumns($table);
         static::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s".', $column, $table));
 
-        $actualType = $columns[$column]->getType()->getName();
+        $actualType = Type::getTypeRegistry()->lookupName($columns[$column]->getType());
         static::assertEquals($expectedType, $actualType, sprintf('Column "%s.%s" has type "%s", expected "%s".', $table, $column, $actualType, $expectedType));
     }
 
@@ -361,6 +379,9 @@ trait DatabaseTrait
 
     /**
      * Gets columns that can be inserted into (excludes generated columns).
+     */
+    /**
+     * @return array<int, string>
      */
     private function getInsertableColumns(string $table): array
     {

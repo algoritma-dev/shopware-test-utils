@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Helper;
 
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
+use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -28,7 +29,7 @@ class CheckoutHelper
 
     private function getOrder(string $orderId, Context $context): OrderEntity
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<OrderCollection> $repository */
         $repository = $this->container->get('order.repository');
 
         $criteria = new Criteria([$orderId]);
@@ -38,7 +39,7 @@ class CheckoutHelper
 
         $order = $repository->search($criteria, $context)->first();
 
-        if (! $order) {
+        if (! $order instanceof OrderEntity) {
             throw new \RuntimeException(sprintf('Order with ID "%s" not found', $orderId));
         }
 

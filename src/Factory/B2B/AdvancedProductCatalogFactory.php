@@ -7,6 +7,13 @@ use Shopware\Commercial\B2B\AdvancedProductCatalogs\Entity\AdvancedProductCatalo
 
 class AdvancedProductCatalogFactory extends AbstractFactory
 {
+    public function withCustomer(string $customerId): self
+    {
+        $this->data['customerId'] = $customerId;
+
+        return $this;
+    }
+
     protected function getRepositoryName(): string
     {
         return 'b2b_advanced_product_catalogs.repository';

@@ -30,7 +30,7 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     {
         $browser = $this->createCustomSalesChannelBrowser($options);
 
-        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)?->create(Uuid::randomHex(), $options['id'], $options);
+        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), $options['id'], $options);
 
         return new StorefrontApiRequestHelper($browser, $salesChannelContext);
     }

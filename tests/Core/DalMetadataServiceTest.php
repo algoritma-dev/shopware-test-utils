@@ -5,8 +5,11 @@ declare(strict_types=1);
 namespace Algoritma\ShopwareTestUtils\Tests\Core;
 
 use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
+use Shopware\Core\Framework\DataAbstractionLayer\Entity;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\IdField;
@@ -18,7 +21,7 @@ class DalMetadataServiceTest extends TestCase
 {
     private DalMetadataService $service;
 
-    private DefinitionInstanceRegistry $registry;
+    private DefinitionInstanceRegistry&MockObject $registry;
 
     protected function setUp(): void
     {
@@ -37,7 +40,10 @@ class DalMetadataServiceTest extends TestCase
 
     public function testGetEntityMetadataReturnsNullForMappingEntity(): void
     {
+        /** @phpstan-ignore-next-line */
         $definition = new class() extends MappingEntityDefinition {
+            public function __construct() {}
+
             public function getEntityName(): string
             {
                 return 'mapping_entity';
@@ -206,10 +212,10 @@ class DalMetadataServiceTest extends TestCase
 
     private function createMockDefinition(): EntityDefinition
     {
+        /** @phpstan-ignore-next-line */
         return new class($this->registry) extends EntityDefinition {
             public function __construct(DefinitionInstanceRegistry $reg)
             {
-                parent::__construct();
                 $this->registry = $reg;
             }
 
@@ -220,12 +226,12 @@ class DalMetadataServiceTest extends TestCase
 
             public function getEntityClass(): string
             {
-                return 'TestEntity';
+                return Entity::class;
             }
 
             public function getCollectionClass(): string
             {
-                return 'TestEntityCollection';
+                return EntityCollection::class;
             }
 
             protected function defineFields(): FieldCollection

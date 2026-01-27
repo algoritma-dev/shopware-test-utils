@@ -16,8 +16,8 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\Country\CountryEntity;
-use Shopware\Core\System\Salutation\SalutationEntity;
+use Shopware\Core\System\Country\CountryCollection;
+use Shopware\Core\System\Salutation\SalutationCollection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class OrderFactory extends AbstractFactory
@@ -213,7 +213,7 @@ class OrderFactory extends AbstractFactory
 
     private function getSalutationId(): string
     {
-        /** @var EntityRepository<SalutationEntity> $repo */
+        /** @var EntityRepository<SalutationCollection> $repo */
         $repo = $this->container->get('salutation.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -221,7 +221,7 @@ class OrderFactory extends AbstractFactory
 
     private function getCountryId(): string
     {
-        /** @var EntityRepository<CountryEntity> $repo */
+        /** @var EntityRepository<CountryCollection> $repo */
         $repo = $this->container->get('country.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();

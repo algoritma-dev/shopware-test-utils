@@ -26,6 +26,13 @@ class OrderReturnFactory extends AbstractFactory
         ];
     }
 
+    public function withOrder(string $orderId): self
+    {
+        $this->data['orderId'] = $orderId;
+
+        return $this;
+    }
+
     protected function getRepositoryName(): string
     {
         return 'order_return.repository';

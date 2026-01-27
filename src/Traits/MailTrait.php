@@ -7,12 +7,16 @@ use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Mailer\Event\MessageEvent;
 use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\RawMessage;
 
 trait MailTrait
 {
     use KernelTestBehaviour;
     use EventDispatcherBehaviour;
 
+    /**
+     * @var array<int, RawMessage>
+     */
     private array $capturedEmails = [];
 
     /**
@@ -148,6 +152,8 @@ trait MailTrait
 
     /**
      * Gets all captured emails.
+     *
+     * @return array<int, RawMessage>
      */
     protected function getCapturedEmails(): array
     {

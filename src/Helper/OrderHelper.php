@@ -7,6 +7,7 @@ use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\Aggregate\OrderDelivery\OrderDeliveryCollection;
 use Shopware\Core\Checkout\Order\Aggregate\OrderLineItem\OrderLineItemCollection;
 use Shopware\Core\Checkout\Order\Aggregate\OrderTransaction\OrderTransactionCollection;
+use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -51,7 +52,7 @@ class OrderHelper
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $orderRepository */
+        /** @var EntityRepository<OrderCollection> $orderRepository */
         $orderRepository = $this->container->get('order.repository');
 
         $criteria = new Criteria([$orderId]);
@@ -60,7 +61,9 @@ class OrderHelper
         $criteria->addAssociation('deliveries');
         $criteria->addAssociation('stateMachineState');
 
-        return $orderRepository->search($criteria, $context)->first();
+        $entity = $orderRepository->search($criteria, $context)->first();
+
+        return $entity instanceof OrderEntity ? $entity : null;
     }
 
     /**

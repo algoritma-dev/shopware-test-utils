@@ -215,6 +215,8 @@ class MigrationDataTester
 
     /**
      * Tests migration performance with progress tracking.
+     *
+     * @return array{duration_seconds: float, memory_used_mb: float, peak_memory_mb: float, throughput_rows_per_second: float, processed_rows: int}
      */
     public function benchmarkMigration(callable $migrationCallback, int $expectedRowCount): array
     {

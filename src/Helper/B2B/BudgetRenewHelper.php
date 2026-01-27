@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -24,7 +25,7 @@ class BudgetRenewHelper
         $context ??= Context::createCLIContext();
         $this->loadBudget($budgetId, $context);
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $repository->update([
@@ -47,14 +48,11 @@ class BudgetRenewHelper
 
         $renewsType = $this->getRenewsTypeValue($budget);
 
-        if ($renewsType === 'none' || $renewsType === null) {
+        if ($renewsType === 'none') {
             return false;
         }
 
         $lastRenews = $budget->getLastRenews();
-        if (! $lastRenews) {
-            return true;
-        }
 
         $now = new \DateTime();
 
@@ -70,22 +68,23 @@ class BudgetRenewHelper
     /**
      * Get next renewal date for budget.
      */
-    public function getNextRenewalDate(string $budgetId, ?Context $context = null): ?\DateTime
+    public function getNextRenewalDate(string $budgetId, ?Context $context = null): ?\DateTimeInterface
     {
         $budget = $this->loadBudget($budgetId, $context);
         $renewsType = $this->getRenewsTypeValue($budget);
 
-        if ($renewsType === 'none' || $renewsType === null) {
+        if ($renewsType === 'none') {
             return null;
         }
 
-        $lastRenews = $budget->getLastRenews() ?? new \DateTime();
+        $lastRenews = $budget->getLastRenews();
+        $baseDate = \DateTimeImmutable::createFromInterface($lastRenews);
 
         return match (strtolower($renewsType)) {
-            'daily' => (clone $lastRenews)->modify('+1 day'),
-            'weekly' => (clone $lastRenews)->modify('+1 week'),
-            'monthly' => (clone $lastRenews)->modify('+1 month'),
-            'yearly' => (clone $lastRenews)->modify('+1 year'),
+            'daily' => $baseDate->modify('+1 day'),
+            'weekly' => $baseDate->modify('+1 week'),
+            'monthly' => $baseDate->modify('+1 month'),
+            'yearly' => $baseDate->modify('+1 year'),
             default => null,
         };
     }
@@ -93,16 +92,17 @@ class BudgetRenewHelper
     /**
      * Simulate time passing and renew if needed.
      */
-    public function simulateTimePassage(string $budgetId, \DateTime $targetDate, ?Context $context = null): BudgetEntity
+    public function simulateTimePassage(string $budgetId, \DateTimeInterface $targetDate, ?Context $context = null): BudgetEntity
     {
         $context ??= Context::createCLIContext();
         $budget = $this->loadBudget($budgetId, $context);
 
-        $lastRenews = $budget->getLastRenews() ?? new \DateTime();
-        $currentDate = clone $lastRenews;
+        $lastRenews = $budget->getLastRenews();
+        $currentDate = \DateTimeImmutable::createFromInterface($lastRenews);
+        $targetDate = \DateTimeImmutable::createFromInterface($targetDate);
         $renewsType = $this->getRenewsTypeValue($budget);
 
-        if ($renewsType === 'none' || $renewsType === null) {
+        if ($renewsType === 'none') {
             return $budget;
         }
 
@@ -142,14 +142,16 @@ class BudgetRenewHelper
         return $results;
     }
 
-    private function calculateNextRenewalFrom(\DateTime $date, string $renewsType): \DateTime
+    private function calculateNextRenewalFrom(\DateTimeInterface $date, string $renewsType): \DateTimeImmutable
     {
+        $baseDate = \DateTimeImmutable::createFromInterface($date);
+
         return match (strtolower($renewsType)) {
-            'daily' => (clone $date)->modify('+1 day'),
-            'weekly' => (clone $date)->modify('+1 week'),
-            'monthly' => (clone $date)->modify('+1 month'),
-            'yearly' => (clone $date)->modify('+1 year'),
-            default => clone $date,
+            'daily' => $baseDate->modify('+1 day'),
+            'weekly' => $baseDate->modify('+1 week'),
+            'monthly' => $baseDate->modify('+1 month'),
+            'yearly' => $baseDate->modify('+1 year'),
+            default => $baseDate,
         };
     }
 
@@ -157,7 +159,7 @@ class BudgetRenewHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<BudgetEntity> $repository */
+        /** @var EntityRepository<BudgetCollection> $repository */
         $repository = $this->container->get('b2b_components_budget.repository');
 
         $criteria = new Criteria([$budgetId]);
@@ -172,7 +174,7 @@ class BudgetRenewHelper
         return $budget;
     }
 
-    private function getRenewsTypeValue(BudgetEntity $budget): ?string
+    private function getRenewsTypeValue(BudgetEntity $budget): string
     {
         $type = $budget->getRenewsType();
 

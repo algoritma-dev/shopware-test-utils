@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Commercial\B2B\OrderApproval\Domain\CartToPendingOrder\PendingOrderRequestedRoute;
+use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderCollection;
 use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderEntity;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\Context;
@@ -77,13 +78,13 @@ class OrderApprovalHelper
     private function loadPendingOrderEntity(string $pendingOrderId, ?Context $context): PendingOrderEntity
     {
         $context ??= Context::createCLIContext();
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
         $criteria = new Criteria([$pendingOrderId]);
         $criteria->addAssociation('stateMachineState');
 
         $pendingOrder = $repository->search($criteria, $context)->first();
-        if (! $pendingOrder) {
+        if (! $pendingOrder instanceof PendingOrderEntity) {
             throw new \RuntimeException(sprintf('PendingOrder with ID "%s" not found', $pendingOrderId));
         }
 
@@ -93,22 +94,30 @@ class OrderApprovalHelper
     private function loadPendingOrderByOrderId(string $orderId, ?Context $context): ?PendingOrderEntity
     {
         $context ??= Context::createCLIContext();
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('orderId', $orderId));
 
-        return $repository->search($criteria, $context)->first();
+        $entity = $repository->search($criteria, $context)->first();
+
+        return $entity instanceof PendingOrderEntity ? $entity : null;
     }
 
+    /**
+     * @return array<int, PendingOrderEntity>
+     */
     private function loadPendingOrdersForEmployee(string $employeeId, ?Context $context): array
     {
         $context ??= Context::createCLIContext();
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('employeeId', $employeeId));
 
-        return array_values($repository->search($criteria, $context)->getElements());
+        /** @var array<string, PendingOrderEntity> $elements */
+        $elements = $repository->search($criteria, $context)->getElements();
+
+        return array_values($elements);
     }
 }

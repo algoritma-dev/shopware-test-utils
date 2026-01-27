@@ -17,6 +17,20 @@ class LanguageFactory extends AbstractFactory
         ];
     }
 
+    public function withName(string $name): self
+    {
+        $this->data['name'] = $name;
+
+        return $this;
+    }
+
+    public function withLocale(string $localeId): self
+    {
+        $this->data['localeId'] = $localeId;
+
+        return $this;
+    }
+
     protected function getRepositoryName(): string
     {
         return 'language.repository';

@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper;
 
+use Shopware\Core\Content\Media\MediaCollection;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -20,6 +21,9 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class MediaHelper
 {
+    /**
+     * @var EntityRepository<MediaCollection>
+     */
     private readonly EntityRepository $mediaRepository;
 
     public function __construct(private readonly ContainerInterface $container)
@@ -76,11 +80,15 @@ class MediaHelper
             $context = Context::createCLIContext();
         }
 
-        return $this->mediaRepository->search(new Criteria([$mediaId]), $context)->first();
+        $entity = $this->mediaRepository->search(new Criteria([$mediaId]), $context)->first();
+
+        return $entity instanceof MediaEntity ? $entity : null;
     }
 
     /**
      * Updates media metadata (alt text, title, etc.).
+     *
+     * @param array<string, mixed> $metadata
      */
     public function updateMetadata(string $mediaId, array $metadata, ?Context $context = null): void
     {
@@ -127,6 +135,8 @@ class MediaHelper
 
     /**
      * Bulk deletes media files.
+     *
+     * @param array<int, string> $mediaIds
      */
     public function bulkDelete(array $mediaIds, ?Context $context = null): void
     {
@@ -134,7 +144,7 @@ class MediaHelper
             $context = Context::createCLIContext();
         }
 
-        $deleteData = array_map(fn ($id): array => ['id' => $id], $mediaIds);
+        $deleteData = array_map(fn (string $id): array => ['id' => $id], $mediaIds);
         $this->mediaRepository->delete($deleteData, $context);
     }
 }

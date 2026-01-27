@@ -18,7 +18,7 @@ class MigrationDataTesterTest extends TestCase
         $connection->method('fetchOne')->willReturn(1);
 
         $tester = new MigrationDataTester($connection);
-        $tester->testDataIntegrity('old_table', 'new_table', fn ($row) => $row);
+        $tester->testDataIntegrity('old_table', 'new_table', fn (array $row): array => $row);
 
         $this->assertTrue(true); // Assertions are inside the method
     }
@@ -29,7 +29,7 @@ class MigrationDataTesterTest extends TestCase
         $tester = new MigrationDataTester($connection);
 
         $processed = 0;
-        $callback = function ($offset, $limit) use (&$processed): void {
+        $callback = function (int $offset, int $limit) use (&$processed): void {
             $processed += $limit;
         };
 
@@ -43,7 +43,7 @@ class MigrationDataTesterTest extends TestCase
         $connection->method('fetchAllAssociative')->willReturn([['id' => 1]]);
 
         $tester = new MigrationDataTester($connection);
-        $tester->verifyDataTransformation('table', fn ($row): true => true);
+        $tester->verifyDataTransformation('table', fn (array $row): bool => true);
 
         $this->assertTrue(true);
     }
@@ -102,7 +102,7 @@ class MigrationDataTesterTest extends TestCase
         $connection = $this->createStub(Connection::class);
         $tester = new MigrationDataTester($connection);
 
-        $result = $tester->benchmarkMigration(fn (): null => null, 100);
+        $result = $tester->benchmarkMigration(static function (): void {}, 100);
 
         $this->assertArrayHasKey('duration_seconds', $result);
         $this->assertEquals(100, $result['processed_rows']);

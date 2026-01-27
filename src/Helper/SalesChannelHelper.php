@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Helper;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\System\SalesChannel\SalesChannelCollection;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SalesChannel\SalesChannelEntity;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -23,13 +24,13 @@ class SalesChannelHelper
      */
     public function assertSalesChannelActive(string $salesChannelId): void
     {
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<SalesChannelCollection> $repository */
         $repository = $this->container->get('sales_channel.repository');
         $context = Context::createCLIContext();
 
-        /** @var SalesChannelEntity|null $salesChannel */
-        $salesChannel = $repository->search(new Criteria([$salesChannelId]), $context)->first();
-        assert($salesChannel !== null, sprintf('Sales channel %s not found', $salesChannelId));
+        $entity = $repository->search(new Criteria([$salesChannelId]), $context)->first();
+        $salesChannel = $entity instanceof SalesChannelEntity ? $entity : null;
+        assert($salesChannel instanceof SalesChannelEntity, sprintf('Sales channel %s not found', $salesChannelId));
         assert($salesChannel->getActive(), sprintf('Sales channel %s is not active', $salesChannelId));
     }
 

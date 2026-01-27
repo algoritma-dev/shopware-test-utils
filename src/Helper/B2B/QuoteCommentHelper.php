@@ -2,8 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteComment\QuoteCommentCollection;
+use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteComment\QuoteCommentEntity;
 use Shopware\Core\Framework\Context;
-use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
@@ -30,7 +31,7 @@ class QuoteCommentHelper
     ): string {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteCommentCollection> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
         $commentId = Uuid::randomHex();
@@ -71,13 +72,13 @@ class QuoteCommentHelper
     /**
      * Get all comments for a quote.
      *
-     * @return array<Entity>
+     * @return array<QuoteCommentEntity>
      */
     public function getComments(string $quoteId, ?Context $context = null): array
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteCommentCollection> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
         $criteria = new Criteria();
@@ -87,7 +88,10 @@ class QuoteCommentHelper
 
         $result = $repository->search($criteria, $context);
 
-        return array_values($result->getElements());
+        /** @var array<string, QuoteCommentEntity> $elements */
+        $elements = $result->getElements();
+
+        return array_values($elements);
     }
 
     /**
@@ -101,7 +105,7 @@ class QuoteCommentHelper
     /**
      * Get last comment for a quote.
      */
-    public function getLastComment(string $quoteId, ?Context $context = null): ?Entity
+    public function getLastComment(string $quoteId, ?Context $context = null): ?QuoteCommentEntity
     {
         $comments = $this->getComments($quoteId, $context);
 
@@ -115,7 +119,7 @@ class QuoteCommentHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteCommentCollection> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
         $repository->delete([['id' => $commentId]], $context);
@@ -134,10 +138,10 @@ class QuoteCommentHelper
 
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<Entity> $repository */
+        /** @var EntityRepository<QuoteCommentCollection> $repository */
         $repository = $this->container->get('quote_comment.repository');
 
-        $ids = array_map(fn (Entity $comment): array => ['id' => $comment->getId()], $comments);
+        $ids = array_map(fn (QuoteCommentEntity $comment): array => ['id' => $comment->getId()], $comments);
         $repository->delete($ids, $context);
     }
 

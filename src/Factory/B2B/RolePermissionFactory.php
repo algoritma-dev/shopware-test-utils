@@ -29,6 +29,13 @@ class RolePermissionFactory extends AbstractFactory
         ];
     }
 
+    public function withName(string $name): self
+    {
+        $this->data['name'] = $name;
+
+        return $this;
+    }
+
     /**
      * Add a single permission by code.
      */
@@ -166,10 +173,14 @@ class RolePermissionFactory extends AbstractFactory
      */
     public static function createAdmin(ContainerInterface $container, ?Context $context = null): RoleEntity
     {
-        return (new self($container))
+        $role = (new self($container))
             ->withName('Admin')
             ->withAdminPermissions()
             ->create($context);
+
+        \assert($role instanceof RoleEntity);
+
+        return $role;
     }
 
     /**
@@ -177,12 +188,16 @@ class RolePermissionFactory extends AbstractFactory
      */
     public static function createManager(ContainerInterface $container, ?Context $context = null): RoleEntity
     {
-        return (new self($container))
+        $role = (new self($container))
             ->withName('Manager')
             ->withQuotePermissions()
             ->withApprovalPermissions()
             ->withBudgetPermissions()
             ->create($context);
+
+        \assert($role instanceof RoleEntity);
+
+        return $role;
     }
 
     /**
@@ -190,7 +205,7 @@ class RolePermissionFactory extends AbstractFactory
      */
     public static function createEmployee(ContainerInterface $container, ?Context $context = null): RoleEntity
     {
-        return (new self($container))
+        $role = (new self($container))
             ->withName('Employee')
             ->withPermissions([
                 'quote.create',
@@ -200,6 +215,10 @@ class RolePermissionFactory extends AbstractFactory
                 'shopping_list.edit',
             ])
             ->create($context);
+
+        \assert($role instanceof RoleEntity);
+
+        return $role;
     }
 
     /**
@@ -207,10 +226,14 @@ class RolePermissionFactory extends AbstractFactory
      */
     public static function createViewer(ContainerInterface $container, ?Context $context = null): RoleEntity
     {
-        return (new self($container))
+        $role = (new self($container))
             ->withName('Viewer')
             ->withReadOnlyPermissions()
             ->create($context);
+
+        \assert($role instanceof RoleEntity);
+
+        return $role;
     }
 
     protected function getRepositoryName(): string

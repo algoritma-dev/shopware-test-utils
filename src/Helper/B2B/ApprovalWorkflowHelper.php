@@ -3,7 +3,9 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Shopware\Commercial\B2B\OrderApproval\Domain\State\PendingOrderStates;
+use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderCollection;
 use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderEntity;
+use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -125,7 +127,7 @@ class ApprovalWorkflowHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<PendingOrderEntity> $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         $criteria = new Criteria();
@@ -136,7 +138,10 @@ class ApprovalWorkflowHelper
 
         $result = $repository->search($criteria, $context);
 
-        return array_values($result->getElements());
+        /** @var array<string, PendingOrderEntity> $elements */
+        $elements = $result->getElements();
+
+        return array_values($elements);
     }
 
     /**
@@ -148,7 +153,7 @@ class ApprovalWorkflowHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository<PendingOrderEntity> $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         $criteria = new Criteria();
@@ -159,7 +164,10 @@ class ApprovalWorkflowHelper
 
         $result = $repository->search($criteria, $context);
 
-        return array_values($result->getElements());
+        /** @var array<string, PendingOrderEntity> $elements */
+        $elements = $result->getElements();
+
+        return array_values($elements);
     }
 
     /**
@@ -185,7 +193,7 @@ class ApprovalWorkflowHelper
 
     private function loadPendingOrder(string $pendingOrderId, Context $context): PendingOrderEntity
     {
-        /** @var EntityRepository<PendingOrderEntity> $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         $criteria = new Criteria([$pendingOrderId]);
@@ -207,7 +215,7 @@ class ApprovalWorkflowHelper
 
     private function updatePendingOrderReason(string $pendingOrderId, string $reason, Context $context): void
     {
-        /** @var EntityRepository<PendingOrderEntity> $repository */
+        /** @var EntityRepository<PendingOrderCollection> $repository */
         $repository = $this->container->get('b2b_components_pending_order.repository');
 
         $repository->update([
@@ -226,7 +234,7 @@ class ApprovalWorkflowHelper
             throw new \RuntimeException('Pending order has not been converted to an order yet');
         }
 
-        /** @var EntityRepository<OrderEntity> $orderRepository */
+        /** @var EntityRepository<OrderCollection> $orderRepository */
         $orderRepository = $this->container->get('order.repository');
 
         $criteria = new Criteria([$pendingOrder->getOrderId()]);

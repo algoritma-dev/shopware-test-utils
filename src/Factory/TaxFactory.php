@@ -25,6 +25,13 @@ class TaxFactory extends AbstractFactory
         ];
     }
 
+    public function withRate(float $rate): self
+    {
+        $this->data['taxRate'] = $rate;
+
+        return $this;
+    }
+
     protected function getRepositoryName(): string
     {
         return 'tax.repository';

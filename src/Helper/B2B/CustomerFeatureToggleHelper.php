@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\QuickOrder\Entity\CustomerSpecificFeaturesCollection;
 use Shopware\Commercial\B2B\QuickOrder\Entity\CustomerSpecificFeaturesEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -88,19 +89,19 @@ class CustomerFeatureToggleHelper
      */
     private function getOrCreateCustomerFeatures(string $customerId, Context $context): array
     {
-        /** @var EntityRepository<CustomerSpecificFeaturesEntity> $repository */
+        /** @var EntityRepository<CustomerSpecificFeaturesCollection> $repository */
         $repository = $this->container->get('b2b_customer_specific_features.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('customerId', $customerId));
 
-        /** @var CustomerSpecificFeaturesEntity|null $existing */
-        $existing = $repository->search($criteria, $context)->first();
+        $entity = $repository->search($criteria, $context)->first();
+        $existing = $entity instanceof CustomerSpecificFeaturesEntity ? $entity : null;
 
-        if ($existing) {
+        if ($existing instanceof CustomerSpecificFeaturesEntity) {
             return [
                 'id' => $existing->getId(),
-                'features' => $existing->getFeatures() ?? [],
+                'features' => $existing->getFeatures(),
             ];
         }
 
@@ -116,7 +117,7 @@ class CustomerFeatureToggleHelper
      */
     private function updateFeatures(string $customerId, array $features, Context $context): void
     {
-        /** @var EntityRepository<CustomerSpecificFeaturesEntity> $repository */
+        /** @var EntityRepository<CustomerSpecificFeaturesCollection> $repository */
         $repository = $this->container->get('b2b_customer_specific_features.repository');
 
         $data = $this->getOrCreateCustomerFeatures($customerId, $context);

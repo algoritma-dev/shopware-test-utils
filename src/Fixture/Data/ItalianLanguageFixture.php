@@ -13,12 +13,12 @@ class ItalianLanguageFixture extends AbstractFixture
     public function load(ReferenceRepository $references): void
     {
         $localeId = $this->container->get('locale.repository')
-            ?->searchIds(
+            ->searchIds(
                 (new Criteria())
                     ->addFilter(
                         new EqualsFilter('code', 'it-IT')
                     ),
-                $this->container->get('context')?->getContext()
+                $this->container->get('context')->getContext()
             )
             ->firstId();
 

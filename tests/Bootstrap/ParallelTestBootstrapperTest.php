@@ -3,10 +3,8 @@
 namespace Algoritma\ShopwareTestUtils\Tests\Bootstrap;
 
 use Algoritma\ShopwareTestUtils\Bootstrap\ParallelTestBootstrapper;
-use Composer\Autoload\ClassLoader;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
-use Shopware\Core\TestBootstrapper;
 
 #[CoversClass(ParallelTestBootstrapper::class)]
 class ParallelTestBootstrapperTest extends TestCase
@@ -18,6 +16,9 @@ class ParallelTestBootstrapperTest extends TestCase
 
     private bool $bootstrappedBackup = false;
 
+    /**
+     * @var array<int, string>|null
+     */
     private ?array $argvBackup = null;
 
     protected function setUp(): void
@@ -301,6 +302,9 @@ class ParallelTestBootstrapperTest extends TestCase
         $this->assertSame('custom_prefix_', getenv('REDIS_PREFIX'));
     }
 
+    /**
+     * @param array<int, mixed> $args
+     */
     private function callPrivateMethod(object $object, string $method, array $args = []): mixed
     {
         $reflection = new \ReflectionClass($object);

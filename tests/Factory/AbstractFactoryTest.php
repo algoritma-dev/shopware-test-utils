@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Algoritma\ShopwareTestUtils\Tests\Factory;
 
-use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Framework\Context;
@@ -108,6 +107,7 @@ class AbstractFactoryTest extends TestCase
         $this->expectException(\BadMethodCallException::class);
         $this->expectExceptionMessage('Method');
 
+        /** @phpstan-ignore-next-line */
         $this->factory->invalidMethod();
     }
 
@@ -129,7 +129,7 @@ class AbstractFactoryTest extends TestCase
 
         $repository->expects($this->once())
             ->method('create')
-            ->with($this->callback(fn ($data): bool => is_array($data) && isset($data[0]['id'])), $this->isInstanceOf(Context::class));
+            ->with($this->callback(fn (array $data): bool => isset($data[0]['id'])), $this->isInstanceOf(Context::class));
 
         $searchResult->method('first')->willReturn($entity);
         $repository->method('search')->willReturn($searchResult);
@@ -185,18 +185,5 @@ class AbstractFactoryTest extends TestCase
 
         $this->assertArrayHasKey('categoryId', $data);
         $this->assertSame($uuid, $data['categoryId']);
-    }
-}
-
-class TestableFactory extends AbstractFactory
-{
-    protected function getRepositoryName(): string
-    {
-        return 'test.repository';
-    }
-
-    protected function getEntityName(): string
-    {
-        return 'test_entity';
     }
 }

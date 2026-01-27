@@ -2,7 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -46,16 +48,15 @@ class EmployeeStorefrontHelper
     public function canPerformAction(string $employeeId, string $permissionCode, ?Context $context = null): bool
     {
         $context ??= Context::createCLIContext();
-        /** @var EntityRepository<EmployeeEntity> $repository */
+        /** @var EntityRepository<EmployeeCollection> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
         $criteria->addAssociation('role.permissions');
 
-        /** @var EmployeeEntity|null $employee */
         $employee = $repository->search($criteria, $context)->first();
 
-        if (! $employee || ! $employee->getRole()) {
+        if (! $employee instanceof EmployeeEntity || ! $employee->getRole() instanceof RoleEntity) {
             return false;
         }
 
@@ -64,12 +65,6 @@ class EmployeeStorefrontHelper
             return false;
         }
 
-        foreach ($permissions as $permission) {
-            if ($permission === $permissionCode) {
-                return true;
-            }
-        }
-
-        return false;
+        return in_array($permissionCode, $permissions, true);
     }
 }

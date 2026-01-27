@@ -4,16 +4,16 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Faker\Factory;
 use Faker\Generator;
-use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
-use Shopware\Core\Checkout\Shipping\ShippingMethodEntity;
-use Shopware\Core\Content\Category\CategoryEntity;
+use Shopware\Core\Checkout\Payment\PaymentMethodCollection;
+use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
+use Shopware\Core\Content\Category\CategoryCollection;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\Country\CountryEntity;
+use Shopware\Core\System\Country\CountryCollection;
 use Shopware\Core\System\SalesChannel\SalesChannelDefinition;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -56,7 +56,7 @@ class SalesChannelFactory extends AbstractFactory
 
     private function getDefaultPaymentMethodId(): string
     {
-        /** @var EntityRepository<PaymentMethodEntity> $repo */
+        /** @var EntityRepository<PaymentMethodCollection> $repo */
         $repo = $this->container->get('payment_method.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -64,7 +64,7 @@ class SalesChannelFactory extends AbstractFactory
 
     private function getDefaultShippingMethodId(): string
     {
-        /** @var EntityRepository<ShippingMethodEntity> $repo */
+        /** @var EntityRepository<ShippingMethodCollection> $repo */
         $repo = $this->container->get('shipping_method.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -72,7 +72,7 @@ class SalesChannelFactory extends AbstractFactory
 
     private function getCountryId(): string
     {
-        /** @var EntityRepository<CountryEntity> $repo */
+        /** @var EntityRepository<CountryCollection> $repo */
         $repo = $this->container->get('country.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -80,7 +80,7 @@ class SalesChannelFactory extends AbstractFactory
 
     private function getRootCategoryId(): string
     {
-        /** @var EntityRepository<CategoryEntity> $repo */
+        /** @var EntityRepository<CategoryCollection> $repo */
         $repo = $this->container->get('category.repository');
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('parentId', null));

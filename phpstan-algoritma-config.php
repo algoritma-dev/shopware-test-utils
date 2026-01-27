@@ -29,7 +29,7 @@ return [
             'no_mixed_property' => true,
             'no_mixed_caller' => true,
             'null_over_false' => true,
-            'narrow_param' => true,
+            'narrow_param' => false,
             'narrow_return' => true,
         ],
         'errorFormat' => 'ticketswap',

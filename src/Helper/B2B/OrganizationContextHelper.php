@@ -3,10 +3,12 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\B2B\B2BContextFactory;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Commercial\B2B\OrganizationUnit\Entity\OrganizationEntity;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
@@ -66,7 +68,7 @@ class OrganizationContextHelper
             throw new \RuntimeException(sprintf('No default organization found for customer "%s"', $customerId));
         }
 
-        return $this->createForOrganization($organization->getId(), null, $salesChannelId);
+        return $this->createForOrganization($organization->id, null, $salesChannelId);
     }
 
     /**
@@ -108,7 +110,7 @@ class OrganizationContextHelper
      */
     public function getCustomerOrganizations(string $customerId): array
     {
-        /** @var EntityRepository<OrganizationEntity> $repository */
+        /** @var EntityRepository<EntityCollection<OrganizationEntity>> $repository */
         $repository = $this->container->get('b2b_components_organization.repository');
 
         $criteria = new Criteria();
@@ -119,7 +121,10 @@ class OrganizationContextHelper
 
         $result = $repository->search($criteria, Context::createCLIContext());
 
-        return array_values($result->getElements());
+        /** @var array<string, OrganizationEntity> $elements */
+        $elements = $result->getElements();
+
+        return array_values($elements);
     }
 
     /**
@@ -127,14 +132,17 @@ class OrganizationContextHelper
      */
     public function employeeBelongsToOrganization(string $employeeId, string $organizationId): bool
     {
-        /** @var EntityRepository<EmployeeEntity> $repository */
+        /** @var EntityRepository<EmployeeCollection> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
-        /** @var EmployeeEntity|null $employee */
         $employee = $repository->search($criteria, Context::createCLIContext())->first();
 
-        if (! $employee) {
+        if (! $employee instanceof EmployeeEntity) {
+            return false;
+        }
+
+        if (! method_exists($employee, 'getOrganizationId')) {
             return false;
         }
 
@@ -143,7 +151,7 @@ class OrganizationContextHelper
 
     private function loadOrganization(string $organizationId): ?OrganizationEntity
     {
-        /** @var EntityRepository<OrganizationEntity> $repository */
+        /** @var EntityRepository<EntityCollection<OrganizationEntity>> $repository */
         $repository = $this->container->get('b2b_components_organization.repository');
 
         $criteria = new Criteria([$organizationId]);
@@ -154,10 +162,9 @@ class OrganizationContextHelper
         $criteria->addAssociation('defaultShippingAddress');
         $criteria->addAssociation('defaultBillingAddress');
 
-        /** @var OrganizationEntity|null $entity */
         $entity = $repository->search($criteria, Context::createCLIContext())->first();
 
-        return $entity;
+        return $entity instanceof OrganizationEntity ? $entity : null;
     }
 
     private function findCustomerDefaultOrganization(string $customerId): ?OrganizationEntity

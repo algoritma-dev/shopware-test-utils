@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -28,16 +29,15 @@ class EmployeeLoginHelper
      */
     public function login(string $email, string $password, ?string $salesChannelId = null): SalesChannelContext
     {
-        /** @var EntityRepository<EmployeeEntity> $repository */
+        /** @var EntityRepository<EmployeeCollection> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('email', $email));
 
-        /** @var EmployeeEntity|null $employee */
         $employee = $repository->search($criteria, Context::createCLIContext())->first();
 
-        if (! $employee) {
+        if (! $employee instanceof EmployeeEntity) {
             throw new \RuntimeException(sprintf('Employee with email "%s" not found', $email));
         }
 

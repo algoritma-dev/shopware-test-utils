@@ -2,6 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
+use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListCollection;
+use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -22,7 +25,7 @@ class SharedListPermissionHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<ShoppingListCollection> $repository */
         $repository = $this->container->get('shopping_list.repository');
 
         $criteria = new Criteria([$shoppingListId]);
@@ -31,7 +34,7 @@ class SharedListPermissionHelper
 
         $shoppingList = $repository->search($criteria, $context)->first();
 
-        if (! $shoppingList) {
+        if (! $shoppingList instanceof ShoppingListEntity) {
             return false;
         }
 
@@ -41,10 +44,14 @@ class SharedListPermissionHelper
         }
 
         // Check if shared with this employee
+        if (! method_exists($shoppingList, 'getSharedWith')) {
+            return false;
+        }
+
         $sharedWith = $shoppingList->getSharedWith();
         if ($sharedWith) {
             foreach ($sharedWith as $shared) {
-                if ($shared->getEmployeeId() === $employeeId) {
+                if (method_exists($shared, 'getEmployeeId') && $shared->getEmployeeId() === $employeeId) {
                     return true;
                 }
             }
@@ -60,7 +67,7 @@ class SharedListPermissionHelper
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<ShoppingListCollection> $repository */
         $repository = $this->container->get('shopping_list.repository');
 
         $repository->update([
@@ -75,12 +82,14 @@ class SharedListPermissionHelper
 
     /**
      * Get all employees who have access to shopping list.
+     *
+     * @return array<int, EmployeeEntity>
      */
     public function getSharedEmployees(string $shoppingListId, ?Context $context = null): array
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<ShoppingListCollection> $repository */
         $repository = $this->container->get('shopping_list.repository');
 
         $criteria = new Criteria([$shoppingListId]);
@@ -88,13 +97,17 @@ class SharedListPermissionHelper
 
         $shoppingList = $repository->search($criteria, $context)->first();
 
-        if (! $shoppingList || ! $shoppingList->getSharedWith()) {
+        if (! $shoppingList instanceof ShoppingListEntity) {
+            return [];
+        }
+
+        if (! method_exists($shoppingList, 'getSharedWith') || ! $shoppingList->getSharedWith()) {
             return [];
         }
 
         $employees = [];
         foreach ($shoppingList->getSharedWith() as $shared) {
-            if ($shared->getEmployee()) {
+            if (method_exists($shared, 'getEmployee') && $shared->getEmployee()) {
                 $employees[] = $shared->getEmployee();
             }
         }
@@ -104,18 +117,21 @@ class SharedListPermissionHelper
 
     /**
      * Get all shopping lists accessible by employee.
+     *
+     * @return array<int, ShoppingListEntity>
      */
     public function getAccessibleLists(string $employeeId, ?Context $context = null): array
     {
         $context ??= Context::createCLIContext();
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<ShoppingListCollection> $repository */
         $repository = $this->container->get('shopping_list.repository');
 
         // Get owned lists
         $ownedCriteria = new Criteria();
         $ownedCriteria->addFilter(new EqualsFilter('employeeId', $employeeId));
 
+        /** @var array<string, ShoppingListEntity> $ownedLists */
         $ownedLists = $repository->search($ownedCriteria, $context)->getElements();
 
         // Get shared lists
@@ -123,6 +139,7 @@ class SharedListPermissionHelper
         $sharedCriteria->addFilter(new EqualsFilter('sharedWith.employeeId', $employeeId));
         $sharedCriteria->addAssociation('employee');
 
+        /** @var array<string, ShoppingListEntity> $sharedLists */
         $sharedLists = $repository->search($sharedCriteria, $context)->getElements();
 
         return array_merge(array_values($ownedLists), array_values($sharedLists));

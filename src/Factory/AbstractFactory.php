@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -30,6 +31,8 @@ abstract class AbstractFactory
      * - withCustomer('uuid') → sets 'customerId' (automatically adds 'Id' suffix when value is UUID)
      * - withProduct('uuid') → sets 'productId'
      * - withSalesChannel('uuid') → sets 'salesChannelId'
+     *
+     * @param array<int, mixed> $arguments
      */
     public function __call(string $method, array $arguments): static
     {
@@ -85,7 +88,7 @@ abstract class AbstractFactory
             $context = Context::createCLIContext();
         }
 
-        /** @var EntityRepository $repository */
+        /** @var EntityRepository<EntityCollection<Entity>> $repository */
         $repository = $this->container->get($this->getRepositoryName());
 
         $repository->create([$this->data], $context);
@@ -102,9 +105,7 @@ abstract class AbstractFactory
     abstract protected function getRepositoryName(): string;
 
     /**
-     * Get the entity class name (e.g., 'Shopware\Core\Content\Product\ProductEntity').
-     *
-     * @return class-string
+     * Get the entity name (e.g., 'product').
      */
     abstract protected function getEntityName(): string;
 

@@ -11,14 +11,11 @@ class TimeHelper
 {
     private static ?\DateTimeImmutable $frozenTime = null;
 
-    private static ?\DateTimeImmutable $originalTime = null;
-
     /**
      * Freezes time at a specific point.
      */
     public function freezeTime(\DateTimeInterface $at): void
     {
-        self::$originalTime = new \DateTimeImmutable();
         self::$frozenTime = \DateTimeImmutable::createFromInterface($at);
     }
 
@@ -56,7 +53,6 @@ class TimeHelper
     public function travelBack(): void
     {
         self::$frozenTime = null;
-        self::$originalTime = null;
     }
 
     /**
@@ -102,7 +98,10 @@ class TimeHelper
     /**
      * Executes a callback with frozen time, then restores.
      */
-    public function withFrozenTime(\DateTimeInterface $at, callable $callback)
+    /**
+     * @param callable(): mixed $callback
+     */
+    public function withFrozenTime(\DateTimeInterface $at, callable $callback): mixed
     {
         $this->freezeTime($at);
 

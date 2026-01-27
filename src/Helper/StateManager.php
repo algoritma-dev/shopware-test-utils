@@ -4,7 +4,12 @@ namespace Algoritma\ShopwareTestUtils\Helper;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\Entity;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachineStateEntity;
+use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionEntity;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -80,6 +85,8 @@ class StateManager
 
     /**
      * Gets all available transitions for an entity in a state machine.
+     *
+     * @return array<int, StateMachineTransitionEntity>
      */
     public function getAvailableTransitions(string $entityId, string $stateMachineName, ?Context $context = null): array
     {
@@ -104,19 +111,24 @@ class StateManager
             $context = Context::createCLIContext();
         }
 
+        /** @var EntityRepository<EntityCollection<Entity>> $repository */
         $repository = $this->container->get($entityName . '.repository');
         $criteria = new Criteria([$entityId]);
         $criteria->addAssociation('stateMachineState');
 
         $entity = $repository->search($criteria, $context)->first();
 
-        if (! $entity) {
+        if (! $entity instanceof Entity) {
             return null;
         }
 
-        $stateMachineState = $entity->getStateMachineState();
+        $stateMachineState = $entity->get('stateMachineState');
 
-        return $stateMachineState ? $stateMachineState->getTechnicalName() : null;
+        if (! $stateMachineState instanceof StateMachineStateEntity) {
+            return null;
+        }
+
+        return $stateMachineState->getTechnicalName();
     }
 
     /**
@@ -163,6 +175,8 @@ class StateManager
 
     /**
      * Transitions order through multiple states sequentially.
+     *
+     * @param array<int, string> $states
      */
     public function transitionOrderThroughStates(string $orderId, array $states, ?Context $context = null): void
     {

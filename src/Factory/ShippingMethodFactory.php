@@ -5,13 +5,13 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Core\Checkout\Shipping\ShippingMethodDefinition;
-use Shopware\Core\Content\Rule\RuleEntity;
+use Shopware\Core\Content\Rule\RuleCollection;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\DeliveryTime\DeliveryTimeEntity;
+use Shopware\Core\System\DeliveryTime\DeliveryTimeCollection;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ShippingMethodFactory extends AbstractFactory
@@ -53,7 +53,7 @@ class ShippingMethodFactory extends AbstractFactory
     private function getAvailabilityRuleId(): string
     {
         // Fetch any rule, or create a simple "always valid" one if none exist (simplified here)
-        /** @var EntityRepository<RuleEntity> $repo */
+        /** @var EntityRepository<RuleCollection> $repo */
         $repo = $this->container->get('rule.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -61,7 +61,7 @@ class ShippingMethodFactory extends AbstractFactory
 
     private function getDeliveryTimeId(): string
     {
-        /** @var EntityRepository<DeliveryTimeEntity> $repo */
+        /** @var EntityRepository<DeliveryTimeCollection> $repo */
         $repo = $this->container->get('delivery_time.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();

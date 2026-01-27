@@ -7,6 +7,13 @@ use Shopware\Commercial\Subscription\Entity\SubscriptionInterval\SubscriptionInt
 
 class SubscriptionIntervalFactory extends AbstractFactory
 {
+    public function withName(string $name): self
+    {
+        $this->data['name'] = $name;
+
+        return $this;
+    }
+
     protected function getRepositoryName(): string
     {
         return 'subscription_interval.repository';

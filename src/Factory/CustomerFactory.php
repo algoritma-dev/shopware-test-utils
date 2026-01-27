@@ -2,18 +2,17 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
-use Doctrine\DBAL\Connection;
 use Faker\Factory;
 use Faker\Generator;
 use Shopware\Core\Checkout\Customer\CustomerDefinition;
-use Shopware\Core\Checkout\Payment\PaymentMethodEntity;
+use Shopware\Core\Checkout\Payment\PaymentMethodCollection;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Shopware\Core\System\Country\CountryEntity;
-use Shopware\Core\System\Salutation\SalutationEntity;
+use Shopware\Core\System\Country\CountryCollection;
+use Shopware\Core\System\Salutation\SalutationCollection;
 use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -70,7 +69,7 @@ class CustomerFactory extends AbstractFactory
 
     private function getSalutationId(): string
     {
-        /** @var EntityRepository<SalutationEntity> $repo */
+        /** @var EntityRepository<SalutationCollection> $repo */
         $repo = $this->container->get('salutation.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -78,7 +77,7 @@ class CustomerFactory extends AbstractFactory
 
     private function getCountryId(): string
     {
-        /** @var EntityRepository<CountryEntity> $repo */
+        /** @var EntityRepository<CountryCollection> $repo */
         $repo = $this->container->get('country.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
@@ -86,17 +85,9 @@ class CustomerFactory extends AbstractFactory
 
     private function getDefaultPaymentMethodId(): string
     {
-        /** @var EntityRepository<PaymentMethodEntity> $repo */
+        /** @var EntityRepository<PaymentMethodCollection> $repo */
         $repo = $this->container->get('payment_method.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
-    }
-
-    private function getSalesChannelId(): string
-    {
-        $connection = $this->container->get(Connection::class);
-        $id = $connection->fetchOne('SELECT LOWER(HEX(id)) FROM sales_channel LIMIT 1');
-
-        return $id ?: Uuid::randomHex();
     }
 }

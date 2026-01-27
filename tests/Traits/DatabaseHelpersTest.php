@@ -11,7 +11,7 @@ class DatabaseHelpersTest extends TestCase
 {
     use DatabaseTrait;
 
-    private MockObject $connection;
+    private Connection&MockObject $connection;
 
     protected function setUp(): void
     {

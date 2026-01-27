@@ -13,14 +13,13 @@ class FactoryStubGeneratorTest extends TestCase
 {
     private string $tempDir;
 
-    private MockObject $metadataService;
+    private DalMetadataService&MockObject $metadataService;
 
     protected function setUp(): void
     {
         $this->tempDir = sys_get_temp_dir() . '/factory-stub-test-' . uniqid('', true);
         mkdir($this->tempDir, 0o777, true);
-        mkdir($this->tempDir . '/tests', 0o777, true);
-        // Do not create .phpstorm.meta.php as a directory
+        mkdir($this->tempDir . '/var/cache', 0o777, true);
 
         $this->metadataService = $this->createMock(DalMetadataService::class);
         $this->metadataService->method('getEntityProperties')
@@ -86,8 +85,8 @@ class FactoryStubGeneratorTest extends TestCase
 
         $result = $generator->generate();
 
-        $expectedStubPath = $this->tempDir . '/tests/factory-stubs.php';
-        $expectedMetaPath = $this->tempDir . '/tests/.phpstorm.meta.php';
+        $expectedStubPath = $this->tempDir . '/var/cache/factory-stubs.php';
+        $expectedMetaPath = $this->tempDir . '/var/cache/.phpstorm.meta.php';
 
         $this->assertSame($expectedStubPath, $result['stub']);
         $this->assertSame($expectedMetaPath, $result['meta']);
@@ -108,8 +107,8 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateOverwritesExistingFiles(): void
     {
-        $stubPath = $this->tempDir . '/tests/factory-stubs.php';
-        $metaPath = $this->tempDir . '/tests/.phpstorm.meta.php';
+        $stubPath = $this->tempDir . '/var/cache/factory-stubs.php';
+        $metaPath = $this->tempDir . '/var/cache/.phpstorm.meta.php';
 
         file_put_contents($stubPath, 'old content');
         file_put_contents($metaPath, 'old content');

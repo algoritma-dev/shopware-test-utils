@@ -6,7 +6,7 @@ use Faker\Factory;
 use Faker\Generator;
 use Shopware\Core\Checkout\Payment\Cart\PaymentHandler\DefaultPayment;
 use Shopware\Core\Checkout\Payment\PaymentMethodDefinition;
-use Shopware\Core\Content\Rule\RuleEntity;
+use Shopware\Core\Content\Rule\RuleCollection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -43,7 +43,7 @@ class PaymentMethodFactory extends AbstractFactory
 
     private function getAvailabilityRuleId(): string
     {
-        /** @var EntityRepository<RuleEntity> $repo */
+        /** @var EntityRepository<RuleCollection> $repo */
         $repo = $this->container->get('rule.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();

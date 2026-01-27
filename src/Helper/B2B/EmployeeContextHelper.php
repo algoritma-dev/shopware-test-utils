@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\B2B\B2BContextFactory;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Core\Framework\Context;
@@ -124,7 +125,7 @@ class EmployeeContextHelper
 
     private function loadEmployee(string $employeeId): ?EmployeeEntity
     {
-        /** @var EntityRepository<EmployeeEntity> $repository */
+        /** @var EntityRepository<EmployeeCollection> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria([$employeeId]);
@@ -132,15 +133,14 @@ class EmployeeContextHelper
         $criteria->addAssociation('role');
         $criteria->addAssociation('organization');
 
-        /** @var EmployeeEntity|null $entity */
         $entity = $repository->search($criteria, Context::createCLIContext())->first();
 
-        return $entity;
+        return $entity instanceof EmployeeEntity ? $entity : null;
     }
 
     private function loadEmployeeByEmail(string $email): ?EmployeeEntity
     {
-        /** @var EntityRepository<EmployeeEntity> $repository */
+        /** @var EntityRepository<EmployeeCollection> $repository */
         $repository = $this->container->get('b2b_employee.repository');
 
         $criteria = new Criteria();
@@ -149,23 +149,22 @@ class EmployeeContextHelper
         $criteria->addAssociation('role');
         $criteria->addAssociation('organization');
 
-        /** @var EmployeeEntity|null $entity */
         $entity = $repository->search($criteria, Context::createCLIContext())->first();
 
-        return $entity;
+        return $entity instanceof EmployeeEntity ? $entity : null;
     }
 
     private function loadEmployeeWithAssociations(string $employeeId, ?Context $context): EmployeeEntity
     {
         $context ??= Context::createCLIContext();
-        /** @var EntityRepository<EmployeeEntity> $repository */
+        /** @var EntityRepository<EmployeeCollection> $repository */
         $repository = $this->container->get('b2b_employee.repository');
         $criteria = new Criteria([$employeeId]);
         $criteria->addAssociation('role');
         $criteria->addAssociation('role.permissions');
 
         $employee = $repository->search($criteria, $context)->first();
-        if (! $employee) {
+        if (! $employee instanceof EmployeeEntity) {
             throw new \RuntimeException(sprintf('Employee with ID "%s" not found', $employeeId));
         }
 
