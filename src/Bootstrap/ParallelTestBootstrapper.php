@@ -28,7 +28,7 @@ class ParallelTestBootstrapper extends TestBootstrapper
             self::$bootstrapped = true;
             $this->getClassLoader();
 
-            return $this;
+            return parent::bootstrap();
         }
 
         self::$bootstrapped = true;
