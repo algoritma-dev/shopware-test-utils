@@ -8,12 +8,6 @@
             "email": "info@algoritma.it"
         }
     ],
-    "repositories": {
-        "shopware-packages": {
-            "type": "composer",
-            "url": "https://packages.shopware.com"
-        }
-    },
     "require": {
         "php": ">=8.2",
         "shopware/core": "^6.7",
