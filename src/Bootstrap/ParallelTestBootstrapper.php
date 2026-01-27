@@ -173,8 +173,8 @@ class ParallelTestBootstrapper extends TestBootstrapper
             return false;
         }
 
-        $user = isset($parts['user']) ? (string) $parts['user'] : '';
-        $pass = isset($parts['pass']) ? (string) $parts['pass'] : '';
+        $user = $parts['user'] ?? '';
+        $pass = $parts['pass'] ?? '';
 
         try {
             new PDO($dsn, $user, $pass, [
@@ -189,28 +189,6 @@ class ParallelTestBootstrapper extends TestBootstrapper
 
             throw $exception;
         }
-    }
-
-    /**
-     * @param array<string, string|int> $parts
-     * @param array<string, mixed> $params
-     */
-    private function createDatabase(array $parts, string $dbName, string $charset, array $params): void
-    {
-        $dsn = $this->buildServerDsn($parts, $charset, $params);
-        if ($dsn === null) {
-            return;
-        }
-
-        $user = isset($parts['user']) ? (string) $parts['user'] : '';
-        $pass = isset($parts['pass']) ? (string) $parts['pass'] : '';
-
-        $pdo = new PDO($dsn, $user, $pass, [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        ]);
-
-        $escapedDbName = str_replace('`', '``', $dbName);
-        $pdo->exec('CREATE DATABASE IF NOT EXISTS `' . $escapedDbName . '`');
     }
 
     private function runInstallCommands(): void
@@ -299,33 +277,6 @@ class ParallelTestBootstrapper extends TestBootstrapper
                 $stderr ? "STDERR:\n" . $stderr : ''
             ));
         }
-    }
-
-    /**
-     * @param array<string, string|int> $parts
-     * @param array<string, mixed> $params
-     */
-    private function buildServerDsn(array $parts, string $charset, array $params): ?string
-    {
-        if (isset($params['unix_socket'])) {
-            return 'mysql:unix_socket=' . $params['unix_socket'] . ';charset=' . $charset;
-        }
-
-        $host = $parts['host'] ?? 'localhost';
-        $port = isset($parts['port']) ? (string) $parts['port'] : '';
-        if ($host === '') {
-            return null;
-        }
-
-        $dsn = 'mysql:host=' . $host;
-        if ($port !== '') {
-            $dsn .= ';port=' . $port;
-        }
-        if ($charset !== '') {
-            $dsn .= ';charset=' . $charset;
-        }
-
-        return $dsn;
     }
 
     /**
