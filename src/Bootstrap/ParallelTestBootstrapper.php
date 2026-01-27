@@ -2,26 +2,8 @@
 
 namespace Algoritma\ShopwareTestUtils\Bootstrap;
 
-use PDO;
-use PDOException;
 use Shopware\Core\TestBootstrapper;
 use Symfony\Component\Dotenv\Dotenv;
-use function class_exists;
-use function fclose;
-use function getenv;
-use function in_array;
-use function ltrim;
-use function parse_str;
-use function parse_url;
-use function preg_split;
-use function proc_close;
-use function proc_open;
-use function putenv;
-use function sprintf;
-use function str_replace;
-use function stream_get_contents;
-use function stripos;
-use function trim;
 
 class ParallelTestBootstrapper extends TestBootstrapper
 {
@@ -61,7 +43,7 @@ class ParallelTestBootstrapper extends TestBootstrapper
             return;
         }
 
-        $token = getenv('TEST_TOKEN');
+        $token = \getenv('TEST_TOKEN');
         if ($token === false || $token === '') {
             return;
         }
@@ -95,7 +77,7 @@ class ParallelTestBootstrapper extends TestBootstrapper
 
     private function prepareParallelDatabase(): void
     {
-        $token = getenv('TEST_TOKEN');
+        $token = \getenv('TEST_TOKEN');
         if ($token === false || $token === '') {
             return;
         }
@@ -114,15 +96,15 @@ class ParallelTestBootstrapper extends TestBootstrapper
 
     private function loadEnvFileIfNeeded(): void
     {
-        if (!$this->shouldLoadEnvFile) {
+        if (! $this->shouldLoadEnvFile) {
             return;
         }
 
-        if (!empty($_SERVER['DATABASE_URL']) || !empty($_ENV['DATABASE_URL'])) {
+        if (! empty($_SERVER['DATABASE_URL']) || ! empty($_ENV['DATABASE_URL'])) {
             return;
         }
 
-        if (!class_exists(Dotenv::class)) {
+        if (! \class_exists(Dotenv::class)) {
             return;
         }
 
@@ -136,34 +118,30 @@ class ParallelTestBootstrapper extends TestBootstrapper
     {
         $_SERVER['DATABASE_URL'] = $databaseUrl;
         $_ENV['DATABASE_URL'] = $databaseUrl;
-        putenv('DATABASE_URL=' . $databaseUrl);
+        \putenv('DATABASE_URL=' . $databaseUrl);
     }
 
-    /**
-     * @param array<string, string|int> $parts
-     * @param array<string, mixed> $params
-     */
     private function databaseExists(string $databaseUrl): bool
     {
-        $parts = parse_url($databaseUrl);
+        $parts = \parse_url($databaseUrl);
 
         if ($parts === false) {
             return false;
         }
 
-        $dbName = ltrim($parts['path'] ?? '', '/');
+        $dbName = \ltrim($parts['path'] ?? '', '/');
         if ($dbName === '') {
             return false;
         }
 
         $scheme = $parts['scheme'] ?? 'mysql';
-        if (!in_array($scheme, ['mysql', 'mariadb'], true)) {
+        if (! \in_array($scheme, ['mysql', 'mariadb'], true)) {
             return false;
         }
 
         $params = [];
         if (isset($parts['query'])) {
-            parse_str($parts['query'], $params);
+            \parse_str($parts['query'], $params);
         }
 
         $charset = isset($params['charset']) ? (string) $params['charset'] : 'utf8mb4';
@@ -177,12 +155,12 @@ class ParallelTestBootstrapper extends TestBootstrapper
         $pass = $parts['pass'] ?? '';
 
         try {
-            new PDO($dsn, $user, $pass, [
-                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            new \PDO($dsn, $user, $pass, [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
             ]);
 
             return true;
-        } catch (PDOException $exception) {
+        } catch (\PDOException $exception) {
             if (isset($exception->errorInfo[1]) && (int) $exception->errorInfo[1] === 1049) {
                 return false;
             }
@@ -209,15 +187,15 @@ class ParallelTestBootstrapper extends TestBootstrapper
     private function getInstallCommands(): array
     {
         $commands = $this->installCommands;
-        $extra = getenv('SW_TEST_INSTALL_COMMANDS');
+        $extra = \getenv('SW_TEST_INSTALL_COMMANDS');
 
         if ($extra === false || $extra === '') {
             return $commands;
         }
 
-        $extraCommands = preg_split('/\R|;/', $extra) ?: [];
+        $extraCommands = \preg_split('/\R|;/', $extra) ?: [];
         foreach ($extraCommands as $command) {
-            $command = trim($command);
+            $command = \trim($command);
             if ($command !== '') {
                 $commands[] = $command;
             }
@@ -228,19 +206,19 @@ class ParallelTestBootstrapper extends TestBootstrapper
 
     private function shouldSkipBootstrapForParatestMaster(): bool
     {
-        $token = getenv('TEST_TOKEN');
+        $token = \getenv('TEST_TOKEN');
         if ($token !== false && $token !== '') {
             return false;
         }
 
-        $paratest = getenv('PARATEST');
+        $paratest = \getenv('PARATEST');
         if ($paratest !== false && $paratest !== '') {
             return true;
         }
 
         $argv = $_SERVER['argv'] ?? [];
         foreach ($argv as $arg) {
-            if (stripos((string) $arg, 'paratest') !== false) {
+            if (\stripos((string) $arg, 'paratest') !== false) {
                 return true;
             }
         }
@@ -256,26 +234,20 @@ class ParallelTestBootstrapper extends TestBootstrapper
             2 => ['pipe', 'w'],
         ];
 
-        $process = proc_open($command, $descriptorSpec, $pipes, $this->getProjectDir());
-        if (!\is_resource($process)) {
+        $process = \proc_open($command, $descriptorSpec, $pipes, $this->getProjectDir());
+        if (! \is_resource($process)) {
             throw new \RuntimeException('Failed to start command: ' . $command);
         }
 
-        $stdout = stream_get_contents($pipes[1]);
-        $stderr = stream_get_contents($pipes[2]);
+        $stdout = \stream_get_contents($pipes[1]);
+        $stderr = \stream_get_contents($pipes[2]);
 
-        fclose($pipes[1]);
-        fclose($pipes[2]);
+        \fclose($pipes[1]);
+        \fclose($pipes[2]);
 
-        $exitCode = proc_close($process);
+        $exitCode = \proc_close($process);
         if ($exitCode !== 0) {
-            throw new \RuntimeException(sprintf(
-                "Command failed with exit code %d: %s\n%s%s",
-                $exitCode,
-                $command,
-                $stdout ? "STDOUT:\n" . $stdout . "\n" : '',
-                $stderr ? "STDERR:\n" . $stderr : ''
-            ));
+            throw new \RuntimeException(\sprintf("Command failed with exit code %d: %s\n%s%s", $exitCode, $command, $stdout ? "STDOUT:\n" . $stdout . "\n" : '', $stderr ? "STDERR:\n" . $stderr : ''));
         }
     }
 

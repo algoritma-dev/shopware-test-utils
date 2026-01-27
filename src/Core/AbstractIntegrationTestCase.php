@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
-use Algoritma\ShopwareTestUtils\Bootstrap\ParallelTestBootstrapper;
 use Algoritma\ShopwareTestUtils\Factory\CartFactory;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;

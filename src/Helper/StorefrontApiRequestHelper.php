@@ -60,6 +60,16 @@ class StorefrontApiRequestHelper
         $this->reloadSalesChannelContext('');
     }
 
+    public function getSalesChannelContext(): SalesChannelContext
+    {
+        return $this->salesChannelContext;
+    }
+
+    public function getBrowser(): KernelBrowser
+    {
+        return $this->browser;
+    }
+
     private function reloadSalesChannelContext(string $contextToken): void
     {
         $container = $this->browser->getContainer();
@@ -69,7 +79,7 @@ class StorefrontApiRequestHelper
 
         $contextAsArray = $contextPersister->load($contextToken, $this->salesChannelContext->getSalesChannelId());
 
-        if($contextAsArray === []) {
+        if ($contextAsArray === []) {
             return;
         }
 
@@ -78,15 +88,5 @@ class StorefrontApiRequestHelper
             $this->salesChannelContext->getSalesChannelId(),
             $contextAsArray
         );
-    }
-
-    public function getSalesChannelContext(): SalesChannelContext
-    {
-        return $this->salesChannelContext;
-    }
-
-    public function getBrowser(): KernelBrowser
-    {
-        return $this->browser;
     }
 }
