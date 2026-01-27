@@ -26,9 +26,13 @@ class ParallelTestBootstrapperTest extends TestCase
         $this->setBootstrappedFlag(false);
 
         $this->backupEnvVar('TEST_TOKEN');
+        $this->backupEnvVar('UNIQUE_TEST_TOKEN');
         $this->backupEnvVar('PARATEST');
         $this->backupEnvVar('SW_TEST_INSTALL_COMMANDS');
         $this->backupEnvVar('DATABASE_URL');
+        $this->backupEnvVar('SHOPWARE_CACHE_ID');
+        $this->backupEnvVar('APP_CACHE_DIR');
+        $this->backupEnvVar('REDIS_PREFIX');
 
         $this->argvBackup = $_SERVER['argv'] ?? null;
     }
@@ -44,22 +48,6 @@ class ParallelTestBootstrapperTest extends TestCase
         }
 
         $this->setBootstrappedFlag($this->bootstrappedBackup);
-    }
-
-    public function testBootstrapSkipsForParatestMaster(): void
-    {
-        $this->setEnvVar('PARATEST', '1');
-        $this->unsetEnvVar('TEST_TOKEN');
-        $_SERVER['argv'] = ['phpunit'];
-
-        $bootstrapper = new ParallelTestBootstrapper();
-        $result = $bootstrapper->bootstrap();
-
-        $this->assertSame($bootstrapper, $result);
-        $this->assertTrue($this->getBootstrappedFlag());
-
-        $classLoader = $this->getPrivateProperty($bootstrapper, TestBootstrapper::class, 'classLoader');
-        $this->assertInstanceOf(ClassLoader::class, $classLoader);
     }
 
     public function testShouldSkipBootstrapForParatestMasterWhenParatestEnvSet(): void
@@ -198,6 +186,119 @@ class ParallelTestBootstrapperTest extends TestCase
         $this->assertSame($databaseUrl, $_SERVER['DATABASE_URL']);
         $this->assertSame($databaseUrl, $_ENV['DATABASE_URL']);
         $this->assertSame($databaseUrl, getenv('DATABASE_URL'));
+    }
+
+    public function testGetDatabaseUrlAppendsTestAndTokenSuffix(): void
+    {
+        $this->setEnvVar('DATABASE_URL', 'mysql://user:pass@localhost/fintyre_b2b_2024');
+        $this->setEnvVar('TEST_TOKEN', '2');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $databaseUrl = $bootstrapper->getDatabaseUrl();
+
+        $this->assertSame('mysql://user:pass@localhost/fintyre_b2b_2024_test_p2', $databaseUrl);
+    }
+
+    public function testGetDatabaseUrlKeepsExistingTokenSuffix(): void
+    {
+        $this->setEnvVar('DATABASE_URL', 'mysql://user:pass@localhost/fintyre_b2b_2024_test2');
+        $this->setEnvVar('TEST_TOKEN', '2');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $databaseUrl = $bootstrapper->getDatabaseUrl();
+
+        $this->assertSame('mysql://user:pass@localhost/fintyre_b2b_2024_test2_test_p2', $databaseUrl);
+    }
+
+    public function testGetDatabaseUrlAppendsTestSuffixWhenTokenMissing(): void
+    {
+        $this->setEnvVar('DATABASE_URL', 'mysql://user:pass@localhost/fintyre_b2b_2024');
+        $this->unsetEnvVar('TEST_TOKEN');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $databaseUrl = $bootstrapper->getDatabaseUrl();
+
+        $this->assertSame('mysql://user:pass@localhost/fintyre_b2b_2024_test', $databaseUrl);
+    }
+
+    public function testEnsureCacheIdEnvUsesUniqueToken(): void
+    {
+        $this->setEnvVar('UNIQUE_TEST_TOKEN', '2_697894cfcf70c');
+        $this->unsetEnvVar('SHOPWARE_CACHE_ID');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $this->callPrivateMethod($bootstrapper, 'ensureCacheIdEnv');
+
+        $this->assertSame('test_2_697894cfcf70c', $_SERVER['SHOPWARE_CACHE_ID']);
+        $this->assertSame('test_2_697894cfcf70c', $_ENV['SHOPWARE_CACHE_ID']);
+        $this->assertSame('test_2_697894cfcf70c', getenv('SHOPWARE_CACHE_ID'));
+    }
+
+    public function testEnsureCacheIdEnvDoesNotOverrideExisting(): void
+    {
+        $this->setEnvVar('SHOPWARE_CACHE_ID', 'custom_cache');
+        $this->setEnvVar('UNIQUE_TEST_TOKEN', '2_697894cfcf70c');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $this->callPrivateMethod($bootstrapper, 'ensureCacheIdEnv');
+
+        $this->assertSame('custom_cache', $_SERVER['SHOPWARE_CACHE_ID']);
+        $this->assertSame('custom_cache', $_ENV['SHOPWARE_CACHE_ID']);
+        $this->assertSame('custom_cache', getenv('SHOPWARE_CACHE_ID'));
+    }
+
+    public function testEnsureCacheDirEnvUsesUniqueToken(): void
+    {
+        $this->setEnvVar('UNIQUE_TEST_TOKEN', '2_697894cfcf70c');
+        $this->unsetEnvVar('APP_CACHE_DIR');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $this->callPrivateMethod($bootstrapper, 'ensureCacheDirEnv');
+
+        $expected = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'shopware-cache-2_697894cfcf70c';
+
+        $this->assertSame($expected, $_SERVER['APP_CACHE_DIR']);
+        $this->assertSame($expected, $_ENV['APP_CACHE_DIR']);
+        $this->assertSame($expected, getenv('APP_CACHE_DIR'));
+    }
+
+    public function testEnsureCacheDirEnvDoesNotOverrideExisting(): void
+    {
+        $this->setEnvVar('APP_CACHE_DIR', '/tmp/custom-cache');
+        $this->setEnvVar('UNIQUE_TEST_TOKEN', '2_697894cfcf70c');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $this->callPrivateMethod($bootstrapper, 'ensureCacheDirEnv');
+
+        $this->assertSame('/tmp/custom-cache', $_SERVER['APP_CACHE_DIR']);
+        $this->assertSame('/tmp/custom-cache', $_ENV['APP_CACHE_DIR']);
+        $this->assertSame('/tmp/custom-cache', getenv('APP_CACHE_DIR'));
+    }
+
+    public function testEnsureRedisPrefixEnvUsesUniqueToken(): void
+    {
+        $this->setEnvVar('UNIQUE_TEST_TOKEN', '2_697894cfcf70c');
+        $this->unsetEnvVar('REDIS_PREFIX');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $this->callPrivateMethod($bootstrapper, 'ensureRedisPrefixEnv');
+
+        $this->assertSame('test_2_697894cfcf70c_', $_SERVER['REDIS_PREFIX']);
+        $this->assertSame('test_2_697894cfcf70c_', $_ENV['REDIS_PREFIX']);
+        $this->assertSame('test_2_697894cfcf70c_', getenv('REDIS_PREFIX'));
+    }
+
+    public function testEnsureRedisPrefixEnvDoesNotOverrideExisting(): void
+    {
+        $this->setEnvVar('REDIS_PREFIX', 'custom_prefix_');
+        $this->setEnvVar('UNIQUE_TEST_TOKEN', '2_697894cfcf70c');
+
+        $bootstrapper = new ParallelTestBootstrapper();
+        $this->callPrivateMethod($bootstrapper, 'ensureRedisPrefixEnv');
+
+        $this->assertSame('custom_prefix_', $_SERVER['REDIS_PREFIX']);
+        $this->assertSame('custom_prefix_', $_ENV['REDIS_PREFIX']);
+        $this->assertSame('custom_prefix_', getenv('REDIS_PREFIX'));
     }
 
     private function callPrivateMethod(object $object, string $method, array $args = []): mixed

@@ -3,11 +3,15 @@
 namespace Algoritma\ShopwareTestUtils\Bootstrap;
 
 use Shopware\Core\TestBootstrapper;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelLifecycleManager;
 use Symfony\Component\Dotenv\Dotenv;
+use Symfony\Component\Process\Process;
+use function dump;
 
 class ParallelTestBootstrapper extends TestBootstrapper
 {
     private static bool $bootstrapped = false;
+    private ?string $parallelDatabaseUrl = null;
 
     /**
      * @var list<string>
@@ -25,10 +29,10 @@ class ParallelTestBootstrapper extends TestBootstrapper
         }
 
         if ($this->shouldSkipBootstrapForParatestMaster()) {
-            self::$bootstrapped = true;
-            $this->getClassLoader();
+            $classLoader = $this->getClassLoader();
+            KernelLifecycleManager::prepare($classLoader);
 
-            return parent::bootstrap();
+            return $this;
         }
 
         self::$bootstrapped = true;
@@ -75,6 +79,32 @@ class ParallelTestBootstrapper extends TestBootstrapper
         return parent::setLoadEnvFile($loadEnvFile);
     }
 
+    public function getDatabaseUrl(): string
+    {
+        if ($this->parallelDatabaseUrl !== null) {
+            return $this->parallelDatabaseUrl;
+        }
+
+        $rawUrl = $this->getRawDatabaseUrl();
+        $parts = \parse_url($rawUrl) ?: [];
+
+        $dbName = \ltrim((string) ($parts['path'] ?? ''), '/');
+        if ($dbName === '') {
+            $dbName = 'root';
+        }
+
+        $dbName = $this->ensureTestDatabaseName($dbName);
+        $token = \getenv('TEST_TOKEN');
+        if ($token !== false && $token !== '') {
+            $dbName = $this->ensureTokenSuffix($dbName, (string) $token);
+        }
+
+        $parts['path'] = '/' . $dbName;
+        $this->parallelDatabaseUrl = $this->buildDatabaseUrl($parts);
+
+        return $this->parallelDatabaseUrl;
+    }
+
     private function prepareParallelDatabase(): void
     {
         $token = \getenv('TEST_TOKEN');
@@ -83,6 +113,9 @@ class ParallelTestBootstrapper extends TestBootstrapper
         }
 
         $this->loadEnvFileIfNeeded();
+        $this->ensureCacheIdEnv();
+        $this->ensureCacheDirEnv();
+        $this->ensureRedisPrefixEnv();
 
         $databaseUrl = $this->getDatabaseUrl();
         $this->setDatabaseUrlEnv($databaseUrl);
@@ -119,6 +152,88 @@ class ParallelTestBootstrapper extends TestBootstrapper
         $_SERVER['DATABASE_URL'] = $databaseUrl;
         $_ENV['DATABASE_URL'] = $databaseUrl;
         \putenv('DATABASE_URL=' . $databaseUrl);
+    }
+
+    private function ensureCacheIdEnv(): void
+    {
+        if (! empty($_SERVER['SHOPWARE_CACHE_ID']) || ! empty($_ENV['SHOPWARE_CACHE_ID'])) {
+            return;
+        }
+
+        $env = \getenv('SHOPWARE_CACHE_ID');
+        if ($env !== false && $env !== '') {
+            return;
+        }
+
+        $token = \getenv('UNIQUE_TEST_TOKEN');
+        if ($token === false || $token === '') {
+            $token = \getenv('TEST_TOKEN');
+        }
+
+        if ($token === false || $token === '') {
+            return;
+        }
+
+        $this->setEnvVar('SHOPWARE_CACHE_ID', 'test_' . $token);
+    }
+
+    private function ensureCacheDirEnv(): void
+    {
+        if (! empty($_SERVER['APP_CACHE_DIR']) || ! empty($_ENV['APP_CACHE_DIR'])) {
+            return;
+        }
+
+        $env = \getenv('APP_CACHE_DIR');
+        if ($env !== false && $env !== '') {
+            return;
+        }
+
+        $token = \getenv('UNIQUE_TEST_TOKEN');
+        if ($token === false || $token === '') {
+            $token = \getenv('TEST_TOKEN');
+        }
+
+        if ($token === false || $token === '') {
+            return;
+        }
+
+        $baseDir = \rtrim(\sys_get_temp_dir(), \DIRECTORY_SEPARATOR) . \DIRECTORY_SEPARATOR . 'shopware-cache-' . $token;
+        $this->setEnvVar('APP_CACHE_DIR', $baseDir);
+
+        $cacheRoot = $baseDir . \DIRECTORY_SEPARATOR . 'var' . \DIRECTORY_SEPARATOR . 'cache';
+        if (!\is_dir($cacheRoot) && (!mkdir($cacheRoot, 0777, true) && !is_dir($cacheRoot))) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $cacheRoot));
+        }
+    }
+
+    private function ensureRedisPrefixEnv(): void
+    {
+        if (! empty($_SERVER['REDIS_PREFIX']) || ! empty($_ENV['REDIS_PREFIX'])) {
+            return;
+        }
+
+        $env = \getenv('REDIS_PREFIX');
+        if ($env !== false && $env !== '') {
+            return;
+        }
+
+        $token = \getenv('UNIQUE_TEST_TOKEN');
+        if ($token === false || $token === '') {
+            $token = \getenv('TEST_TOKEN');
+        }
+
+        if ($token === false || $token === '') {
+            return;
+        }
+
+        $this->setEnvVar('REDIS_PREFIX', 'test_' . $token . '_');
+    }
+
+    private function setEnvVar(string $key, string $value): void
+    {
+        $_SERVER[$key] = $value;
+        $_ENV[$key] = $value;
+        \putenv($key . '=' . $value);
     }
 
     private function databaseExists(string $databaseUrl): bool
@@ -228,26 +343,28 @@ class ParallelTestBootstrapper extends TestBootstrapper
 
     private function runCommand(string $command): void
     {
-        $descriptorSpec = [
-            0 => ['file', '/dev/null', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
+        $this->disableExecutionTimeout();
 
-        $process = \proc_open($command, $descriptorSpec, $pipes, $this->getProjectDir());
-        if (! \is_resource($process)) {
-            throw new \RuntimeException('Failed to start command: ' . $command);
+        $process = Process::fromShellCommandline($command, $this->getProjectDir());
+        $process->setTimeout(null);
+        $process->setIdleTimeout(null);
+        $exitCode = $process->run();
+
+        if (! $process->isSuccessful()) {
+            $stdout = $process->getOutput();
+            $stderr = $process->getErrorOutput();
+            throw new \RuntimeException(\sprintf("Command failed with exit code %d: %s\n%s%s", $exitCode, $command, $stdout !== '' && $stdout !== '0' ? "STDOUT:\n" . $stdout . "\n" : '', $stderr !== '' && $stderr !== '0' ? "STDERR:\n" . $stderr : ''));
+        }
+    }
+
+    private function disableExecutionTimeout(): void
+    {
+        if (\function_exists('set_time_limit')) {
+            @\set_time_limit(0);
         }
 
-        $stdout = \stream_get_contents($pipes[1]);
-        $stderr = \stream_get_contents($pipes[2]);
-
-        \fclose($pipes[1]);
-        \fclose($pipes[2]);
-
-        $exitCode = \proc_close($process);
-        if ($exitCode !== 0) {
-            throw new \RuntimeException(\sprintf("Command failed with exit code %d: %s\n%s%s", $exitCode, $command, $stdout ? "STDOUT:\n" . $stdout . "\n" : '', $stderr ? "STDERR:\n" . $stderr : ''));
+        if (\function_exists('ini_set')) {
+            @\ini_set('max_execution_time', '0');
         }
     }
 
@@ -277,5 +394,66 @@ class ParallelTestBootstrapper extends TestBootstrapper
         }
 
         return $dsn;
+    }
+
+    private function getRawDatabaseUrl(): string
+    {
+        if (! empty($_SERVER['DATABASE_URL'])) {
+            return (string) $_SERVER['DATABASE_URL'];
+        }
+
+        if (! empty($_ENV['DATABASE_URL'])) {
+            return (string) $_ENV['DATABASE_URL'];
+        }
+
+        $env = \getenv('DATABASE_URL');
+        if ($env !== false && $env !== '') {
+            return (string) $env;
+        }
+
+        return '';
+    }
+
+    private function ensureTestDatabaseName(string $dbName): string
+    {
+        if (\preg_match('/_test(?:_p?[A-Za-z0-9]+)?$/', $dbName) === 1) {
+            return $dbName;
+        }
+
+        return $dbName . '_test';
+    }
+
+    private function ensureTokenSuffix(string $dbName, string $token): string
+    {
+        $escapedToken = \preg_quote($token, '/');
+        if (\preg_match('/(_p)?' . $escapedToken . '$/', $dbName) === 1) {
+            return $dbName;
+        }
+
+        return $dbName . '_p' . $token;
+    }
+
+    /**
+     * @param array<string, string|int> $parts
+     */
+    private function buildDatabaseUrl(array $parts): string
+    {
+        $scheme = $parts['scheme'] ?? 'mysql';
+        $host = $parts['host'] ?? 'localhost';
+        $port = isset($parts['port']) ? (':' . $parts['port']) : '';
+        $path = $parts['path'] ?? '';
+
+        $auth = '';
+        if (! empty($parts['user'])) {
+            $auth = (string) $parts['user'];
+            if (isset($parts['pass'])) {
+                $auth .= ':' . $parts['pass'];
+            }
+            $auth .= '@';
+        }
+
+        $query = isset($parts['query']) ? ('?' . $parts['query']) : '';
+
+        return \sprintf('%s://%s%s%s%s%s', $scheme, $auth, $host, $port, $path, $query);
     }
 }
