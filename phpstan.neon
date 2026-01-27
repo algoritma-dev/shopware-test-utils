@@ -6,8 +6,6 @@ parameters:
 	excludePaths:
 		- **/node_modules/*
 		- **/vendor/*
-	stubFiles:
-		- var/cache/factory-stubs.php
 	ignoreErrors:
 	    - '#is used zero times and is not analysed.$#'
 	    - '# will always evaluate to true.$#'

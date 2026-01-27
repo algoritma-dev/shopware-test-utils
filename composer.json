@@ -48,7 +48,9 @@
         "phpstan/phpstan-phpunit": "^2.0",
         "algoritma/castor-recipes": "dev-main"
     },
-    "bin": ["bin/generate-factory-stubs"],
+    "bin": [
+        "bin/generate-factory-stubs"
+    ],
     "scripts": {
         "cs-check": "php-cs-fixer fix --dry-run --diff",
         "cs-fix": "php-cs-fixer fix --diff",
