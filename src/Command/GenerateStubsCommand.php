@@ -26,13 +26,37 @@ class GenerateStubsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        if (! is_dir($this->projectRoot)) {
+            $output->write("Error generating stubs: Project root {$this->projectRoot} does not exist\n", false, OutputInterface::OUTPUT_RAW);
+
+            return Command::FAILURE;
+        }
+
+        $outputDir = $this->projectRoot . '/tests';
+        if (! is_dir($outputDir) && (! @mkdir($outputDir, 0o775, true) && ! is_dir($outputDir))) {
+            $output->write("Error generating stubs: Failed to create output directory {$outputDir}\n", false, OutputInterface::OUTPUT_RAW);
+
+            return Command::FAILURE;
+        }
+
         $generator = new FactoryStubGenerator($this->projectRoot, $this->metadataService);
 
         try {
             $result = $generator->generate();
+
+            $stubTarget = $outputDir . '/factory-stubs.php';
+            $metaTarget = $outputDir . '/.phpstorm.meta.php';
+
+            if (! @copy($result['stub'], $stubTarget)) {
+                throw new \RuntimeException("Failed to copy stub file to {$stubTarget}");
+            }
+            if (! @copy($result['meta'], $metaTarget)) {
+                throw new \RuntimeException("Failed to copy meta file to {$metaTarget}");
+            }
+
             $output->write("Factory stubs generated successfully\n", false, OutputInterface::OUTPUT_RAW);
-            $output->write("  - PHPStan stub: {$result['stub']}\n", false, OutputInterface::OUTPUT_RAW);
-            $output->write("  - PhpStorm meta: {$result['meta']}\n", false, OutputInterface::OUTPUT_RAW);
+            $output->write("  - PHPStan stub: {$stubTarget}\n", false, OutputInterface::OUTPUT_RAW);
+            $output->write("  - PhpStorm meta: {$metaTarget}\n", false, OutputInterface::OUTPUT_RAW);
         } catch (\Exception $e) {
             $output->write("Error generating stubs: {$e->getMessage()}\n", false, OutputInterface::OUTPUT_RAW);
 

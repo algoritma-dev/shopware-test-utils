@@ -25,8 +25,6 @@ class FixtureManagerTest extends TestCase
     public function testItInjectsContainerIntoDependencies(): void
     {
         $container = $this->createMock(ContainerInterface::class);
-
-        new DependencyFixture();
         $mainFixture = new MainFixture(DependencyFixture::class);
 
         $manager = new FixtureManager($container);
