@@ -22,7 +22,7 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        run: composer require shopware/core:${{ matrix.shopware }} --no-interaction --prefer-dist --no-progress
+        run: composer require shopware/core:${{ matrix.shopware }} --no-interaction --prefer-dist --no-progress --prefer-stable
 
       - name: Run QA checks
         run: composer pre-commit
