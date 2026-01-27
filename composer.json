@@ -60,6 +60,14 @@
         "rector-check": "rector process --dry-run",
         "rector-fix": "rector process",
         "phpstan": "phpstan analyze --memory-limit=-1",
+        "phpunit": "phpunit -c phpunit.xml",
+        "qa": [
+            "@phpstan",
+            "@cs-check",
+            "@rector-check",
+            "@phpunit"
+        ],
+        "pre-commit": "@qa",
         "generate-stubs": "bin/generate-factory-stubs"
     }
 }
