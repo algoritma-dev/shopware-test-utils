@@ -113,7 +113,7 @@ Custom setup commands can be injected via:
 
 To ensure CLI commands like `bin/console` pick the correct worker DB, set `TEST_TOKEN` in `.env.test`
 and include it in `DATABASE_URL`, for example:
-`DATABASE_URL=mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}_${TEST_TOKEN:-}?serverVersion=8.4`
+`DATABASE_URL=mysql://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}${TEST_TOKEN:-}?serverVersion=8.4`
 Use a default like `TEST_TOKEN=local` to avoid a trailing underscore in non-parallel runs.
 
 Note: The per-worker bootstrap is triggered in `AbstractIntegrationTestCase::setUpBeforeClass()`.
