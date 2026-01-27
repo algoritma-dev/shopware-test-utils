@@ -24,8 +24,12 @@ jobs:
             -   name: Configure Composer auth
                 env:
                     SHOPWARE_PACKAGES_TOKEN: ${{ secrets.SHOPWARE_PACKAGES_TOKEN }}
+                    GITHUB_TOKEN_COMPOSER: ${{ secrets.GH_TOKEN_COMPOSER }}
                 run: |
                     composer config --global --auth bearer.packages.shopware.com "$SHOPWARE_PACKAGES_TOKEN"
+                    if [ -n "$GITHUB_TOKEN_COMPOSER" ]; then
+                      composer config --global --auth github-oauth.github.com "$GH_TOKEN_COMPOSER"
+                    fi
 
             -   name: Install dependencies
                 run: |
