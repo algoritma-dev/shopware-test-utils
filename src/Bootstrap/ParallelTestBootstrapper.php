@@ -2,15 +2,15 @@
 
 namespace Algoritma\ShopwareTestUtils\Bootstrap;
 
-use Shopware\Core\TestBootstrapper;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelLifecycleManager;
+use Shopware\Core\TestBootstrapper;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Process\Process;
-use function dump;
 
 class ParallelTestBootstrapper extends TestBootstrapper
 {
     private static bool $bootstrapped = false;
+
     private ?string $parallelDatabaseUrl = null;
 
     /**
@@ -201,7 +201,7 @@ class ParallelTestBootstrapper extends TestBootstrapper
         $this->setEnvVar('APP_CACHE_DIR', $baseDir);
 
         $cacheRoot = $baseDir . \DIRECTORY_SEPARATOR . 'var' . \DIRECTORY_SEPARATOR . 'cache';
-        if (!\is_dir($cacheRoot) && (!mkdir($cacheRoot, 0777, true) && !is_dir($cacheRoot))) {
+        if (! \is_dir($cacheRoot) && (! mkdir($cacheRoot, 0o777, true) && ! is_dir($cacheRoot))) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $cacheRoot));
         }
     }
