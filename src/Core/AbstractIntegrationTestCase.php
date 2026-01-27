@@ -38,13 +38,6 @@ abstract class AbstractIntegrationTestCase extends TestCase
 
     private ?FixtureManager $fixtureManager = null;
 
-    public static function setUpBeforeClass(): void
-    {
-        parent::setUpBeforeClass();
-
-        ParallelTestBootstrapper::ensureParallelBootstrap();
-    }
-
     protected function tearDown(): void
     {
         if ($this->fixtureManager instanceof FixtureManager) {
