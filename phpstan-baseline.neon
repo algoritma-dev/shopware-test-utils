@@ -1,2 +1,139 @@
 parameters:
-	ignoreErrors: []
+	ignoreErrors:
+		-
+			message: '#^Parameters should have "string\|string\|null" types as the only types passed to this method$#'
+			identifier: typePerfect.narrowPublicClassMethodParamType
+			count: 1
+			path: src/Helper/B2B/EmployeeContextHelper.php
+
+		-
+			message: '#^Parameters should have "array\|string\|null" types as the only types passed to this method$#'
+			identifier: typePerfect.narrowPublicClassMethodParamType
+			count: 1
+			path: src/Helper/ConfigHelper.php
+
+		-
+			message: '#^Parameters should have "string\|string\|null" types as the only types passed to this method$#'
+			identifier: typePerfect.narrowPublicClassMethodParamType
+			count: 1
+			path: src/Helper/ConfigHelper.php
+
+		-
+			message: '#^Parameters should have "string\|string\|string\|null" types as the only types passed to this method$#'
+			identifier: typePerfect.narrowPublicClassMethodParamType
+			count: 1
+			path: src/Helper/ConfigHelper.php
+
+		-
+			message: '#^Parameters should have "string\|string\|string\|string\|null" types as the only types passed to this method$#'
+			identifier: typePerfect.narrowPublicClassMethodParamType
+			count: 1
+			path: src/Helper/ConfigHelper.php
+
+		-
+			message: '#^Parameters should have "Symfony\\Component\\HttpFoundation\\Response\|string\|null\|string" types as the only types passed to this method$#'
+			identifier: typePerfect.narrowPublicClassMethodParamType
+			count: 1
+			path: src/Helper/StorefrontRequestHelper.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\B2B\\ApprovalRuleFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/B2B/ApprovalRuleFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\B2B\\BudgetFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/B2B/BudgetFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\B2B\\OrganizationFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/B2B/OrganizationFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\B2B\\RoleFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/B2B/RoleFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\B2B\\ShoppingListFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/B2B/ShoppingListFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\CategoryFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/CategoryFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\CustomerFactory\:\:withEmail\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/CustomerFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\LanguageFactory\:\:setActive\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/LanguageFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\MediaFactory\:\:withTitle\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/MediaFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\MultiWarehouse\\WarehouseFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/MultiWarehouse/WarehouseFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\MultiWarehouse\\WarehouseGroupFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/MultiWarehouse/WarehouseGroupFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\PaymentMethodFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/PaymentMethodFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\ProductFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/ProductFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\RuleFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/RuleFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\SalesChannelFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/SalesChannelFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\ShippingMethodFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/ShippingMethodFactoryTest.php
+
+		-
+			message: '#^Call to an undefined method Algoritma\\ShopwareTestUtils\\Factory\\Subscription\\SubscriptionPlanFactory\:\:withName\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Factory/Subscription/SubscriptionPlanFactoryTest.php

@@ -6,6 +6,7 @@ use Algoritma\ShopwareTestUtils\Helper\B2B\BudgetRenewHelper;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEnum;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -52,7 +53,7 @@ class BudgetRenewHelperTest extends TestCase
         $searchResult->method('first')->willReturn($budget);
 
         $helper = new BudgetRenewHelper($container);
-        $result = $helper->shouldRenew('budget-id');
+        $result = $helper->shouldRenew('budget-id', Context::createCLIContext());
 
         $this->assertTrue($result);
     }

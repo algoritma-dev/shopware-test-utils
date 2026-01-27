@@ -78,7 +78,7 @@ class EmployeeContextHelperTest extends TestCase
         $connection->method('fetchOne')->willReturn('sales-channel-id');
 
         $helper = new EmployeeContextHelper($container);
-        $result = $helper->createContextForEmployeeEmail('test@example.com');
+        $result = $helper->createContextForEmployeeEmail('test@example.com', 'sales-channel-id');
 
         $this->assertSame($context, $result);
     }

@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 use Algoritma\ShopwareTestUtils\Helper\B2B\SharedListPermissionHelper;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\ShoppingList\Entity\ShoppingList\ShoppingListEntity;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -32,7 +33,7 @@ class SharedListPermissionHelperTest extends TestCase
         $searchResult->method('first')->willReturn($shoppingList);
 
         $helper = new SharedListPermissionHelper($container);
-        $result = $helper->canAccess('employee-id', 'list-id');
+        $result = $helper->canAccess('employee-id', 'list-id', Context::createCLIContext());
 
         $this->assertTrue($result);
     }
@@ -46,6 +47,6 @@ class SharedListPermissionHelperTest extends TestCase
         $repository->expects($this->once())->method('update');
 
         $helper = new SharedListPermissionHelper($container);
-        $helper->shareWith('list-id', 'employee-id');
+        $helper->shareWith('list-id', 'employee-id', Context::createCLIContext());
     }
 }

@@ -6,6 +6,7 @@ use Algoritma\ShopwareTestUtils\Helper\B2B\EmployeeStorefrontHelper;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -35,7 +36,7 @@ class EmployeeStorefrontHelperTest extends TestCase
         $searchResult->method('first')->willReturn($employee);
 
         $helper = new EmployeeStorefrontHelper($container);
-        $result = $helper->canPerformAction('employee-id', 'test.action');
+        $result = $helper->canPerformAction('employee-id', 'test.action', Context::createCLIContext());
 
         $this->assertTrue($result);
     }

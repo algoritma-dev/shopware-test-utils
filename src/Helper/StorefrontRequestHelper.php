@@ -215,7 +215,7 @@ class StorefrontRequestHelper
     /**
      * Assert that the JSON response contains a specific key-value pair.
      */
-    public function assertResponseJsonContains(Response $response, string $key, mixed $expectedValue, string $message = ''): void
+    public function assertResponseJsonContains(Response $response, string $key, string $expectedValue, string $message = ''): void
     {
         $this->assertResponseIsJson($response, $message);
         $content = (string) $response->getContent();

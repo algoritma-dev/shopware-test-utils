@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -61,7 +62,7 @@ class BudgetValidationHelperTest extends TestCase
         $repository->expects($this->once())->method('update');
 
         $helper = new BudgetValidationHelper($container);
-        $result = $helper->simulateBudgetUsage('budget-id', 10.0);
+        $result = $helper->simulateBudgetUsage('budget-id', 10.0, Context::createCLIContext());
 
         $this->assertSame($budget, $result);
     }

@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 
 use Algoritma\ShopwareTestUtils\Helper\B2B\QuoteCommentHelper;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -49,6 +50,6 @@ class QuoteCommentHelperTest extends TestCase
         $repository->expects($this->once())->method('delete');
 
         $helper = new QuoteCommentHelper($container);
-        $helper->deleteComment('comment-id');
+        $helper->deleteComment('comment-id', Context::createCLIContext());
     }
 }

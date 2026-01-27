@@ -88,40 +88,42 @@ class ConfigHelperTest extends TestCase
             'key2' => 'value2',
             'key3' => 'value3',
         ];
+        $salesChannelId = 'channel-123';
 
         $matcher = $this->exactly(3);
         $this->configService->expects($matcher)
             ->method('set')
-            ->willReturnCallback(function (string $key, string $value, ?string $salesChannelId) use ($matcher): void {
+            ->willReturnCallback(function (string $key, string $value, ?string $actualSalesChannelId) use ($matcher, $salesChannelId): void {
                 match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertEquals(['key1', 'value1', null], [$key, $value, $salesChannelId]),
-                    2 => $this->assertEquals(['key2', 'value2', null], [$key, $value, $salesChannelId]),
-                    3 => $this->assertEquals(['key3', 'value3', null], [$key, $value, $salesChannelId]),
+                    1 => $this->assertEquals(['key1', 'value1', $salesChannelId], [$key, $value, $actualSalesChannelId]),
+                    2 => $this->assertEquals(['key2', 'value2', $salesChannelId], [$key, $value, $actualSalesChannelId]),
+                    3 => $this->assertEquals(['key3', 'value3', $salesChannelId], [$key, $value, $actualSalesChannelId]),
                     default => $this->fail('Unexpected invocation count'),
                 };
             });
 
-        $this->helper->setMultiple($configs);
+        $this->helper->setMultiple($configs, $salesChannelId);
     }
 
     public function testWithConfigRestoresOriginalValues(): void
     {
         $originalValue = 'original';
         $tempValue = 'temporary';
+        $salesChannelId = 'channel-123';
 
         // Expect get to be called ONCE to save original value
         $this->configService->expects($this->once())
             ->method('get')
-            ->with('test.key', null)
+            ->with('test.key', $salesChannelId)
             ->willReturn($originalValue);
 
         $matcher = $this->exactly(2);
         $this->configService->expects($matcher)
             ->method('set')
-            ->willReturnCallback(function (string $key, string $value, ?string $salesChannelId) use ($matcher, $tempValue, $originalValue): void {
+            ->willReturnCallback(function (string $key, string $value, ?string $actualSalesChannelId) use ($matcher, $tempValue, $originalValue, $salesChannelId): void {
                 match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertEquals(['test.key', $tempValue, null], [$key, $value, $salesChannelId]),
-                    2 => $this->assertEquals(['test.key', $originalValue, null], [$key, $value, $salesChannelId]),
+                    1 => $this->assertEquals(['test.key', $tempValue, $salesChannelId], [$key, $value, $actualSalesChannelId]),
+                    2 => $this->assertEquals(['test.key', $originalValue, $salesChannelId], [$key, $value, $actualSalesChannelId]),
                     default => $this->fail('Unexpected invocation count'),
                 };
             });
@@ -129,7 +131,7 @@ class ConfigHelperTest extends TestCase
         $callbackExecuted = false;
         $this->helper->withConfig(['test.key' => $tempValue], function () use (&$callbackExecuted): void {
             $callbackExecuted = true;
-        });
+        }, $salesChannelId);
 
         $this->assertTrue($callbackExecuted);
     }
@@ -165,12 +167,13 @@ class ConfigHelperTest extends TestCase
     public function testGetDomainCallsConfigService(): void
     {
         $expected = ['key1' => 'value1', 'key2' => 'value2'];
+        $salesChannelId = 'channel-123';
         $this->configService->expects($this->once())
             ->method('getDomain')
-            ->with('test.domain', null, true)
+            ->with('test.domain', $salesChannelId, true)
             ->willReturn($expected);
 
-        $result = $this->helper->getDomain('test.domain');
+        $result = $this->helper->getDomain('test.domain', $salesChannelId);
 
         $this->assertSame($expected, $result);
     }
@@ -228,21 +231,23 @@ class ConfigHelperTest extends TestCase
 
     public function testSetPluginConfigBuildsCorrectKey(): void
     {
+        $salesChannelId = 'channel-123';
         $this->configService->expects($this->once())
             ->method('set')
-            ->with('MyPlugin.config.myKey', 'value', null);
+            ->with('MyPlugin.config.myKey', 'value', $salesChannelId);
 
-        $this->helper->setPluginConfig('MyPlugin', 'myKey', 'value');
+        $this->helper->setPluginConfig('MyPlugin', 'myKey', 'value', $salesChannelId);
     }
 
     public function testGetPluginConfigBuildsCorrectKey(): void
     {
+        $salesChannelId = 'channel-123';
         $this->configService->expects($this->once())
             ->method('get')
-            ->with('MyPlugin.config.myKey', null)
+            ->with('MyPlugin.config.myKey', $salesChannelId)
             ->willReturn('value');
 
-        $result = $this->helper->getPluginConfig('MyPlugin', 'myKey');
+        $result = $this->helper->getPluginConfig('MyPlugin', 'myKey', $salesChannelId);
 
         $this->assertSame('value', $result);
     }

@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 use Algoritma\ShopwareTestUtils\Helper\B2B\CustomerFeatureToggleHelper;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\QuickOrder\Entity\CustomerSpecificFeaturesEntity;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -33,7 +34,7 @@ class CustomerFeatureToggleHelperTest extends TestCase
         $repository->expects($this->once())->method('upsert');
 
         $helper = new CustomerFeatureToggleHelper($container);
-        $helper->enableFeature('customer-id', 'QUICK_ORDER');
+        $helper->enableFeature('customer-id', 'QUICK_ORDER', Context::createCLIContext());
     }
 
     public function testIsFeatureEnabled(): void
@@ -50,7 +51,7 @@ class CustomerFeatureToggleHelperTest extends TestCase
         $searchResult->method('first')->willReturn($features);
 
         $helper = new CustomerFeatureToggleHelper($container);
-        $result = $helper->isFeatureEnabled('customer-id', 'QUICK_ORDER');
+        $result = $helper->isFeatureEnabled('customer-id', 'QUICK_ORDER', Context::createCLIContext());
 
         $this->assertTrue($result);
     }

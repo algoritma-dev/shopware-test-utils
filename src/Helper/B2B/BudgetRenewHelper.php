@@ -142,7 +142,7 @@ class BudgetRenewHelper
         return $results;
     }
 
-    private function calculateNextRenewalFrom(\DateTimeInterface $date, string $renewsType): \DateTimeImmutable
+    private function calculateNextRenewalFrom(\DateTimeImmutable $date, string $renewsType): \DateTimeImmutable
     {
         $baseDate = \DateTimeImmutable::createFromInterface($date);
 

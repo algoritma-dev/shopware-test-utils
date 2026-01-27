@@ -39,7 +39,7 @@ class CartFactoryTest extends TestCase
         $cartService->method('add')->willReturn($cart);
 
         $factory = new CartFactory($container, $context);
-        $factory->withProduct('product-id');
+        $factory->withProduct('product-id', 2);
 
         $this->assertInstanceOf(CartFactory::class, $factory);
     }

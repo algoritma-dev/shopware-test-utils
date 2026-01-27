@@ -19,7 +19,7 @@ class FactoryStubGeneratorTest extends TestCase
     {
         $this->tempDir = sys_get_temp_dir() . '/factory-stub-test-' . uniqid('', true);
         mkdir($this->tempDir, 0o777, true);
-        mkdir($this->tempDir . '/var/cache', 0o777, true);
+        mkdir($this->tempDir . '/tests', 0o777, true);
 
         $this->metadataService = $this->createMock(DalMetadataService::class);
         $this->metadataService->method('getEntityProperties')
@@ -42,9 +42,9 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateCreatesStubFile(): void
     {
-        $generator = new FactoryStubGenerator($this->tempDir, $this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService);
 
-        $result = $generator->generate();
+        $result = $generator->generate($this->tempDir);
 
         $this->assertArrayHasKey('stub', $result);
         $this->assertArrayHasKey('meta', $result);
@@ -54,9 +54,9 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateStubFileContainsExpectedContent(): void
     {
-        $generator = new FactoryStubGenerator($this->tempDir, $this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService);
 
-        $result = $generator->generate();
+        $result = $generator->generate($this->tempDir . '/tests');
 
         $stubContent = file_get_contents($result['stub']);
 
@@ -67,9 +67,9 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateMetaFileContainsExpectedContent(): void
     {
-        $generator = new FactoryStubGenerator($this->tempDir, $this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService);
 
-        $result = $generator->generate();
+        $result = $generator->generate($this->tempDir . '/tests');
 
         $metaContent = file_get_contents($result['meta']);
 
@@ -81,12 +81,12 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateReturnsCorrectPaths(): void
     {
-        $generator = new FactoryStubGenerator($this->tempDir, $this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService);
 
-        $result = $generator->generate();
+        $result = $generator->generate($this->tempDir . '/tests');
 
-        $expectedStubPath = $this->tempDir . '/var/cache/factory-stubs.php';
-        $expectedMetaPath = $this->tempDir . '/var/cache/.phpstorm.meta.php';
+        $expectedStubPath = $this->tempDir . '/tests/factory-stubs.php';
+        $expectedMetaPath = $this->tempDir . '/tests/.phpstorm.meta.php';
 
         $this->assertSame($expectedStubPath, $result['stub']);
         $this->assertSame($expectedMetaPath, $result['meta']);
@@ -94,9 +94,9 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateHandlesEmptyFactoryDirectory(): void
     {
-        $generator = new FactoryStubGenerator($this->tempDir, $this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService);
 
-        $result = $generator->generate();
+        $result = $generator->generate($this->tempDir . '/tests');
 
         $this->assertFileExists($result['stub']);
         $this->assertFileExists($result['meta']);
@@ -107,14 +107,15 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateOverwritesExistingFiles(): void
     {
-        $stubPath = $this->tempDir . '/var/cache/factory-stubs.php';
-        $metaPath = $this->tempDir . '/var/cache/.phpstorm.meta.php';
+        $stubPath = $this->tempDir . '/tests/factory-stubs.php';
+        $metaPath = $this->tempDir . '/tests/.phpstorm.meta.php';
 
         file_put_contents($stubPath, 'old content');
         file_put_contents($metaPath, 'old content');
 
-        $generator = new FactoryStubGenerator($this->tempDir, $this->metadataService);
-        $result = $generator->generate();
+        $generator = new FactoryStubGenerator($this->metadataService);
+
+        $result = $generator->generate($this->tempDir . '/tests');
 
         $stubContent = file_get_contents($result['stub']);
         $metaContent = file_get_contents($result['meta']);

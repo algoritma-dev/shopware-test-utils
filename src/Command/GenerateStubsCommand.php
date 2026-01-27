@@ -9,6 +9,7 @@ use Algoritma\ShopwareTestUtils\Core\FactoryStubGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
@@ -24,6 +25,11 @@ class GenerateStubsCommand extends Command
         parent::__construct();
     }
 
+    protected function configure(): void
+    {
+        $this->addOption('output-dir', '-O', InputOption::VALUE_OPTIONAL, 'Output directory for generated files (<projectRoot>/tests by default)', $this->projectRoot . '/tests');
+    }
+
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         if (! is_dir($this->projectRoot)) {
@@ -32,25 +38,25 @@ class GenerateStubsCommand extends Command
             return Command::FAILURE;
         }
 
-        $outputDir = $this->projectRoot . '/tests';
+        $outputDir = $input->getOption('output-dir');
         if (! is_dir($outputDir) && (! @mkdir($outputDir, 0o775, true) && ! is_dir($outputDir))) {
             $output->write("Error generating stubs: Failed to create output directory {$outputDir}\n", false, OutputInterface::OUTPUT_RAW);
 
             return Command::FAILURE;
         }
 
-        $generator = new FactoryStubGenerator($this->projectRoot, $this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService);
 
         try {
-            $result = $generator->generate();
+            $result = $generator->generate($outputDir);
 
             $stubTarget = $outputDir . '/factory-stubs.php';
             $metaTarget = $outputDir . '/.phpstorm.meta.php';
 
-            if (! @copy($result['stub'], $stubTarget)) {
+            if ($result['stub'] !== $stubTarget && ! @copy($result['stub'], $stubTarget)) {
                 throw new \RuntimeException("Failed to copy stub file to {$stubTarget}");
             }
-            if (! @copy($result['meta'], $metaTarget)) {
+            if ($result['meta'] !== $metaTarget && ! @copy($result['meta'], $metaTarget)) {
                 throw new \RuntimeException("Failed to copy meta file to {$metaTarget}");
             }
 

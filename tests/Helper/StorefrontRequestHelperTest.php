@@ -48,6 +48,6 @@ class StorefrontRequestHelperTest extends TestCase
         $response->method('getStatusCode')->willReturn(200);
 
         $helper = new StorefrontRequestHelper($browser);
-        $helper->addToCart('product-id');
+        $helper->addToCart('product-id', 2);
     }
 }

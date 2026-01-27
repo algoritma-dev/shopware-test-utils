@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Helper\B2B;
 use Algoritma\ShopwareTestUtils\Helper\B2B\BudgetUsageTracker;
 use PHPUnit\Framework\TestCase;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
+use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -56,6 +57,6 @@ class BudgetUsageTrackerTest extends TestCase
         $repository->expects($this->once())->method('update');
 
         $tracker = new BudgetUsageTracker($container);
-        $tracker->fillToPercentage('budget-id', 50.0);
+        $tracker->fillToPercentage('budget-id', 50.0, Context::createCLIContext());
     }
 }
