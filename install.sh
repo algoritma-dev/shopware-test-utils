@@ -6,6 +6,7 @@
 echo "Installing private package..."
 
 # install
+composer config repositories.shopware-packages composer https://packages.shopware.com
 composer require store.shopware.com/swagcommercial --prefer-stable --ignore-platform-reqs
 
 # Rollback composer.json

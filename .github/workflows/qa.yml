@@ -1,28 +1,36 @@
 name: QA
 
 on:
-  push:
-  pull_request:
+    push:
+    pull_request:
 
 jobs:
-  qa:
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        shopware: ["6.6.10.*", "6.7.*"]
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+    qa:
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                shopware: [ "6.6.10.*", "6.7.*" ]
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: "8.2"
-          coverage: none
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: "8.2"
+                    coverage: none
 
-      - name: Install dependencies
-        run: composer require shopware/core:${{ matrix.shopware }} --no-interaction --prefer-dist --no-progress --prefer-stable
+            -   name: Configure Composer auth
+                env:
+                    SHOPWARE_PACKAGES_TOKEN: ${{ secrets.SHOPWARE_PACKAGES_TOKEN }}
+                run: |
+                    composer config --global --auth bearer.packages.shopware.com "$SHOPWARE_PACKAGES_TOKEN"
 
-      - name: Run QA checks
-        run: composer pre-commit
+            -   name: Install dependencies
+                run: |
+                    composer require shopware/core:${{ matrix.shopware }} --no-interaction --prefer-dist --no-progress --prefer-stable
+                    ./install.sh
+
+            -   name: Run QA checks
+                run: composer pre-commit
