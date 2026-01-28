@@ -16,23 +16,6 @@ composer require --dev algoritma/shopware-test-utils
 
 ---
 
-## ✅ Enable Bundle (Test Environment)
-
-Register the bundle only for tests so the compiler pass can collect tagged factories.
-
-Add this line to your `config/bundles.php`:
-
-```php
-<?php
-
-return [
-    // ...
-    Algoritma\ShopwareTestUtils\ShopwareTestUtils::class => ['test' => true],
-];
-```
-
----
-
 ## 🎯 Overview
 
 This library provides a structured, clean, and maintainable approach to writing tests for Shopware 6 projects. It follows strict **Single Responsibility Principle (SRP)** and the **Factory/Helper/Trait** pattern to ensure separation of concerns.
@@ -653,65 +636,18 @@ For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 This library provides IDE support for factory magic methods through auto-generated PHPStorm metadata and PHPStan stubs.
 
-#### Custom Factories (Test Bundle)
-
-To include your own factories in the stubs, register them as **test services** and tag them with `FactoryRegistry::TAG`.
-
-1) Create a factory that extends `AbstractFactory`:
-
-```php
-<?php
-
-namespace App\Tests\Factory;
-
-use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-
-final class CustomProductFactory extends AbstractFactory
-{
-    protected function getRepositoryName(): string
-    {
-        return 'product.repository';
-    }
-
-    protected function getEntityName(): string
-    {
-        return 'product';
-    }
-}
-```
-
-2) Register it in `config/services_test.php` (PHP config, no XML) and add the tag:
-
-```php
-<?php
-
-use Algoritma\ShopwareTestUtils\Core\FactoryRegistry;
-use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
-
-return static function (ContainerConfigurator $container): void {
-    $services = $container->services();
-
-    $services->set(App\Tests\Factory\CustomProductFactory::class)
-        ->autowire()
-        ->public()
-        ->tag(FactoryRegistry::TAG);
-};
-```
-
-> Tip: if you have many factories, use `$services->load('App\\Tests\\Factory\\', __DIR__ . '/../tests/Factory')->tag(FactoryRegistry::TAG);`
-
 #### Generate Stubs
 
 Run the following command to generate IDE autocomplete metadata:
 
 ```bash
-APP_ENV=test composer generate-stubs
+composer generate-stubs
 ```
 
 Or use the binary directly:
 
 ```bash
-APP_ENV=test vendor/bin/generate-factory-stubs
+vendor/bin/generate-factory-stubs
 ```
 
 This command generates two files:
