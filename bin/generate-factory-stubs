@@ -1,0 +1,52 @@
+#!/usr/bin/env php
+<?php
+
+use Shopware\Core\Framework\Adapter\Kernel\KernelFactory;
+use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\ArgvInput;
+use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
+use Algoritma\ShopwareTestUtils\Command\GenerateStubsCommand;
+use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
+use Shopware\Core\Framework\Plugin\KernelPluginLoader\ComposerPluginLoader;
+
+$envFile = __DIR__ . '/../../../../.env';
+
+require_once __DIR__ . '/../../../../vendor/autoload_runtime.php';
+
+return static function (array &$context) {
+    set_time_limit(0);
+
+    $classLoader = require __DIR__ . '/../../../../vendor/autoload.php';
+
+    if (!isset($context['PROJECT_ROOT'])) {
+        $context['PROJECT_ROOT'] = dirname(__DIR__, 4);
+    }
+
+    $input = new ArgvInput();
+    $env = $input->getParameterOption(['--env', '-e'], $context['APP_ENV'] ?? 'prod', true);
+    $debug = ($context['APP_DEBUG'] ?? ($env !== 'prod')) && !$input->hasParameterOption('--no-debug', true);
+
+    $pluginLoader = new ComposerPluginLoader($classLoader, null);
+
+    $kernel = KernelFactory::create(
+        environment: $env,
+        debug: $debug,
+        classLoader: $classLoader,
+        pluginLoader: $pluginLoader,
+    );
+
+    $application = new Application($kernel);
+    $kernel->boot();
+
+    $application->setName('ShopwareTestUtils');
+
+    $metatadaService = new DalMetadataService($kernel->getContainer()->get(DefinitionInstanceRegistry::class));
+
+    $application->add(new GenerateStubsCommand(
+        $kernel->getContainer()->getParameter('kernel.project_dir'),
+        $metatadaService
+    ));
+    $application->setDefaultCommand('alg:sw-test-util:generate-stubs', true);
+
+    return $application;
+};

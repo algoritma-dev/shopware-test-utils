@@ -7,8 +7,7 @@ use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 /**
  * Generates PHPDoc stub files for factories to enable IDE autocomplete.
  *
- * This class reads factory classes from the registry
- * and generates @method annotations
+ * This class scans declared factory classes and generates @method annotations
  * based on the properties defined in the factory's $data array.
  */
 class FactoryStubGenerator
@@ -25,7 +24,6 @@ class FactoryStubGenerator
 
     public function __construct(
         private readonly DalMetadataService $metadataService,
-        private readonly FactoryRegistry $factoryRegistry,
     ) {}
 
     /**
@@ -35,7 +33,7 @@ class FactoryStubGenerator
      */
     public function generate(string $outputDir): array
     {
-        $factories = $this->getFactoryClasses();
+        $factories = $this->findFactories();
 
         // Generate PHPStan stub file
         $stubPath = $this->generateStubFile($factories, $outputDir);
@@ -161,20 +159,16 @@ class FactoryStubGenerator
     }
 
     /**
-     * @return list<class-string<AbstractFactory>>
+     * Find all declared factory classes.
+     *
+     * @return array<string>
      */
-    private function getFactoryClasses(): array
+    private function findFactories(): array
     {
         $factories = [];
 
-        foreach ($this->factoryRegistry->getFactories() as $className) {
-            if (! is_string($className)) {
-                continue;
-            }
-            if ($className === '') {
-                continue;
-            }
-            if (! class_exists($className)) {
+        foreach (get_declared_classes() as $className) {
+            if ($className === AbstractFactory::class) {
                 continue;
             }
 

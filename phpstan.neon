@@ -4,7 +4,6 @@ includes:
 
 parameters:
 	level: 6
-	phpVersion: 80200
 	excludePaths:
 		- **/node_modules/*
 		- **/vendor/*
