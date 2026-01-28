@@ -27,20 +27,6 @@ and make sure the plugin is active (license required).
 
 ---
 
-## 🎯 Overview
-
-This library provides a structured, clean, and maintainable approach to writing tests for Shopware 6 projects. It follows strict **Single Responsibility Principle (SRP)** and the **Factory/Helper/Trait** pattern to ensure separation of concerns.
-
-### Core Philosophy
-
-> **"Factory CREATES, Helper ACTS, Trait ASSERTS"**
-
-- **Factories** → Create and configure entities (Products, Orders, Customers, etc.)
-- **Helpers** → Execute actions on existing entities (place order, cancel, transition states, configuration, time travel)
-- **Traits** → Provide test assertions (database checks, event verification, mail assertions)
-
----
-
 ## 🚀 Quick Start
 
 ### Basic Integration Test
