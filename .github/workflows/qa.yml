@@ -20,6 +20,7 @@ jobs:
                 with:
                     php-version: "8.2"
                     coverage: none
+                    ini-values: zend.assertions=1, assert.exception=1
 
             -   name: Configure Composer auth
                 env:
