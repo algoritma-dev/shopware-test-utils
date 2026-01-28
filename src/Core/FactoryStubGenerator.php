@@ -6,9 +6,7 @@ use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Roave\BetterReflection\BetterReflection;
 use Roave\BetterReflection\Reflection\ReflectionClass as BetterReflectionClass;
 use Roave\BetterReflection\Reflector\DefaultReflector;
-use Roave\BetterReflection\SourceLocator\Type\AggregateSourceLocator;
 use Roave\BetterReflection\SourceLocator\Type\DirectoriesSourceLocator;
-use function dump;
 
 /**
  * Generates PHPDoc stub files for factories to enable IDE autocomplete.
@@ -187,10 +185,12 @@ class FactoryStubGenerator
         $reflector = new DefaultReflector(new DirectoriesSourceLocator($directories, $astLocator));
 
         foreach ($reflector->reflectAllClasses() as $class) {
-            if ($class->isAbstract() || $class->isInterface()) {
+            if ($class->isAbstract()) {
                 continue;
             }
-
+            if ($class->isInterface()) {
+                continue;
+            }
             if ($class->getName() === AbstractFactory::class) {
                 continue;
             }
@@ -211,12 +211,6 @@ class FactoryStubGenerator
         return array_values($factories);
     }
 
-    /**
-     * Generate stub content for a single factory class.
-     */
-    /**
-     * @param BetterReflectionClass $reflection
-     */
     private function generateFactoryStub(BetterReflectionClass $reflection): string
     {
         try {
@@ -322,7 +316,7 @@ class FactoryStubGenerator
             $uniqueDirectories[$resolved] = true;
         }
 
-        return array_values(array_keys($uniqueDirectories));
+        return array_keys($uniqueDirectories);
     }
 
     /**
@@ -403,6 +397,6 @@ class FactoryStubGenerator
             return true;
         }
 
-        return preg_match('/^[A-Za-z]:[\\\\\\/]/', $path) === 1;
+        return preg_match('/^[A-Za-z]:[\\\\\/]/', $path) === 1;
     }
 }
