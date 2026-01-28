@@ -4,9 +4,12 @@ includes:
 
 parameters:
 	level: 6
+	phpVersion: 80200
 	excludePaths:
 		- **/node_modules/*
 		- **/vendor/*
+	type_coverage:
+	    constant: 0
 	ignoreErrors:
 	    - '#is used zero times and is not analysed.$#'
 	    - '# will always evaluate to true.$#'

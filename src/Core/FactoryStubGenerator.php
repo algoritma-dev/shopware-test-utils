@@ -16,14 +16,8 @@ use Roave\BetterReflection\SourceLocator\Type\DirectoriesSourceLocator;
  */
 class FactoryStubGenerator
 {
-    /**
-     * @phpstan-ignore-next-line
-     */
     private const STUB_FILE = 'factory-stubs.php';
 
-    /**
-     * @phpstan-ignore-next-line
-     */
     private const META_FILE = '.phpstorm.meta.php';
 
     private readonly string $projectRoot;
