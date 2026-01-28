@@ -183,19 +183,28 @@ class FactoryStubGenerator
         $reflector = new DefaultReflector($filteredLocator);
         $classes = $reflector->reflectAllClasses();
 
+        $processedClasses = [];
+
         foreach ($classes as $class) {
+            if (\in_array($class->getName(), $processedClasses, true)) {
+                continue;
+            }
             if ($class->isAbstract()) {
+                $processedClasses[] = $class->getName();
                 continue;
             }
             if ($class->isInterface()) {
+                $processedClasses[] = $class->getName();
                 continue;
             }
             if ($class->getName() === AbstractFactory::class) {
+                $processedClasses[] = $class->getName();
                 continue;
             }
 
             try {
                 if (! \is_a($class->getName(), AbstractFactory::class, true)) {
+                    $processedClasses[] = $class->getName();
                     continue;
                 }
             } catch (\Throwable) {
@@ -203,6 +212,7 @@ class FactoryStubGenerator
             }
 
             $factories[$class->getNamespaceName()][] = $class;
+            $processedClasses[] = $class->getName();
         }
 
         \ksort($factories);

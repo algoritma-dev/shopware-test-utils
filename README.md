@@ -10,9 +10,20 @@ A comprehensive collection of helpers, factories, and utilities for **Shopware 6
 
 ## 📦 Installation
 
+### Prerequisites
+
+- PHP >= 8.2
+- Shopware 6.7
+- A Shopware project with a working DB configuration (the stub generator boots the kernel)
+
+### Install in your Shopware project
+
 ```bash
 composer require --dev algoritma/shopware-test-utils
 ```
+
+If you plan to use the B2B factories/helpers, install Shopware Commercial (`store.shopware.com/swagcommercial`)
+and make sure the plugin is active (license required).
 
 ---
 
@@ -185,6 +196,71 @@ $quote = (new B2B\QuoteFactory($container))
     ->withOrganization($uuid)       // → 'organizationId'
     ->withExpirationDate($date)     // Magic method
     ->create();
+```
+
+#### Custom factories (your project)
+
+Create project-specific factories by extending `AbstractFactory` and placing them in a namespace that is
+autoloaded (ideally under `autoload-dev` so the stub generator can discover them).
+
+```php
+<?php
+
+namespace Acme\Shopware\Tests\Factory;
+
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
+use Shopware\Core\Framework\Uuid\Uuid;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Acme\Shopware\Core\Content\Badge\BadgeDefinition;
+
+class BadgeFactory extends AbstractFactory
+{
+    public function __construct(ContainerInterface $container)
+    {
+        parent::__construct($container);
+
+        $this->data = [
+            'id' => Uuid::randomHex(),
+            'name' => 'Gold',
+            'priority' => 10,
+            'active' => true,
+        ];
+    }
+
+    public function withPriority(int $priority): self
+    {
+        $this->data['priority'] = $priority;
+
+        return $this;
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'acme_badge.repository';
+    }
+
+    protected function getEntityName(): string
+    {
+        return BadgeDefinition::ENTITY_NAME;
+    }
+}
+```
+
+Notes:
+- You can still rely on magic `with*()`/`set*()` methods for simple fields.
+- For custom entities, ensure the plugin is installed/active so DAL definitions are available to the stub generator.
+- Make sure your `composer.json` includes the namespace in `autoload-dev` and run `composer dump-autoload`.
+
+Example `composer.json` snippet:
+
+```json
+{
+  "autoload-dev": {
+    "psr-4": {
+      "Acme\\Shopware\\Tests\\": "tests/"
+    }
+  }
+}
 ```
 
 ### 🔧 Helpers (Execute Actions)
@@ -590,6 +666,12 @@ class BulkOperationTest extends AbstractIntegrationTestCase
 
 ## 🛠️ Configuration
 
+### Environment
+
+- Configure `DATABASE_URL` in your Shopware project as usual (tests and stub generation boot the kernel).
+- If you rely on `.env.test`, run commands with `APP_ENV=test` or `--env=test`.
+- For parallel testing, see the **Parallel Tests** section above.
+
 ### PHPUnit Configuration
 
 ```xml
@@ -607,6 +689,16 @@ class BulkOperationTest extends AbstractIntegrationTestCase
         </testsuite>
     </testsuites>
 </phpunit>
+```
+
+### PHPStan Stubs
+
+After generating stubs, add the file to your `phpstan.neon`:
+
+```neon
+parameters:
+    stubFiles:
+        - tests/factory-stubs.php
 ```
 
 ### Running Tests
@@ -630,76 +722,64 @@ For detailed architecture documentation, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ---
 
-## 🧩 PHPStorm IDE Support
+## 🧩 IDE and PHPStan Support
 
-### Generating Factory Stubs and Metadata
+### Generate Factory Stubs (PHPStan + PhpStorm)
 
-This library provides IDE support for factory magic methods through auto-generated PHPStorm metadata and PHPStan stubs.
+The stub generator boots the Shopware kernel and scans:
+- Built-in factories in `src/Factory`
+- Any custom factories found in your project's `autoload-dev` paths
 
-#### Generate Stubs
-
-Run the following command to generate IDE autocomplete metadata:
-
-```bash
-composer generate-stubs
-```
-
-Or use the binary directly:
+Run it from your Shopware project root:
 
 ```bash
-vendor/bin/generate-factory-stubs
+composer generate-stubs -- --env=test
 ```
 
-This command generates two files:
+Or call the binary directly:
 
-1. **`.phpstorm.meta.php`** - PHPStorm metadata for autocomplete support
-2. **`tests/factory-stubs.php`** - PHPStan stub file with DAL entity definitions
-
-#### PHPStan Configuration
-
-To enable PHPStan support, add the stub file to your `phpstan.neon`:
-
-```neon
-parameters:
-    stubFiles:
-        - tests/factory-stubs.php
+```bash
+vendor/bin/generate-factory-stubs --env=test
 ```
 
-This allows PHPStan to understand the factory magic methods and provide proper type analysis.
+Default output:
+- `tests/factory-stubs.php` (PHPStan stub file)
+- `tests/.phpstorm.meta.php` (PhpStorm metadata)
 
-#### What It Does
+You can change the output directory:
+
+```bash
+vendor/bin/generate-factory-stubs --env=test --output-dir=var/stubs
+```
+
+### PhpStorm Integration
+
+Add the generated metadata to your project root (copy or include):
+
+```php
+<?php
+
+if (file_exists(__DIR__ . '/tests/.phpstorm.meta.php')) {
+    require __DIR__ . '/tests/.phpstorm.meta.php';
+}
+```
+
+Import live templates from `phpstorm-live-templates.xml` (Settings > Editor > Live Templates > + > Import).
+
+### What It Does
 
 The stub generator:
 - Uses `ComposerPluginLoader` to load Shopware plugins
-- Analyzes all DAL entity definitions via `DalMetadataService`
+- Analyzes DAL entity definitions via `DalMetadataService`
 - Generates type hints for factory magic methods (`with*()` and `set*()`)
-- Enables full IDE autocomplete for entity properties in factories
+- Enables autocomplete for entity properties in factories
 
-#### IDE Integration
-
-After generation, PHPStorm will provide:
-- Autocomplete for all entity properties in factory methods
-- Type checking for method parameters
-- Quick navigation to property definitions
-
-**Example:**
-
-```php
-// PHPStorm will autocomplete these magic methods
-$product = (new ProductFactory($container))
-    ->withName('Test')           // ✓ Autocomplete available
-    ->withPrice(99.99)           // ✓ Type checking enabled
-    ->withManufacturerNumber('') // ✓ Navigation to definition
-    ->create();
-```
-
-#### When to Regenerate
+### When to Regenerate
 
 Run `composer generate-stubs` after:
-- Adding new entity definitions
-- Installing/updating Shopware plugins
-- Modifying entity properties
-- Installing this library for the first time
+- Adding or changing custom factories
+- Installing or updating Shopware plugins
+- Modifying entity definitions
 
 ---
 
