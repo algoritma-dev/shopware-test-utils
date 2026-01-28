@@ -45,7 +45,7 @@ class GenerateStubsCommand extends Command
             return Command::FAILURE;
         }
 
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService, $this->projectRoot);
 
         try {
             $result = $generator->generate($outputDir);

@@ -3,6 +3,12 @@
 namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
+use Roave\BetterReflection\BetterReflection;
+use Roave\BetterReflection\Reflection\ReflectionClass as BetterReflectionClass;
+use Roave\BetterReflection\Reflector\DefaultReflector;
+use Roave\BetterReflection\SourceLocator\Type\AggregateSourceLocator;
+use Roave\BetterReflection\SourceLocator\Type\DirectoriesSourceLocator;
+use function dump;
 
 /**
  * Generates PHPDoc stub files for factories to enable IDE autocomplete.
@@ -22,9 +28,14 @@ class FactoryStubGenerator
      */
     private const META_FILE = '.phpstorm.meta.php';
 
+    private readonly string $projectRoot;
+
     public function __construct(
         private readonly DalMetadataService $metadataService,
-    ) {}
+        ?string $projectRoot = null,
+    ) {
+        $this->projectRoot = $projectRoot ?? (getcwd() ?: '');
+    }
 
     /**
      * Generate stub file with @method annotations for all factories.
@@ -50,7 +61,7 @@ class FactoryStubGenerator
     /**
      * Generate the PHPStan stub file.
      *
-     * @param array<string> $factories
+     * @param array<BetterReflectionClass> $factories
      */
     private function generateStubFile(array $factories, string $outputDir): string
     {
@@ -60,19 +71,18 @@ class FactoryStubGenerator
         $stubContent .= "// @see https://phpstan.org/user-guide/stub-files\n\n";
         $classesByNamespace = [];
 
-        foreach ($factories as $factoryClass) {
-            try {
-                $reflection = new \ReflectionClass($factoryClass);
-                $classesByNamespace[$reflection->getNamespaceName()][] = $reflection;
-            } catch (\ReflectionException) {
-                continue;
-            }
+        foreach ($factories as $reflection) {
+            $classesByNamespace[$reflection->getNamespaceName()][] = $reflection;
         }
 
         ksort($classesByNamespace);
 
         foreach ($classesByNamespace as $namespace => $classes) {
             $stubContent .= "namespace {$namespace} {\n\n";
+            usort(
+                $classes,
+                static fn (BetterReflectionClass $left, BetterReflectionClass $right): int => strcmp($left->getName(), $right->getName())
+            );
             foreach ($classes as $reflection) {
                 $stubContent .= $this->generateFactoryStub($reflection);
             }
@@ -96,7 +106,7 @@ class FactoryStubGenerator
     /**
      * Generate the PhpStorm meta file.
      *
-     * @param array<string> $factories
+     * @param array<BetterReflectionClass> $factories
      */
     private function generateMetaFile(array $factories, string $outputDir): string
     {
@@ -113,10 +123,9 @@ class FactoryStubGenerator
 
         // Collect all unique method names
         $allMethods = [];
-        foreach ($factories as $factoryClass) {
+        foreach ($factories as $reflection) {
             try {
-                $reflection = new \ReflectionClass($factoryClass);
-                $properties = $this->extractFactoryProperties($reflection);
+                $properties = $this->extractFactoryProperties($reflection->getName());
                 foreach ($properties as $property) {
                     // Removes Id suffix from property name
                     $property = \preg_replace('/Id$/i', '', (string) $property['name']);
@@ -161,40 +170,57 @@ class FactoryStubGenerator
     /**
      * Find all declared factory classes.
      *
-     * @return array<string>
+     * @return array<BetterReflectionClass>
      */
     private function findFactories(): array
     {
+        $directories = $this->getFactoryDirectories();
         $factories = [];
 
-        foreach (get_declared_classes() as $className) {
-            if ($className === AbstractFactory::class) {
-                continue;
-            }
-
-            if (! is_subclass_of($className, AbstractFactory::class)) {
-                continue;
-            }
-
-            $factories[] = $className;
+        if ($directories === []) {
+            return [];
         }
 
-        $factories = array_values(array_unique($factories));
-        sort($factories);
+        $betterReflection = new BetterReflection();
+        $astLocator = $betterReflection->astLocator();
 
-        return $factories;
+        $reflector = new DefaultReflector(new DirectoriesSourceLocator($directories, $astLocator));
+
+        foreach ($reflector->reflectAllClasses() as $class) {
+            if ($class->isAbstract() || $class->isInterface()) {
+                continue;
+            }
+
+            if ($class->getName() === AbstractFactory::class) {
+                continue;
+            }
+
+            try {
+                if (! $class->isSubclassOf(AbstractFactory::class)) {
+                    continue;
+                }
+            } catch (\Throwable) {
+                continue;
+            }
+
+            $factories[$class->getName()] = $class;
+        }
+
+        ksort($factories);
+
+        return array_values($factories);
     }
 
     /**
      * Generate stub content for a single factory class.
      */
     /**
-     * @param \ReflectionClass<object> $reflection
+     * @param BetterReflectionClass $reflection
      */
-    private function generateFactoryStub(\ReflectionClass $reflection): string
+    private function generateFactoryStub(BetterReflectionClass $reflection): string
     {
         try {
-            $properties = $this->extractFactoryProperties($reflection);
+            $properties = $this->extractFactoryProperties($reflection->getName());
 
             if ($properties === []) {
                 return '';
@@ -234,13 +260,12 @@ class FactoryStubGenerator
      * @return list<array{name: string, type: string}>
      */
     /**
-     * @param \ReflectionClass<object> $reflection
-     *
      * @return list<array{name: string, type: string}>
      */
-    private function extractFactoryProperties(\ReflectionClass $reflection): array
+    private function extractFactoryProperties(string $factoryClass): array
     {
         try {
+            $reflection = new \ReflectionClass($factoryClass);
             // Get entity class from factory
             $factory = $reflection->newInstanceWithoutConstructor();
             $method = $reflection->getMethod('getEntityName');
@@ -272,5 +297,112 @@ class FactoryStubGenerator
         } catch (\Exception) {
             return [];
         }
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getFactoryDirectories(): array
+    {
+        $directories = $this->getAutoloadDevDirectories();
+
+        $toolFactoryDirectory = dirname(__DIR__) . '/Factory';
+        if (is_dir($toolFactoryDirectory)) {
+            $directories[] = $toolFactoryDirectory;
+        }
+
+        $uniqueDirectories = [];
+
+        foreach ($directories as $directory) {
+            $resolved = realpath($directory) ?: $directory;
+            if (! is_dir($resolved)) {
+                continue;
+            }
+
+            $uniqueDirectories[$resolved] = true;
+        }
+
+        return array_values(array_keys($uniqueDirectories));
+    }
+
+    /**
+     * @return list<string>
+     */
+    private function getAutoloadDevDirectories(): array
+    {
+        if ($this->projectRoot === '') {
+            return [];
+        }
+
+        $composerFile = rtrim($this->projectRoot, '/\\') . '/composer.json';
+        if (! is_file($composerFile)) {
+            return [];
+        }
+
+        $composerContents = file_get_contents($composerFile);
+        if ($composerContents === false) {
+            return [];
+        }
+
+        $composerData = json_decode($composerContents, true);
+        if (! is_array($composerData)) {
+            return [];
+        }
+
+        $autoloadDev = $composerData['autoload-dev'] ?? null;
+        if (! is_array($autoloadDev)) {
+            return [];
+        }
+
+        $paths = [];
+        foreach (['psr-4', 'classmap'] as $autoloadType) {
+            $definitions = $autoloadDev[$autoloadType] ?? null;
+            if (! is_array($definitions)) {
+                continue;
+            }
+
+            foreach ($definitions as $pathDefinition) {
+                if (is_string($pathDefinition)) {
+                    $paths[] = $pathDefinition;
+                    continue;
+                }
+
+                if (is_array($pathDefinition)) {
+                    foreach ($pathDefinition as $path) {
+                        if (is_string($path)) {
+                            $paths[] = $path;
+                        }
+                    }
+                }
+            }
+        }
+
+        $directories = [];
+        foreach ($paths as $path) {
+            $resolved = $this->normalizePath($path);
+            if (is_dir($resolved)) {
+                $directories[] = $resolved;
+            }
+        }
+
+        return $directories;
+    }
+
+    private function normalizePath(string $path): string
+    {
+        if ($this->isAbsolutePath($path)) {
+            return rtrim($path, '/\\');
+        }
+
+        return rtrim($this->projectRoot, '/\\') . '/' . ltrim($path, '/\\');
+    }
+
+    private function isAbsolutePath(string $path): bool
+    {
+        if (str_starts_with($path, '/')) {
+            return true;
+        }
+
+        return preg_match('/^[A-Za-z]:[\\\\\\/]/', $path) === 1;
     }
 }
