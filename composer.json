@@ -60,8 +60,14 @@
         "phpunit": "phpunit -c phpunit.xml",
         "qa": [
             "@phpstan",
-            "@cs-check",
             "@rector-check",
+            "@cs-check",
+            "@phpunit"
+        ],
+        "qa-fix": [
+            "@phpstan",
+            "@rector-fix",
+            "@cs-fix",
             "@phpunit"
         ],
         "pre-commit": "@qa",

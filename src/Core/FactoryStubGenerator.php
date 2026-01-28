@@ -3,12 +3,11 @@
 namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Symfony\Component\Finder\Finder;
 
 /**
  * Generates PHPDoc stub files for factories to enable IDE autocomplete.
  *
- * This class scans all factory classes and generates @method annotations
+ * This class scans declared factory classes and generates @method annotations
  * based on the properties defined in the factory's $data array.
  */
 class FactoryStubGenerator
@@ -34,8 +33,7 @@ class FactoryStubGenerator
      */
     public function generate(string $outputDir): array
     {
-        $factoryDir = __DIR__ . '/../Factory';
-        $factories = $this->findFactories($factoryDir);
+        $factories = $this->findFactories();
 
         // Generate PHPStan stub file
         $stubPath = $this->generateStubFile($factories, $outputDir);
@@ -161,24 +159,28 @@ class FactoryStubGenerator
     }
 
     /**
-     * Find all factory classes in the given directory.
+     * Find all declared factory classes.
      *
      * @return array<string>
      */
-    private function findFactories(string $directory): array
+    private function findFactories(): array
     {
-        $finder = new Finder();
-        $finder->files()->in($directory)->name('*Factory.php');
-
         $factories = [];
 
-        foreach ($finder as $file) {
-            $relativePath = str_replace([__DIR__ . '/../', '.php', '/'], ['', '', '\\'], $file->getPathname());
-            $className = 'Algoritma\ShopwareTestUtils\\' . $relativePath;
-            if (class_exists($className) && $className !== AbstractFactory::class) {
-                $factories[] = $className;
+        foreach (get_declared_classes() as $className) {
+            if ($className === AbstractFactory::class) {
+                continue;
             }
+
+            if (! is_subclass_of($className, AbstractFactory::class)) {
+                continue;
+            }
+
+            $factories[] = $className;
         }
+
+        $factories = array_values(array_unique($factories));
+        sort($factories);
 
         return $factories;
     }

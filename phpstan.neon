@@ -1,6 +1,6 @@
 includes:
     - phpstan-baseline.neon
-	- phpstan-algoritma-config.php
+    - phpstan-algoritma-config.php
 
 parameters:
 	level: 6
@@ -10,3 +10,6 @@ parameters:
 	ignoreErrors:
 	    - '#is used zero times and is not analysed.$#'
 	    - '# will always evaluate to true.$#'
+	    -
+	        message: '#Multiple class/interface/trait is not allowed in single file#'
+	        path: tests/
