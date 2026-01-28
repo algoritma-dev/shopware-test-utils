@@ -12,6 +12,7 @@
         "php": ">=8.2",
         "shopware/core": "~6.6.10|^6.7",
         "fakerphp/faker": "^1.24",
+        "roave/better-reflection": "^6.0",
         "symfony/finder": "^7.0|^8.0",
         "symfony/process": "^7.0|^8.0",
         "ext-pdo": "*"
