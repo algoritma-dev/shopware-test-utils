@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Algoritma\ShopwareTestUtils;
 
 use Algoritma\ShopwareTestUtils\DependencyInjection\CompilerPass\FactoryRegistryCompilerPass;
-use Shopware\Core\Framework\Plugin;
+use Shopware\Core\Framework\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class ShopwareTestUtils extends Plugin
+class ShopwareTestUtils extends Bundle
 {
     public function build(ContainerBuilder $container): void
     {

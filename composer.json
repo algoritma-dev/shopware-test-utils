@@ -1,7 +1,7 @@
 {
     "name": "algoritma/shopware-test-utils",
     "description": "A collection of helpers for Shopware 6 integration/functional tests.",
-    "type": "shopware-platform-plugin",
+    "type": "library",
     "authors": [
         {
             "name": "Algoritma srl",
@@ -26,9 +26,6 @@
         "psr-4": {
             "Algoritma\\ShopwareTestUtils\\Tests\\": "tests/"
         }
-    },
-    "extra": {
-        "shopware-plugin-class": "Algoritma\\ShopwareTestUtils\\ShopwareTestUtils"
     },
     "suggest": {
         "store.shopware.com/swagcommercial": "Enables the B2B extension for functional tests."
