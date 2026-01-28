@@ -7,6 +7,7 @@ namespace Algoritma\ShopwareTestUtils\Core;
 use Shopware\Core\Framework\DataAbstractionLayer\AttributeEntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
+use Shopware\Core\Framework\DataAbstractionLayer\Exception\DefinitionNotFoundException;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\AssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\Field;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
@@ -109,15 +110,15 @@ class DalMetadataService
             return null;
         }
 
-        $getter = 'get' . ucfirst($propertyName);
-        $setter = 'set' . ucfirst($propertyName);
+        $getter = 'get' . \ucfirst($propertyName);
+        $setter = 'set' . \ucfirst($propertyName);
 
         if ($field instanceof AssociationField) {
             $referenceDefinition = $field->getReferenceDefinition();
             $referenceEntityClass = $referenceDefinition->getEntityClass();
             $relationType = $this->getRelationType($field);
 
-            if (in_array($relationType, ['OneToMany', 'ManyToMany'])) {
+            if (\in_array($relationType, ['OneToMany', 'ManyToMany'])) {
                 // Collection
                 $collectionClass = $referenceDefinition->getCollectionClass();
 
@@ -209,7 +210,7 @@ class DalMetadataService
         foreach ($associations as $association) {
             $field = $definition->getFields()->get($association);
             if ($field instanceof AssociationField) {
-                $getter = 'get' . ucfirst((string) $association);
+                $getter = 'get' . \ucfirst((string) $association);
                 $code .= "{$entityVar}->{$getter}(); // Access {$association}\n";
             }
         }
@@ -233,7 +234,7 @@ class DalMetadataService
             ];
         }
 
-        usort($entities, fn (array $a, array $b): int => $a['name'] <=> $b['name']);
+        \usort($entities, fn (array $a, array $b): int => $a['name'] <=> $b['name']);
 
         return $entities;
     }
@@ -295,8 +296,8 @@ class DalMetadataService
                 'reference_entity' => $referenceDefinition->getEntityName(),
                 'reference_class' => $referenceDefinition->getEntityClass(),
                 'reference_definition' => $referenceDefinition::class,
-                'getter' => 'get' . ucfirst($propertyName),
-                'setter' => 'set' . ucfirst($propertyName),
+                'getter' => 'get' . \ucfirst($propertyName),
+                'setter' => 'set' . \ucfirst($propertyName),
             ];
 
             if ($field instanceof ManyToOneAssociationField) {
@@ -359,7 +360,7 @@ class DalMetadataService
     {
         $class = $field::class;
 
-        return substr($class, strrpos($class, '\\') + 1);
+        return \substr($class, \strrpos($class, '\\') + 1);
     }
 
     private function getPhpType(Field $field): string
@@ -381,19 +382,10 @@ class DalMetadataService
 
     private function findDefinition(string $entityName): ?EntityDefinition
     {
-        foreach ($this->definitionRegistry->getDefinitions() as $definition) {
-            if ($definition->getEntityName() === $entityName) {
-                return $definition;
-            }
+        try {
+            return $this->definitionRegistry->getByEntityName($entityName);
+        } catch (DefinitionNotFoundException) {
+            return null;
         }
-
-        // Also try with partial search on the class name
-        foreach ($this->definitionRegistry->getDefinitions() as $definition) {
-            if (str_contains(strtolower($definition::class), strtolower($entityName))) {
-                return $definition;
-            }
-        }
-
-        return null;
     }
 }

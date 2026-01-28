@@ -7,6 +7,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Core;
 use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
@@ -31,7 +32,7 @@ class DalMetadataServiceTest extends TestCase
 
     public function testGetEntityMetadataReturnsNullForNonExistentEntity(): void
     {
-        $this->registry->method('getDefinitions')->willReturn([]);
+        $this->registry->method('getByEntityName')->willThrowException(DataAbstractionLayerException::definitionNotFound('non_existent'));
 
         $result = $this->service->getEntityMetadata('non_existent');
 
@@ -55,7 +56,7 @@ class DalMetadataServiceTest extends TestCase
             }
         };
 
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->getEntityMetadata('mapping_entity');
 
@@ -65,7 +66,7 @@ class DalMetadataServiceTest extends TestCase
     public function testGetEntityMetadataReturnsMetadataForValidEntity(): void
     {
         $definition = $this->createMockDefinition();
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->getEntityMetadata('test_entity');
 
@@ -81,7 +82,7 @@ class DalMetadataServiceTest extends TestCase
 
     public function testGetEntityRelationsReturnsEmptyArrayForNonExistentEntity(): void
     {
-        $this->registry->method('getDefinitions')->willReturn([]);
+        $this->registry->method('getByEntityName')->willThrowException(DataAbstractionLayerException::definitionNotFound('non_existent'));
 
         $result = $this->service->getEntityRelations('non_existent');
 
@@ -91,7 +92,7 @@ class DalMetadataServiceTest extends TestCase
     public function testGetEntityRelationsReturnsRelationsForValidEntity(): void
     {
         $definition = $this->createMockDefinition();
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->getEntityRelations('test_entity');
 
@@ -100,7 +101,7 @@ class DalMetadataServiceTest extends TestCase
 
     public function testGetEntityPropertiesReturnsEmptyArrayForNonExistentEntity(): void
     {
-        $this->registry->method('getDefinitions')->willReturn([]);
+        $this->registry->method('getByEntityName')->willThrowException(DataAbstractionLayerException::definitionNotFound('non_existent'));
 
         $result = $this->service->getEntityProperties('non_existent');
 
@@ -110,7 +111,7 @@ class DalMetadataServiceTest extends TestCase
     public function testGetEntityPropertiesReturnsPropertiesForValidEntity(): void
     {
         $definition = $this->createMockDefinition();
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->getEntityProperties('test_entity');
 
@@ -122,7 +123,7 @@ class DalMetadataServiceTest extends TestCase
 
     public function testGetPropertyMethodsReturnsNullForNonExistentEntity(): void
     {
-        $this->registry->method('getDefinitions')->willReturn([]);
+        $this->registry->method('getByEntityName')->willThrowException(DataAbstractionLayerException::definitionNotFound('non_existent'));
 
         $result = $this->service->getPropertyMethods('non_existent', 'property');
 
@@ -132,7 +133,7 @@ class DalMetadataServiceTest extends TestCase
     public function testGetPropertyMethodsReturnsNullForNonExistentProperty(): void
     {
         $definition = $this->createMockDefinition();
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->getPropertyMethods('test_entity', 'non_existent_property');
 
@@ -142,7 +143,7 @@ class DalMetadataServiceTest extends TestCase
     public function testGetPropertyMethodsReturnsMethodsForValidProperty(): void
     {
         $definition = $this->createMockDefinition();
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->getPropertyMethods('test_entity', 'name');
 
@@ -159,7 +160,7 @@ class DalMetadataServiceTest extends TestCase
 
     public function testGetAssociationPathReturnsNullForNonExistentEntity(): void
     {
-        $this->registry->method('getDefinitions')->willReturn([]);
+        $this->registry->method('getByEntityName')->willThrowException(DataAbstractionLayerException::definitionNotFound('non_existent'));
 
         $result = $this->service->getAssociationPath('non_existent', 'association');
 
@@ -169,7 +170,7 @@ class DalMetadataServiceTest extends TestCase
     public function testGetAssociationPathReturnsNullForNonAssociationField(): void
     {
         $definition = $this->createMockDefinition();
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->getAssociationPath('test_entity', 'name');
 
@@ -178,7 +179,7 @@ class DalMetadataServiceTest extends TestCase
 
     public function testGenerateLoadExampleReturnsEmptyStringForNonExistentEntity(): void
     {
-        $this->registry->method('getDefinitions')->willReturn([]);
+        $this->registry->method('getByEntityName')->willThrowException(DataAbstractionLayerException::definitionNotFound('non_existent'));
 
         $result = $this->service->generateLoadExample('non_existent', []);
 
@@ -188,7 +189,7 @@ class DalMetadataServiceTest extends TestCase
     public function testGenerateLoadExampleGeneratesCode(): void
     {
         $definition = $this->createMockDefinition();
-        $this->registry->method('getDefinitions')->willReturn([$definition]);
+        $this->registry->method('getByEntityName')->willReturn($definition);
 
         $result = $this->service->generateLoadExample('test_entity', []);
 
