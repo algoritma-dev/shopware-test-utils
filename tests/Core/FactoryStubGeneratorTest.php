@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Algoritma\ShopwareTestUtils\Tests\Core;
 
 use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
+use Algoritma\ShopwareTestUtils\Core\FactoryRegistry;
 use Algoritma\ShopwareTestUtils\Core\FactoryStubGenerator;
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -15,6 +16,8 @@ class FactoryStubGeneratorTest extends TestCase
     private string $tempDir;
 
     private DalMetadataService&MockObject $metadataService;
+
+    private FactoryRegistry $factoryRegistry;
 
     protected function setUp(): void
     {
@@ -32,6 +35,8 @@ class FactoryStubGeneratorTest extends TestCase
             ->willReturn([
                 'category' => ['name' => 'category', 'reference_class' => 'CategoryEntity'],
             ]);
+
+        $this->factoryRegistry = new FactoryRegistry();
     }
 
     protected function tearDown(): void
@@ -43,7 +48,7 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateCreatesStubFile(): void
     {
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         $result = $generator->generate($this->tempDir);
 
@@ -55,7 +60,9 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateStubFileContainsExpectedContent(): void
     {
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $this->factoryRegistry->registerFactoryClass(DeclaredTestFactory::class);
+
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         $result = $generator->generate($this->tempDir . '/tests');
 
@@ -68,7 +75,7 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateMetaFileContainsExpectedContent(): void
     {
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         $result = $generator->generate($this->tempDir . '/tests');
 
@@ -82,7 +89,7 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateReturnsCorrectPaths(): void
     {
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         $result = $generator->generate($this->tempDir . '/tests');
 
@@ -93,9 +100,9 @@ class FactoryStubGeneratorTest extends TestCase
         $this->assertSame($expectedMetaPath, $result['meta']);
     }
 
-    public function testGenerateHandlesEmptyFactoryDirectory(): void
+    public function testGenerateHandlesEmptyFactoryRegistry(): void
     {
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         $result = $generator->generate($this->tempDir . '/tests');
 
@@ -103,7 +110,7 @@ class FactoryStubGeneratorTest extends TestCase
         $this->assertFileExists($result['meta']);
 
         $stubContent = file_get_contents($result['stub']);
-        $this->assertStringContainsString('namespace Algoritma\ShopwareTestUtils\Tests\Core', $stubContent);
+        $this->assertStringNotContainsString('namespace Algoritma\ShopwareTestUtils\Tests\Core', $stubContent);
     }
 
     public function testGenerateOverwritesExistingFiles(): void
@@ -114,7 +121,7 @@ class FactoryStubGeneratorTest extends TestCase
         file_put_contents($stubPath, 'old content');
         file_put_contents($metaPath, 'old content');
 
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         $result = $generator->generate($this->tempDir . '/tests');
 
@@ -129,7 +136,9 @@ class FactoryStubGeneratorTest extends TestCase
 
     public function testGenerateIncludesDeclaredFactories(): void
     {
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $this->factoryRegistry->registerFactoryClass(DeclaredTestFactory::class);
+
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         $result = $generator->generate($this->tempDir . '/tests');
 

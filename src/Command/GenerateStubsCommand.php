@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Algoritma\ShopwareTestUtils\Command;
 
 use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
+use Algoritma\ShopwareTestUtils\Core\FactoryRegistry;
 use Algoritma\ShopwareTestUtils\Core\FactoryStubGenerator;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -20,7 +21,8 @@ class GenerateStubsCommand extends Command
 {
     public function __construct(
         private readonly string $projectRoot,
-        private readonly DalMetadataService $metadataService
+        private readonly DalMetadataService $metadataService,
+        private readonly FactoryRegistry $factoryRegistry
     ) {
         parent::__construct();
     }
@@ -45,7 +47,7 @@ class GenerateStubsCommand extends Command
             return Command::FAILURE;
         }
 
-        $generator = new FactoryStubGenerator($this->metadataService);
+        $generator = new FactoryStubGenerator($this->metadataService, $this->factoryRegistry);
 
         try {
             $result = $generator->generate($outputDir);

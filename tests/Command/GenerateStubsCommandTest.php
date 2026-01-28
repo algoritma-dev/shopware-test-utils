@@ -6,6 +6,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Command;
 
 use Algoritma\ShopwareTestUtils\Command\GenerateStubsCommand;
 use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
+use Algoritma\ShopwareTestUtils\Core\FactoryRegistry;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
@@ -13,12 +14,16 @@ class GenerateStubsCommandTest extends TestCase
 {
     private string $tempDir;
 
+    private FactoryRegistry $factoryRegistry;
+
     protected function setUp(): void
     {
         $this->tempDir = sys_get_temp_dir() . '/sw-test-suite-' . uniqid();
         mkdir($this->tempDir, 0o777, true);
         mkdir($this->tempDir . '/tests', 0o777, true);
         // Do not create .phpstorm.meta.php as a directory, it is expected to be a file
+
+        $this->factoryRegistry = new FactoryRegistry();
     }
 
     protected function tearDown(): void
@@ -34,7 +39,7 @@ class GenerateStubsCommandTest extends TestCase
         $metadataService->method('getEntityProperties')->willReturn([]);
         $metadataService->method('getEntityRelations')->willReturn([]);
 
-        $command = new GenerateStubsCommand($this->tempDir, $metadataService);
+        $command = new GenerateStubsCommand($this->tempDir, $metadataService, $this->factoryRegistry);
         $commandTester = new CommandTester($command);
 
         $exitCode = $commandTester->execute([], ['interactive' => false, 'decorated' => false]);
@@ -49,7 +54,7 @@ class GenerateStubsCommandTest extends TestCase
         $metadataService->method('getEntityProperties')->willReturn([]);
         $metadataService->method('getEntityRelations')->willReturn([]);
 
-        $command = new GenerateStubsCommand($this->tempDir, $metadataService);
+        $command = new GenerateStubsCommand($this->tempDir, $metadataService, $this->factoryRegistry);
         $commandTester = new CommandTester($command);
 
         $commandTester->execute([], ['interactive' => false, 'decorated' => false]);
@@ -65,7 +70,7 @@ class GenerateStubsCommandTest extends TestCase
     {
         // Use a file path that is definitely not writable
         $nonExistentDir = '/non-existent-directory-' . uniqid();
-        $command = new GenerateStubsCommand($nonExistentDir, $this->createMock(DalMetadataService::class));
+        $command = new GenerateStubsCommand($nonExistentDir, $this->createMock(DalMetadataService::class), $this->factoryRegistry);
         $commandTester = new CommandTester($command);
 
         $exitCode = $commandTester->execute([], ['interactive' => false, 'decorated' => false]);
@@ -77,7 +82,7 @@ class GenerateStubsCommandTest extends TestCase
     public function testCommandConfiguration(): void
     {
         $metadataService = $this->createMock(DalMetadataService::class);
-        $command = new GenerateStubsCommand($this->tempDir, $metadataService);
+        $command = new GenerateStubsCommand($this->tempDir, $metadataService, $this->factoryRegistry);
 
         $this->assertSame('alg:sw-test-util:generate-stubs', $command->getName());
         $this->assertSame('Generates PHPStan and PhpStorm stub files for factory classes', $command->getDescription());

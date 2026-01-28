@@ -1,7 +1,7 @@
 {
     "name": "algoritma/shopware-test-utils",
     "description": "A collection of helpers for Shopware 6 integration/functional tests.",
-    "type": "library",
+    "type": "shopware-platform-plugin",
     "authors": [
         {
             "name": "Algoritma srl",
@@ -27,6 +27,9 @@
             "Algoritma\\ShopwareTestUtils\\Tests\\": "tests/"
         }
     },
+    "extra": {
+        "shopware-plugin-class": "Algoritma\\ShopwareTestUtils\\ShopwareTestUtils"
+    },
     "suggest": {
         "store.shopware.com/swagcommercial": "Enables the B2B extension for functional tests."
     },
@@ -48,9 +51,6 @@
         "phpstan/phpstan-phpunit": "^2.0",
         "algoritma/castor-recipes": "dev-main"
     },
-    "bin": [
-        "bin/generate-factory-stubs"
-    ],
     "scripts": {
         "cs-check": "php-cs-fixer fix --dry-run --diff",
         "cs-fix": "php-cs-fixer fix --diff",
