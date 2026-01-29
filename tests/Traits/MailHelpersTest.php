@@ -8,6 +8,9 @@ use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Mailer\Envelope;
+use Symfony\Component\Mailer\Event\SentMessageEvent;
+use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
@@ -37,7 +40,10 @@ class MailHelpersTest extends TestCase
     public function testAssertMailSent(): void
     {
         $email = new Email();
-        $this->capturedEmails[] = $email;
+        $email->from(new Address('from@example.com'));
+        $email->to(new Address('test@example.com'));
+        $email->text('test body');
+        $this->captureEmail($email);
 
         $this->assertMailSent(1);
     }
@@ -46,7 +52,9 @@ class MailHelpersTest extends TestCase
     {
         $email = new Email();
         $email->to(new Address('test@example.com'));
-        $this->capturedEmails[] = $email;
+        $email->from(new Address('from@example.com'));
+        $email->text('test body');
+        $this->captureEmail($email);
 
         $this->assertMailSentTo('test@example.com');
     }
@@ -54,5 +62,13 @@ class MailHelpersTest extends TestCase
     protected static function getContainer(): ContainerInterface
     {
         return self::$container;
+    }
+
+    private function captureEmail(Email $email): void
+    {
+        $sentMessage = new SentMessage($email, Envelope::create($email));
+        $event = new SentMessageEvent($sentMessage);
+
+        $this->getMailCaptureHelper()->captureFromEvent($event);
     }
 }

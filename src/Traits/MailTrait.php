@@ -2,38 +2,43 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
-use PHPUnit\Framework\Assert;
+use Algoritma\ShopwareTestUtils\Helper\MailCaptureHelper;
 use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
-use Symfony\Component\Mailer\Event\MessageEvent;
+use Symfony\Component\Mailer\Event\SentMessageEvent;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Mime\RawMessage;
 
 trait MailTrait
 {
     use KernelTestBehaviour;
     use EventDispatcherBehaviour;
 
-    /**
-     * @var array<int, RawMessage>
-     */
-    private array $capturedEmails = [];
+    private ?MailCaptureHelper $mailCaptureHelper = null;
+
+    protected function getMailCaptureHelper(): MailCaptureHelper
+    {
+        if (! $this->mailCaptureHelper instanceof MailCaptureHelper) {
+            $this->mailCaptureHelper = new MailCaptureHelper();
+        }
+
+        return $this->mailCaptureHelper;
+    }
 
     /**
      * Starts capturing sent emails.
      */
     protected function captureEmails(): void
     {
-        $this->capturedEmails = [];
+        $this->getMailCaptureHelper()->clearCapturedEmails();
 
-        // Subscribe to MessageEvent to capture emails
+        // Subscribe to SentMessageEvent to capture sent emails
         $dispatcher = self::getContainer()->get('event_dispatcher');
-
-        $callback = function (MessageEvent $event): void {
-            $this->capturedEmails[] = $event->getMessage();
+        $helper = $this->getMailCaptureHelper();
+        $callback = static function (SentMessageEvent $event) use ($helper): void {
+            $helper->captureFromEvent($event);
         };
 
-        $this->addEventListener($dispatcher, MessageEvent::class, $callback);
+        $this->addEventListener($dispatcher, SentMessageEvent::class, $callback);
     }
 
     /**
@@ -41,13 +46,7 @@ trait MailTrait
      */
     protected function assertMailSent(int $count = 1): void
     {
-        $actualCount = count($this->capturedEmails);
-
-        Assert::assertEquals(
-            $count,
-            $actualCount,
-            sprintf('Expected %d emails to be sent, but %d were sent', $count, $actualCount)
-        );
+        $this->getMailCaptureHelper()->assertMailSent($count);
     }
 
     /**
@@ -55,11 +54,7 @@ trait MailTrait
      */
     protected function assertMailWasSent(): void
     {
-        Assert::assertGreaterThan(
-            0,
-            count($this->capturedEmails),
-            'Expected at least one email to be sent, but none were sent'
-        );
+        $this->getMailCaptureHelper()->assertMailWasSent();
     }
 
     /**
@@ -67,10 +62,7 @@ trait MailTrait
      */
     protected function assertNoMailSent(): void
     {
-        Assert::assertEmpty(
-            $this->capturedEmails,
-            sprintf('Expected no emails to be sent, but %d were sent', count($this->capturedEmails))
-        );
+        $this->getMailCaptureHelper()->assertNoMailSent();
     }
 
     /**
@@ -78,26 +70,7 @@ trait MailTrait
      */
     protected function assertMailSentTo(string $email): void
     {
-        $found = false;
-
-        foreach ($this->capturedEmails as $message) {
-            if (! $message instanceof Email) {
-                continue;
-            }
-
-            $recipients = $message->getTo();
-            foreach ($recipients as $recipient) {
-                if ($recipient->getAddress() === $email) {
-                    $found = true;
-                    break 2;
-                }
-            }
-        }
-
-        Assert::assertTrue(
-            $found,
-            sprintf('No email was sent to "%s"', $email)
-        );
+        $this->getMailCaptureHelper()->assertMailSentTo($email);
     }
 
     /**
@@ -105,23 +78,7 @@ trait MailTrait
      */
     protected function assertMailWithSubject(string $subject): void
     {
-        $found = false;
-
-        foreach ($this->capturedEmails as $message) {
-            if (! $message instanceof Email) {
-                continue;
-            }
-
-            if ($message->getSubject() === $subject) {
-                $found = true;
-                break;
-            }
-        }
-
-        Assert::assertTrue(
-            $found,
-            sprintf('No email with subject "%s" was sent', $subject)
-        );
+        $this->getMailCaptureHelper()->assertMailWithSubject($subject);
     }
 
     /**
@@ -129,35 +86,17 @@ trait MailTrait
      */
     protected function assertMailContains(string $text): void
     {
-        $found = false;
-
-        foreach ($this->capturedEmails as $message) {
-            if (! $message instanceof Email) {
-                continue;
-            }
-
-            $body = $message->getHtmlBody() ?? $message->getTextBody() ?? '';
-
-            if (str_contains($body, $text)) {
-                $found = true;
-                break;
-            }
-        }
-
-        Assert::assertTrue(
-            $found,
-            sprintf('No email contains the text "%s"', $text)
-        );
+        $this->getMailCaptureHelper()->assertMailContains($text);
     }
 
     /**
      * Gets all captured emails.
      *
-     * @return array<int, RawMessage>
+     * @return array<int, Email>
      */
     protected function getCapturedEmails(): array
     {
-        return $this->capturedEmails;
+        return $this->getMailCaptureHelper()->getCapturedEmails();
     }
 
     /**
@@ -165,13 +104,7 @@ trait MailTrait
      */
     protected function getLastEmail(): ?Email
     {
-        if (empty($this->capturedEmails)) {
-            return null;
-        }
-
-        $lastMessage = end($this->capturedEmails);
-
-        return $lastMessage instanceof Email ? $lastMessage : null;
+        return $this->getMailCaptureHelper()->getLastEmail();
     }
 
     /**
@@ -179,7 +112,7 @@ trait MailTrait
      */
     protected function clearCapturedEmails(): void
     {
-        $this->capturedEmails = [];
+        $this->getMailCaptureHelper()->clearCapturedEmails();
     }
 
     /**
@@ -187,26 +120,7 @@ trait MailTrait
      */
     protected function assertMailSentFrom(string $email): void
     {
-        $found = false;
-
-        foreach ($this->capturedEmails as $message) {
-            if (! $message instanceof Email) {
-                continue;
-            }
-
-            $from = $message->getFrom();
-            foreach ($from as $sender) {
-                if ($sender->getAddress() === $email) {
-                    $found = true;
-                    break 2;
-                }
-            }
-        }
-
-        Assert::assertTrue(
-            $found,
-            sprintf('No email was sent from "%s"', $email)
-        );
+        $this->getMailCaptureHelper()->assertMailSentFrom($email);
     }
 
     /**
@@ -214,25 +128,7 @@ trait MailTrait
      */
     protected function assertMailHasAttachment(string $filename): void
     {
-        $found = false;
-
-        foreach ($this->capturedEmails as $message) {
-            if (! $message instanceof Email) {
-                continue;
-            }
-
-            foreach ($message->getAttachments() as $attachment) {
-                if ($attachment->getFilename() === $filename) {
-                    $found = true;
-                    break 2;
-                }
-            }
-        }
-
-        Assert::assertTrue(
-            $found,
-            sprintf('No email has attachment "%s"', $filename)
-        );
+        $this->getMailCaptureHelper()->assertMailHasAttachment($filename);
     }
 
     /**
@@ -240,19 +136,6 @@ trait MailTrait
      */
     protected function findEmailByRecipient(string $email): ?Email
     {
-        foreach ($this->capturedEmails as $message) {
-            if (! $message instanceof Email) {
-                continue;
-            }
-
-            $recipients = $message->getTo();
-            foreach ($recipients as $recipient) {
-                if ($recipient->getAddress() === $email) {
-                    return $message;
-                }
-            }
-        }
-
-        return null;
+        return $this->getMailCaptureHelper()->findEmailByRecipient($email);
     }
 }
