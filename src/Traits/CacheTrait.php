@@ -3,9 +3,6 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use PHPUnit\Framework\Assert;
-use PHPUnit\Framework\Attributes\After;
-use PHPUnit\Framework\Attributes\Before;
-use Shopware\Core\Framework\Test\TestCacheClearer;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
@@ -68,7 +65,7 @@ trait CacheTrait
     /**
      * Gets a value from cache.
      */
-    protected function getCachedValue(string $key, string $poolName = 'cache.app')
+    protected function getCachedValue(string $key, string $poolName = 'cache.app'): mixed
     {
         $pool = self::getContainer()->get($poolName);
 
@@ -84,7 +81,7 @@ trait CacheTrait
     /**
      * Sets a value in cache.
      */
-    protected function setCachedValue(string $key, $value, int $ttl = 3600, string $poolName = 'cache.app'): void
+    protected function setCachedValue(string $key, mixed $value, int $ttl = 3600, string $poolName = 'cache.app'): void
     {
         $pool = self::getContainer()->get($poolName);
 
@@ -113,7 +110,7 @@ trait CacheTrait
     /**
      * Asserts cache contains a value.
      */
-    protected function assertCacheContains(string $key, $expectedValue, string $poolName = 'cache.app'): void
+    protected function assertCacheContains(string $key, mixed $expectedValue, string $poolName = 'cache.app'): void
     {
         $actualValue = $this->getCachedValue($key, $poolName);
         Assert::assertEquals($expectedValue, $actualValue, sprintf('Cache key "%s" does not contain expected value', $key));
