@@ -4,6 +4,8 @@ namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Helper\StorefrontApiRequestHelper;
 use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
+use Algoritma\ShopwareTestUtils\Traits\StorefrontApiRequestTrait;
+use Algoritma\ShopwareTestUtils\Traits\StorefrontRequestTrait;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
@@ -12,6 +14,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
 {
     use SalesChannelFunctionalTestBehaviour;
+    use StorefrontRequestTrait;
+    use StorefrontApiRequestTrait;
 
     /**
      * @param array<string, mixed> $options

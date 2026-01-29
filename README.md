@@ -62,14 +62,26 @@ class OrderPlacementTest extends AbstractIntegrationTestCase
             ->withProduct($product->getId())
             ->create();
 
-        // Place order using Helper
-        $order = $this->placeOrder($cart, $context);
+        // Place order using trait helper
+        $order = $this->orderPlace($cart, $context);
 
         // Assert order was created
-        $this->assertOrderState($order, 'open');
+        $this->orderAssertState($order, 'open');
         $this->assertDatabaseHas('order', ['id' => $order->getId()]);
     }
 }
+```
+
+Short trait usage:
+
+```php
+// Cart + checkout helpers via traits
+$cart = $this->createCart($context)
+    ->withProduct($product->getId())
+    ->create();
+
+$this->cartAssertContainsProduct($cart, $product->getId());
+$order = $this->checkoutPlaceOrder($cart, $context);
 ```
 
 ### Functional/Storefront Test
@@ -83,16 +95,12 @@ class StorefrontCheckoutTest extends AbstractFunctionalTestCase
 {
     public function testCheckoutFlow(): void
     {
-        // Create storefront request helper
-        $storefront = $this->createStorefrontHelper();
-
         // Simulate user actions
-        $storefront->addProductToCart($productId);
-        $storefront->goToCheckout();
-        $response = $storefront->submitOrder();
+        $this->storefrontAddToCart($productId);
+        $this->storefrontProceedToCheckout();
+        $this->storefrontSubmitOrder();
 
-        $this->assertResponseIsSuccessful($response);
-        $this->assertMailSent('order_confirmation');
+        $this->storefrontAssertResponseRedirects($this->storefrontBrowser()->getResponse());
     }
 }
 ```
