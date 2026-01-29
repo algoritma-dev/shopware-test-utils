@@ -3,6 +3,9 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use PHPUnit\Framework\Assert;
+use PHPUnit\Framework\Attributes\After;
+use PHPUnit\Framework\Attributes\Before;
+use Shopware\Core\Framework\Test\TestCacheClearer;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Cache\Adapter\AdapterInterface;
 use Symfony\Component\Cache\Adapter\TagAwareAdapterInterface;
@@ -11,16 +14,15 @@ trait CacheTrait
 {
     use KernelTestBehaviour;
 
-    /**
-     * Clears all cache pools.
-     */
-    protected function clearCache(): void
+    public function clearCacheData(): void
     {
-        $cacheDirectory = self::getContainer()->getParameter('kernel.cache_dir');
+        /** @var TestCacheClearer $cacheClearer */
+        $cacheClearer = static::getContainer()->get(TestCacheClearer::class);
+        $cacheClearer->clear();
 
-        if (is_dir($cacheDirectory)) {
-            $this->recursiveRemoveDirectory($cacheDirectory);
-        }
+        static::getContainer()
+            ->get('services_resetter')
+            ->reset();
     }
 
     /**

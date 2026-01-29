@@ -7,6 +7,7 @@ use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
 use Algoritma\ShopwareTestUtils\Helper\OrderHelper;
 use Algoritma\ShopwareTestUtils\Traits\B2B\B2BHelpersTrait;
+use Algoritma\ShopwareTestUtils\Traits\CacheTrait;
 use Algoritma\ShopwareTestUtils\Traits\CartTrait;
 use Algoritma\ShopwareTestUtils\Traits\CheckoutTrait;
 use Algoritma\ShopwareTestUtils\Traits\ContextTrait;
@@ -44,6 +45,9 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use OrderTrait;
     use CustomerTrait;
     use B2BHelpersTrait;
+    use CacheTrait {
+        CacheTrait::clearCacheData insteadof IntegrationTestBehaviour;
+    }
 
     private ?FixtureManager $fixtureManager = null;
 
