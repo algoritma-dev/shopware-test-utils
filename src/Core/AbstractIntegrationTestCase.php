@@ -45,9 +45,7 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use OrderTrait;
     use CustomerTrait;
     use B2BHelpersTrait;
-    use CacheTrait {
-        CacheTrait::clearCacheData insteadof IntegrationTestBehaviour;
-    }
+    use CacheTrait;
 
     private ?FixtureManager $fixtureManager = null;
 

@@ -14,17 +14,6 @@ trait CacheTrait
 {
     use KernelTestBehaviour;
 
-    public function clearCacheData(): void
-    {
-        /** @var TestCacheClearer $cacheClearer */
-        $cacheClearer = static::getContainer()->get(TestCacheClearer::class);
-        $cacheClearer->clear();
-
-        static::getContainer()
-            ->get('services_resetter')
-            ->reset();
-    }
-
     /**
      * Clears a specific cache pool.
      */
