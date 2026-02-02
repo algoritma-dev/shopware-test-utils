@@ -70,6 +70,30 @@ abstract class AbstractFactory
     }
 
     /**
+     * @param array<string, mixed> $data
+     */
+    public function with(array $data): static
+    {
+        foreach ($data as $key => $value) {
+            $this->data[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    public function set(array $data): static
+    {
+        foreach ($data as $key => $value) {
+            $this->data[$key] = $value;
+        }
+
+        return $this;
+    }
+
+    /**
      * Get the raw data array (useful for debugging or custom modifications).
      *
      * @return array<string, mixed>
