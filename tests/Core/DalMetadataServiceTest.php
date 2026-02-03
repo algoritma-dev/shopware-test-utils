@@ -7,6 +7,8 @@ namespace Algoritma\ShopwareTestUtils\Tests\Core;
 use Algoritma\ShopwareTestUtils\Core\DalMetadataService;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Shopware\Core\Checkout\Promotion\Aggregate\PromotionPersonaCustomer\PromotionPersonaCustomerDefinition;
+use Shopware\Core\Checkout\Promotion\PromotionDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\DataAbstractionLayerException;
 use Shopware\Core\Framework\DataAbstractionLayer\DefinitionInstanceRegistry;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
@@ -14,6 +16,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityDefinition;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\FkField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\IdField;
+use Shopware\Core\Framework\DataAbstractionLayer\Field\ManyToManyAssociationField;
 use Shopware\Core\Framework\DataAbstractionLayer\Field\StringField;
 use Shopware\Core\Framework\DataAbstractionLayer\FieldCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\MappingEntityDefinition;
@@ -76,8 +79,11 @@ class DalMetadataServiceTest extends TestCase
         $this->assertArrayHasKey('collection_class', $result);
         $this->assertArrayHasKey('definition_class', $result);
         $this->assertArrayHasKey('properties', $result);
+        $this->assertCount(4, $result['properties']);
         $this->assertArrayHasKey('relations', $result);
+        $this->assertCount(1, $result['relations']);
         $this->assertArrayHasKey('foreign_keys', $result);
+        $this->assertCount(1, $result['foreign_keys']);
     }
 
     public function testGetEntityRelationsReturnsEmptyArrayForNonExistentEntity(): void
@@ -119,6 +125,10 @@ class DalMetadataServiceTest extends TestCase
         $this->assertArrayHasKey('name', $result);
         $this->assertSame('name', $result['name']['name']);
         $this->assertSame('string', $result['name']['php_type']);
+        $this->assertSame('createdAt', $result['createdAt']['name']);
+        $this->assertSame('mixed', $result['createdAt']['php_type']);
+        $this->assertSame('updatedAt', $result['updatedAt']['name']);
+        $this->assertSame('mixed', $result['updatedAt']['php_type']);
     }
 
     public function testGetPropertyMethodsReturnsNullForNonExistentEntity(): void
@@ -240,8 +250,9 @@ class DalMetadataServiceTest extends TestCase
                 $idField = new IdField('id', 'id');
                 $nameField = new StringField('name', 'name');
                 $fkField = new FkField('category_id', 'categoryId', 'CategoryDefinition');
+                $manyToManyField = new ManyToManyAssociationField('promotions', PromotionDefinition::class, PromotionPersonaCustomerDefinition::class, 'customer_id', 'promotion_id');
 
-                return new FieldCollection([$idField, $nameField, $fkField]);
+                return new FieldCollection([$idField, $nameField, $fkField, $manyToManyField]);
             }
         };
     }
