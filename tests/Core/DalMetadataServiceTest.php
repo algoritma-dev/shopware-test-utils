@@ -70,6 +70,16 @@ class DalMetadataServiceTest extends TestCase
     {
         $definition = $this->createMockDefinition();
         $this->registry->method('getByEntityName')->willReturn($definition);
+        $this->registry->method('getByClassOrEntityName')->willReturnOnConsecutiveCalls(
+            /** @phpstan-ignore-next-line */
+            new PromotionPersonaCustomerDefinition(),
+            /** @phpstan-ignore-next-line */
+            new PromotionDefinition(),
+            /** @phpstan-ignore-next-line */
+            new PromotionPersonaCustomerDefinition(),
+            /** @phpstan-ignore-next-line */
+            new PromotionDefinition()
+        );
 
         $result = $this->service->getEntityMetadata('test_entity');
 

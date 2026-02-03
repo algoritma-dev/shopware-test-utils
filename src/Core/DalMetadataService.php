@@ -282,6 +282,10 @@ class DalMetadataService
             $referenceDefinition = $field->getReferenceDefinition();
             $relationType = $this->getRelationType($field);
 
+            if ($field instanceof ManyToManyAssociationField) {
+                $referenceDefinition = $field->getToManyReferenceDefinition();
+            }
+
             if ($referenceDefinition instanceof MappingEntityDefinition) {
                 continue;
             }
