@@ -23,4 +23,9 @@ class SubscriptionIntervalFactory extends AbstractFactory
     {
         return SubscriptionIntervalDefinition::ENTITY_NAME;
     }
+
+    protected function getDefaults(): array
+    {
+        return [];
+    }
 }

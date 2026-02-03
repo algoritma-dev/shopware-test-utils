@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
+use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
 use Doctrine\DBAL\Connection;
 use Shopware\Commercial\B2B\OrderApproval\Domain\State\PendingOrderStates;
 use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderCollection;
@@ -19,15 +20,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * Factory for creating pending orders with approval rules.
  * Pure factory: only creates pending orders, no business logic.
  */
-class PendingOrderFactory
+class PendingOrderFactory extends AbstractFactory
 {
-    /**
-     * @var array<string, mixed>
-     */
-    private array $data;
-
-    public function __construct(private readonly ContainerInterface $container) {}
-
     /**
      * Set the cart for the pending order.
      */
@@ -177,6 +171,21 @@ class PendingOrderFactory
         }
 
         return $factory->create($context->getContext());
+    }
+
+    protected function getRepositoryName(): string
+    {
+        return 'b2b_components_pending_order.repository';
+    }
+
+    protected function getEntityName(): string
+    {
+        return 'b2b_components_pending_order';
+    }
+
+    protected function getDefaults(): array
+    {
+        return [];
     }
 
     private function load(string $id, Context $context): PendingOrderEntity

@@ -27,4 +27,9 @@ class TestableFactory extends AbstractFactory
     {
         return 'test_entity';
     }
+
+    protected function getDefaults(): array
+    {
+        return [];
+    }
 }

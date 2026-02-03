@@ -2,30 +2,11 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Core\Content\Category\CategoryDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CategoryFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-        $this->faker = Factory::create();
-
-        $this->data = [
-            'id' => Uuid::randomHex(),
-            'name' => $this->faker->word,
-            'active' => true,
-            'displayNestedProducts' => true,
-            'type' => 'page',
-        ];
-    }
-
     public function active(bool $active = true): self
     {
         $this->data['active'] = $active;
@@ -41,5 +22,16 @@ class CategoryFactory extends AbstractFactory
     protected function getEntityName(): string
     {
         return CategoryDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
+            'id' => Uuid::randomHex(),
+            'name' => $this->faker->word,
+            'active' => true,
+            'displayNestedProducts' => true,
+            'type' => 'page',
+        ];
     }
 }

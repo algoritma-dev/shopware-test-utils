@@ -20,15 +20,6 @@ class RolePermissionFactory extends AbstractFactory
      */
     private array $permissions = [];
 
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-
-        $this->data = [
-            'id' => Uuid::randomHex(),
-        ];
-    }
-
     public function withName(string $name): self
     {
         $this->data['name'] = $name;
@@ -244,5 +235,12 @@ class RolePermissionFactory extends AbstractFactory
     protected function getEntityName(): string
     {
         return PermissionDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
+            'id' => Uuid::randomHex(),
+        ];
     }
 }

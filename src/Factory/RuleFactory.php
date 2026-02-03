@@ -2,22 +2,24 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Core\Content\Rule\RuleDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RuleFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
+    protected function getRepositoryName(): string
     {
-        parent::__construct($container);
-        $this->faker = Factory::create();
+        return 'rule.repository';
+    }
 
-        $this->data = [
+    protected function getEntityName(): string
+    {
+        return RuleDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
             'id' => Uuid::randomHex(),
             'name' => $this->faker->words(3, true),
             'priority' => $this->faker->numberBetween(1, 100),
@@ -27,15 +29,5 @@ class RuleFactory extends AbstractFactory
                 ],
             ],
         ];
-    }
-
-    protected function getRepositoryName(): string
-    {
-        return 'rule.repository';
-    }
-
-    protected function getEntityName(): string
-    {
-        return RuleDefinition::ENTITY_NAME;
     }
 }

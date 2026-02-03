@@ -169,4 +169,9 @@ class DeclaredTestFactory extends AbstractFactory
     {
         return 'product';
     }
+
+    protected function getDefaults(): array
+    {
+        return [];
+    }
 }

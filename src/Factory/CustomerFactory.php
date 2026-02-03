@@ -2,8 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Core\Checkout\Customer\CustomerDefinition;
 use Shopware\Core\Checkout\Payment\PaymentMethodCollection;
 use Shopware\Core\Defaults;
@@ -14,22 +12,25 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Country\CountryCollection;
 use Shopware\Core\System\Salutation\SalutationCollection;
 use Shopware\Core\Test\TestDefaults;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class CustomerFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
+    protected function getRepositoryName(): string
     {
-        parent::__construct($container);
+        return 'customer.repository';
+    }
 
-        $this->faker = Factory::create();
+    protected function getEntityName(): string
+    {
+        return CustomerDefinition::ENTITY_NAME;
+    }
 
+    protected function getDefaults(): array
+    {
         $addressId = Uuid::randomHex();
         $salutationId = $this->getSalutationId();
 
-        $this->data = [
+        return [
             'id' => Uuid::randomHex(),
             'customerNumber' => (string) $this->faker->numberBetween(10000, 99999),
             'salutationId' => $salutationId,
@@ -55,16 +56,6 @@ class CustomerFactory extends AbstractFactory
                 ],
             ],
         ];
-    }
-
-    protected function getRepositoryName(): string
-    {
-        return 'customer.repository';
-    }
-
-    protected function getEntityName(): string
-    {
-        return CustomerDefinition::ENTITY_NAME;
     }
 
     private function getSalutationId(): string

@@ -3,37 +3,15 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeDefinition;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeStatus;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\Test\TestDefaults;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class EmployeeFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-
-        $this->faker = Factory::create();
-
-        $this->data = [
-            'id' => Uuid::randomHex(),
-            'firstName' => $this->faker->firstName,
-            'lastName' => $this->faker->lastName,
-            'email' => $this->faker->unique()->safeEmail,
-            'password' => TestDefaults::HASHED_PASSWORD,
-            'active' => true,
-            'status' => EmployeeStatus::ACTIVE->value,
-        ];
-    }
-
     public function withName(string $firstName, string $lastName): self
     {
         $this->data['firstName'] = $firstName;
@@ -71,6 +49,19 @@ class EmployeeFactory extends AbstractFactory
     protected function getEntityName(): string
     {
         return EmployeeDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
+            'id' => Uuid::randomHex(),
+            'firstName' => $this->faker->firstName,
+            'lastName' => $this->faker->lastName,
+            'email' => $this->faker->unique()->safeEmail,
+            'password' => TestDefaults::HASHED_PASSWORD,
+            'active' => true,
+            'status' => EmployeeStatus::ACTIVE->value,
+        ];
     }
 
     /**

@@ -23,4 +23,9 @@ class AdvancedProductCatalogFactory extends AbstractFactory
     {
         return AdvancedProductCatalogsDefinition::ENTITY_NAME;
     }
+
+    protected function getDefaults(): array
+    {
+        return [];
+    }
 }

@@ -2,8 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Core\Checkout\Payment\PaymentMethodCollection;
 use Shopware\Core\Checkout\Shipping\ShippingMethodCollection;
 use Shopware\Core\Content\Category\CategoryCollection;
@@ -16,18 +14,22 @@ use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Country\CountryCollection;
 use Shopware\Core\System\SalesChannel\SalesChannelDefinition;
 use Shopware\Core\Test\TestDefaults;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SalesChannelFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
+    protected function getRepositoryName(): string
     {
-        parent::__construct($container);
-        $this->faker = Factory::create();
+        return 'sales_channel.repository';
+    }
 
-        $this->data = [
+    protected function getEntityName(): string
+    {
+        return SalesChannelDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
             'id' => Uuid::randomHex(),
             'typeId' => Defaults::SALES_CHANNEL_TYPE_STOREFRONT,
             'name' => $this->faker->company . ' Store',
@@ -42,16 +44,6 @@ class SalesChannelFactory extends AbstractFactory
             'languages' => [['id' => Defaults::LANGUAGE_SYSTEM]],
             'currencies' => [['id' => Defaults::CURRENCY]],
         ];
-    }
-
-    protected function getRepositoryName(): string
-    {
-        return 'sales_channel.repository';
-    }
-
-    protected function getEntityName(): string
-    {
-        return SalesChannelDefinition::ENTITY_NAME;
     }
 
     private function getDefaultPaymentMethodId(): string

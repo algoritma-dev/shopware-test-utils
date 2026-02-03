@@ -3,8 +3,6 @@
 namespace Algoritma\ShopwareTestUtils\Factory;
 
 use Doctrine\DBAL\Connection;
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
 use Shopware\Core\Checkout\Cart\Price\Struct\CartPrice;
@@ -18,50 +16,9 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\Country\CountryCollection;
 use Shopware\Core\System\Salutation\SalutationCollection;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class OrderFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-        $this->faker = Factory::create();
-
-        $addressId = Uuid::randomHex();
-        $stateId = $this->getStateId('order.state', 'open');
-
-        $this->data = [
-            'id' => Uuid::randomHex(),
-            'orderNumber' => (string) $this->faker->numberBetween(10000, 99999),
-            'billingAddressId' => $addressId,
-            'currencyId' => Defaults::CURRENCY,
-            'languageId' => Defaults::LANGUAGE_SYSTEM,
-            'salesChannelId' => $this->getSalesChannelId(),
-            'orderDateTime' => (new \DateTime())->format(\DateTime::ATOM),
-            'price' => new CartPrice(
-                100, 100, 100, new CalculatedTaxCollection(), new TaxRuleCollection(), CartPrice::TAX_STATE_GROSS
-            ),
-            'shippingCosts' => new CalculatedPrice(0, 0, new CalculatedTaxCollection(), new TaxRuleCollection()),
-            'stateId' => $stateId,
-            'currencyFactor' => 1.0,
-            // Mocking required associations usually handled by CartService
-            'addresses' => [
-                [
-                    'id' => $addressId,
-                    'salutationId' => $this->getSalutationId(),
-                    'firstName' => $this->faker->firstName,
-                    'lastName' => $this->faker->lastName,
-                    'street' => $this->faker->streetAddress,
-                    'zipcode' => $this->faker->postcode,
-                    'city' => $this->faker->city,
-                    'countryId' => $this->getCountryId(),
-                ],
-            ],
-        ];
-    }
-
     public function withCustomer(string $customerId): self
     {
         $this->data['orderCustomer'] = [
@@ -180,6 +137,41 @@ class OrderFactory extends AbstractFactory
     protected function getEntityName(): string
     {
         return OrderDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        $addressId = Uuid::randomHex();
+        $stateId = $this->getStateId('order.state', 'open');
+
+        return [
+            'id' => Uuid::randomHex(),
+            'orderNumber' => (string) $this->faker->numberBetween(10000, 99999),
+            'billingAddressId' => $addressId,
+            'currencyId' => Defaults::CURRENCY,
+            'languageId' => Defaults::LANGUAGE_SYSTEM,
+            'salesChannelId' => $this->getSalesChannelId(),
+            'orderDateTime' => (new \DateTime())->format(\DateTime::ATOM),
+            'price' => new CartPrice(
+                100, 100, 100, new CalculatedTaxCollection(), new TaxRuleCollection(), CartPrice::TAX_STATE_GROSS
+            ),
+            'shippingCosts' => new CalculatedPrice(0, 0, new CalculatedTaxCollection(), new TaxRuleCollection()),
+            'stateId' => $stateId,
+            'currencyFactor' => 1.0,
+            // Mocking required associations usually handled by CartService
+            'addresses' => [
+                [
+                    'id' => $addressId,
+                    'salutationId' => $this->getSalutationId(),
+                    'firstName' => $this->faker->firstName,
+                    'lastName' => $this->faker->lastName,
+                    'street' => $this->faker->streetAddress,
+                    'zipcode' => $this->faker->postcode,
+                    'city' => $this->faker->city,
+                    'countryId' => $this->getCountryId(),
+                ],
+            ],
+        ];
     }
 
     private function getSalesChannelId(): string

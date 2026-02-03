@@ -3,24 +3,25 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetDefinition;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class BudgetFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
+    protected function getRepositoryName(): string
     {
-        parent::__construct($container);
+        return 'b2b_budget.repository';
+    }
 
-        $this->faker = Factory::create();
+    protected function getEntityName(): string
+    {
+        return BudgetDefinition::ENTITY_NAME;
+    }
 
-        $this->data = [
+    protected function getDefaults(): array
+    {
+        return [
             'id' => Uuid::randomHex(),
             'name' => $this->faker->words(3, true),
             'active' => true,
@@ -33,15 +34,5 @@ class BudgetFactory extends AbstractFactory
             'notify' => false,
             'sent' => false,
         ];
-    }
-
-    protected function getRepositoryName(): string
-    {
-        return 'b2b_budget.repository';
-    }
-
-    protected function getEntityName(): string
-    {
-        return BudgetDefinition::ENTITY_NAME;
     }
 }

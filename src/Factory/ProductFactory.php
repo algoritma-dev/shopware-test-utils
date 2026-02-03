@@ -2,36 +2,12 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class ProductFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-
-        $this->faker = Factory::create();
-
-        $this->data = [
-            'id' => Uuid::randomHex(),
-            'productNumber' => Uuid::randomHex(),
-            'stock' => $this->faker->numberBetween(1, 100),
-            'name' => $this->faker->word,
-            'description' => $this->faker->paragraph,
-            'price' => [['currencyId' => Defaults::CURRENCY, 'gross' => 19.99, 'net' => 16.80, 'linked' => false]],
-            'tax' => ['name' => 'Standard Rate', 'taxRate' => 19],
-            'manufacturer' => ['name' => $this->faker->company],
-            'active' => true,
-        ];
-    }
-
     public function withPrice(float $gross, ?float $net = null): self
     {
         if ($net === null) {
@@ -57,5 +33,20 @@ class ProductFactory extends AbstractFactory
     protected function getEntityName(): string
     {
         return ProductDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
+            'id' => Uuid::randomHex(),
+            'productNumber' => Uuid::randomHex(),
+            'stock' => $this->faker->numberBetween(1, 100),
+            'name' => $this->faker->word,
+            'description' => $this->faker->paragraph,
+            'price' => [['currencyId' => Defaults::CURRENCY, 'gross' => 19.99, 'net' => 16.80, 'linked' => false]],
+            'tax' => ['name' => 'Standard Rate', 'taxRate' => 19],
+            'manufacturer' => ['name' => $this->faker->company],
+            'active' => true,
+        ];
     }
 }

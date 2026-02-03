@@ -23,4 +23,9 @@ class CustomerSpecificFeaturesFactory extends AbstractFactory
     {
         return CustomerSpecificFeaturesDefinition::ENTITY_NAME;
     }
+
+    protected function getDefaults(): array
+    {
+        return [];
+    }
 }

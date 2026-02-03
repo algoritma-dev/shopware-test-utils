@@ -3,29 +3,11 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
-use Faker\Factory;
-use Faker\Generator;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class RoleFactory extends AbstractFactory
 {
-    private readonly Generator $faker;
-
-    public function __construct(ContainerInterface $container)
-    {
-        parent::__construct($container);
-
-        $this->faker = Factory::create();
-
-        $this->data = [
-            'id' => Uuid::randomHex(),
-            'name' => $this->faker->jobTitle,
-            'permissions' => [],
-        ];
-    }
-
     protected function getRepositoryName(): string
     {
         return 'b2b_components_role.repository';
@@ -34,5 +16,14 @@ class RoleFactory extends AbstractFactory
     protected function getEntityName(): string
     {
         return RoleDefinition::ENTITY_NAME;
+    }
+
+    protected function getDefaults(): array
+    {
+        return [
+            'id' => Uuid::randomHex(),
+            'name' => $this->faker->jobTitle,
+            'permissions' => [],
+        ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Algoritma\ShopwareTestUtils\Factory;
 
+use Faker\Factory as FakerFactory;
+use Faker\Generator;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
@@ -19,7 +21,13 @@ abstract class AbstractFactory
      */
     protected array $data = [];
 
-    public function __construct(protected readonly ContainerInterface $container) {}
+    protected Generator $faker;
+
+    public function __construct(protected readonly ContainerInterface $container)
+    {
+        $this->faker = FakerFactory::create();
+        $this->data = $this->getDefaults();
+    }
 
     /**
      * Magic method to handle dynamic with*() and set*() calls.
@@ -120,7 +128,20 @@ abstract class AbstractFactory
         /** @var Entity $entity */
         $entity = $repository->search(new Criteria([$this->data['id']]), $context)->first();
 
+        // Reset to default allow multi creations with same factory instance
+        $this->resetToDefaults();
+
         return $entity;
+    }
+
+    /**
+     * Reset the factory to its initial state.
+     */
+    public function resetToDefaults(): static
+    {
+        $this->data = $this->getDefaults();
+
+        return $this;
     }
 
     /**
@@ -132,6 +153,13 @@ abstract class AbstractFactory
      * Get the entity name (e.g., 'product').
      */
     abstract protected function getEntityName(): string;
+
+    /**
+     * Get default data for the entity (to be implemented by child classes).
+     *
+     * @return array<string, mixed>
+     */
+    abstract protected function getDefaults(): array;
 
     /**
      * Determines if 'Id' suffix should be appended to a property name.
