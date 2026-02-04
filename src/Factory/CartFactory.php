@@ -72,11 +72,21 @@ class CartFactory
     }
 
     /**
-     * Add a custom line item directly (advanced usage).
+     * Add a line item.
      */
     public function withLineItem(LineItem $lineItem): self
     {
         $this->cart = $this->cartService->add($this->cart, $lineItem, $this->context);
+
+        return $this;
+    }
+
+    /**
+     * Add multiple line items.
+     */
+    public function withLineItems(array $lineItems): self
+    {
+        $this->cart = $this->cartService->add($this->cart, $lineItems, $this->context);
 
         return $this;
     }
