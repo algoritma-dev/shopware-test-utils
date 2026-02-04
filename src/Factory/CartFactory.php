@@ -83,6 +83,7 @@ class CartFactory
 
     /**
      * Add multiple line items.
+     * @param array<LineItem> $lineItems
      */
     public function withLineItems(array $lineItems): self
     {
