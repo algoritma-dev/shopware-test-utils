@@ -28,6 +28,7 @@ class CustomerFactoryTest extends TestCase
             ['salutation.repository', 1, $repository],
             ['country.repository', 1, $repository],
             ['payment_method.repository', 1, $repository],
+            ['country_state.repository', 1, $repository],
             [Connection::class, 1, $connection],
         ]);
 
