@@ -8,7 +8,9 @@ use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Uuid\Uuid;
+use Shopware\Core\System\Country\Aggregate\CountryState\CountryStateCollection;
 use Shopware\Core\System\Country\CountryCollection;
 use Shopware\Core\System\Salutation\SalutationCollection;
 use Shopware\Core\Test\TestDefaults;
@@ -29,6 +31,23 @@ class CustomerFactory extends AbstractFactory
     {
         $addressId = Uuid::randomHex();
         $salutationId = $this->getSalutationId();
+        $countryId = $this->getCountryId();
+        $countryStateId = $this->getCountryStateId($countryId);
+
+        $address = [
+            'id' => $addressId,
+            'salutationId' => $salutationId,
+            'firstName' => $this->faker->firstName,
+            'lastName' => $this->faker->lastName,
+            'street' => $this->faker->streetAddress,
+            'zipcode' => $this->faker->postcode,
+            'city' => $this->faker->city,
+            'countryId' => $this->getCountryId(),
+        ];
+
+        if ($countryStateId !== null) {
+            $address['countryStateId'] = $countryStateId;
+        }
 
         return [
             'id' => Uuid::randomHex(),
@@ -43,18 +62,7 @@ class CustomerFactory extends AbstractFactory
             'salesChannelId' => Defaults::SALES_CHANNEL_TYPE_STOREFRONT, // Placeholder
             'defaultBillingAddressId' => $addressId,
             'defaultShippingAddressId' => $addressId,
-            'addresses' => [
-                [
-                    'id' => $addressId,
-                    'salutationId' => $salutationId,
-                    'firstName' => $this->faker->firstName,
-                    'lastName' => $this->faker->lastName,
-                    'street' => $this->faker->streetAddress,
-                    'zipcode' => $this->faker->postcode,
-                    'city' => $this->faker->city,
-                    'countryId' => $this->getCountryId(),
-                ],
-            ],
+            'addresses' => [$address],
         ];
     }
 
@@ -80,5 +88,16 @@ class CustomerFactory extends AbstractFactory
         $repo = $this->container->get('payment_method.repository');
 
         return $repo->searchIds(new Criteria(), Context::createCLIContext())->firstId();
+    }
+
+    private function getCountryStateId(string $countryId): ?string
+    {
+        /** @var EntityRepository<CountryStateCollection> $repo */
+        $repo = $this->container->get('country_state.repository');
+
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('countryId', $countryId));
+
+        return $repo->searchIds($criteria, Context::createCLIContext())->firstId();
     }
 }
