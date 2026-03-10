@@ -4,6 +4,7 @@ namespace Algoritma\ShopwareTestUtils\Core;
 
 use Algoritma\ShopwareTestUtils\Traits\StorefrontApiRequestTrait;
 use Algoritma\ShopwareTestUtils\Traits\StorefrontRequestTrait;
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
@@ -36,7 +37,7 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     protected function getUrl(string $routeName, array $params = []): string
     {
         $router = $this->getContainer()->get('router');
-        \assert($router instanceof UrlGeneratorInterface);
+        Assert::assertInstanceOf(UrlGeneratorInterface::class, $router);
 
         return $router->generate($routeName, $params);
     }

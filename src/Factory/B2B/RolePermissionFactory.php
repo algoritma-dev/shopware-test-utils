@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Factory\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\AbstractFactory;
+use PHPUnit\Framework\Assert;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Permission\PermissionDefinition;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Core\Framework\Context;
@@ -169,7 +170,7 @@ class RolePermissionFactory extends AbstractFactory
             ->withAdminPermissions()
             ->create($context);
 
-        \assert($role instanceof RoleEntity);
+        Assert::assertInstanceOf(RoleEntity::class, $role);
 
         return $role;
     }
@@ -186,7 +187,7 @@ class RolePermissionFactory extends AbstractFactory
             ->withBudgetPermissions()
             ->create($context);
 
-        \assert($role instanceof RoleEntity);
+        Assert::assertInstanceOf(RoleEntity::class, $role);
 
         return $role;
     }
@@ -207,7 +208,7 @@ class RolePermissionFactory extends AbstractFactory
             ])
             ->create($context);
 
-        \assert($role instanceof RoleEntity);
+        Assert::assertInstanceOf(RoleEntity::class, $role);
 
         return $role;
     }
@@ -222,7 +223,7 @@ class RolePermissionFactory extends AbstractFactory
             ->withReadOnlyPermissions()
             ->create($context);
 
-        \assert($role instanceof RoleEntity);
+        Assert::assertInstanceOf(RoleEntity::class, $role);
 
         return $role;
     }

@@ -136,7 +136,7 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         Assert::assertTrue(
             $tableSchema->hasColumn($column),
@@ -151,7 +151,7 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         Assert::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s"', $column, $table));
 
@@ -173,7 +173,7 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         Assert::assertTrue(
             $tableSchema->hasIndex($index),
@@ -188,7 +188,7 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         Assert::assertTrue(
             $tableSchema->hasForeignKey($foreignKey),
@@ -293,7 +293,7 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         return [
             'columns' => $tableSchema->getColumns(),

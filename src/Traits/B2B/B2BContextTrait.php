@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Traits\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\B2B\B2BContextFactory;
+use PHPUnit\Framework\Assert;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
@@ -76,8 +77,9 @@ trait B2BContextTrait
             throw new \RuntimeException(sprintf('Role "%s" has no permissions', $role->getId()));
         }
 
-        assert(
-            in_array($permissionCode, $permissions, true),
+        Assert::assertContains(
+            $permissionCode,
+            $permissions,
             sprintf('Expected employee to have permission "%s", but it was not found', $permissionCode)
         );
     }
@@ -86,8 +88,9 @@ trait B2BContextTrait
     {
         $employee = $this->getEmployeeWithRole($employeeId, $context);
 
-        assert(
-            $employee->getRoleId() === $roleId,
+        Assert::assertSame(
+            $roleId,
+            $employee->getRoleId(),
             sprintf('Expected employee to have role "%s", but has "%s"', $roleId, $employee->getRoleId())
         );
     }

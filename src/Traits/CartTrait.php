@@ -2,7 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Checkout\Cart\Cart;
+use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
@@ -50,15 +52,11 @@ trait CartTrait
 
     protected function cartUpdateProductQuantity(Cart $cart, string $productId, int $quantity, SalesChannelContext $context): Cart
     {
-        $lineItems = $cart->getLineItems();
         $cartService = static::getContainer()->get(CartService::class);
 
-        foreach ($lineItems as $lineItem) {
-            if ($lineItem->getReferencedId() === $productId) {
-                $lineItem->setQuantity($quantity);
-                $cart = $cartService->recalculate($cart, $context);
-                break;
-            }
+        $lineItem = $cart->getLineItems()->get($productId);
+        if ($lineItem instanceof LineItem) {
+            return $cartService->changeQuantity($cart, $lineItem->getId(), $quantity, $context);
         }
 
         return $cart;
@@ -103,22 +101,15 @@ trait CartTrait
     protected function cartAssertContainsProduct(Cart $cart, string $productId): void
     {
         $lineItems = $cart->getLineItems();
-        $found = false;
 
-        foreach ($lineItems as $lineItem) {
-            if ($lineItem->getReferencedId() === $productId) {
-                $found = true;
-                break;
-            }
-        }
-
-        assert($found, sprintf('Cart does not contain product with ID %s', $productId));
+        $found = $lineItems->filter(fn ($item): bool => $item->getReferencedId() === $productId)->count() > 0;
+        Assert::assertTrue($found, sprintf('Cart does not contain product with ID %s', $productId));
     }
 
     protected function cartAssertTotal(Cart $cart, float $expectedTotal): void
     {
         $actualTotal = $cart->getPrice()->getTotalPrice();
-        assert(abs($actualTotal - $expectedTotal) < 0.01, sprintf('Cart total is %.2f, expected %.2f', $actualTotal, $expectedTotal));
+        Assert::assertEqualsWithDelta($expectedTotal, $actualTotal, 0.01, sprintf('Cart total is %.2f, expected %.2f', $actualTotal, $expectedTotal));
     }
 
     protected function cartAssertItemQuantity(Cart $cart, string $productId, int $expectedQuantity): void
@@ -133,6 +124,6 @@ trait CartTrait
             }
         }
 
-        assert($quantity === $expectedQuantity, sprintf('Product %s has quantity %d, expected %d', $productId, $quantity, $expectedQuantity));
+        Assert::assertSame($expectedQuantity, $quantity, sprintf('Product %s has quantity %d, expected %d', $productId, $quantity, $expectedQuantity));
     }
 }

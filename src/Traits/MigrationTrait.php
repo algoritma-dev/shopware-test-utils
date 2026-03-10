@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\Assert;
 
 trait MigrationTrait
@@ -132,7 +133,7 @@ trait MigrationTrait
         // Check if column was removed
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         Assert::assertFalse(
             $tableSchema->hasColumn($column),
@@ -311,13 +312,14 @@ trait MigrationTrait
     protected function assertMigrationColumnType(string $table, string $column, string $expectedType): void
     {
         $schemaManager = $this->getConnection()->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         Assert::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s"', $column, $table));
 
         $type = $tableSchema->getColumn($column)->getType();
-        $className = (new \ReflectionClass($type))->getShortName();
-        $actualType = strtolower(str_replace('Type', '', $className));
+        $actualType = method_exists($type, 'getName')
+            ? $type->getName()
+            : Type::lookupName($type);
 
         Assert::assertEquals(
             $expectedType,

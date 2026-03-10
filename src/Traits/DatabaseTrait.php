@@ -3,7 +3,11 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Schema\AbstractSchemaManager;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Type;
+use PHPUnit\Framework\Assert;
 
 trait DatabaseTrait
 {
@@ -268,7 +272,7 @@ trait DatabaseTrait
         }
 
         $count = (int) $qb->executeQuery()->fetchOne();
-        static::assertGreaterThan(0, $count, sprintf('Failed asserting that table "%s" contains row with conditions: %s', $table, json_encode($conditions)));
+        Assert::assertGreaterThan(0, $count, sprintf('Failed asserting that table "%s" contains row with conditions: %s', $table, json_encode($conditions)));
     }
 
     /**
@@ -288,7 +292,7 @@ trait DatabaseTrait
         }
 
         $count = (int) $qb->executeQuery()->fetchOne();
-        static::assertEquals(0, $count, sprintf('Failed asserting that table "%s" does not contain row with conditions: %s', $table, json_encode($conditions)));
+        Assert::assertEquals(0, $count, sprintf('Failed asserting that table "%s" does not contain row with conditions: %s', $table, json_encode($conditions)));
     }
 
     /**
@@ -298,7 +302,7 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        static::assertTrue($schemaManager->tablesExist([$table]), sprintf('Table "%s" does not exist.', $table));
+        Assert::assertTrue($schemaManager->tablesExist([$table]), sprintf('Table "%s" does not exist.', $table));
     }
 
     /**
@@ -308,7 +312,7 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        static::assertFalse($schemaManager->tablesExist([$table]), sprintf('Table "%s" exists but should not.', $table));
+        Assert::assertFalse($schemaManager->tablesExist([$table]), sprintf('Table "%s" exists but should not.', $table));
     }
 
     /**
@@ -318,8 +322,8 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
-        static::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s".', $column, $table));
+        $tableSchema = $this->introspectTable($schemaManager, $table);
+        Assert::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s".', $column, $table));
     }
 
     /**
@@ -329,11 +333,11 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
-        static::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s".', $column, $table));
+        $tableSchema = $this->introspectTable($schemaManager, $table);
+        Assert::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s".', $column, $table));
 
         $actualType = Type::getTypeRegistry()->lookupName($tableSchema->getColumn($column)->getType());
-        static::assertEquals($expectedType, $actualType, sprintf('Column "%s.%s" has type "%s", expected "%s".', $table, $column, $actualType, $expectedType));
+        Assert::assertEquals($expectedType, $actualType, sprintf('Column "%s.%s" has type "%s", expected "%s".', $table, $column, $actualType, $expectedType));
     }
 
     /**
@@ -343,8 +347,8 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
-        static::assertTrue($tableSchema->hasIndex($index), sprintf('Index "%s" does not exist on table "%s".', $index, $table));
+        $tableSchema = $this->introspectTable($schemaManager, $table);
+        Assert::assertTrue($tableSchema->hasIndex($index), sprintf('Index "%s" does not exist on table "%s".', $index, $table));
     }
 
     /**
@@ -354,9 +358,9 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $tableSchema = $schemaManager->introspectTable($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
-        static::assertTrue($tableSchema->hasForeignKey($foreignKey), sprintf('Foreign key "%s" does not exist on table "%s".', $foreignKey, $table));
+        Assert::assertTrue($tableSchema->hasForeignKey($foreignKey), sprintf('Foreign key "%s" does not exist on table "%s".', $foreignKey, $table));
     }
 
     /**
@@ -366,7 +370,23 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $count = (int) $connection->fetchOne("SELECT COUNT(*) FROM `{$table}`");
-        static::assertEquals($expectedCount, $count, sprintf('Table "%s" has %d rows, expected %d.', $table, $count, $expectedCount));
+        Assert::assertEquals($expectedCount, $count, sprintf('Table "%s" has %d rows, expected %d.', $table, $count, $expectedCount));
+    }
+
+    /**
+     * Helper to call introspectTable or introspectTableByUnquotedName depending on DBAL version.
+     * This avoids deprecation warnings in DBAL 4.4+ while maintaining compatibility with 4.3.
+     *
+     * @param AbstractSchemaManager<AbstractPlatform> $schemaManager
+     */
+    protected function introspectTable(AbstractSchemaManager $schemaManager, string $table): Table
+    {
+        if (method_exists($schemaManager, 'introspectTableByUnquotedName')) {
+            return $schemaManager->introspectTableByUnquotedName($table);
+        }
+
+        /** @phpstan-ignore-next-line */
+        return $schemaManager->introspectTable($table);
     }
 
     /**

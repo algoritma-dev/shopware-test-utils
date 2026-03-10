@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -28,8 +29,8 @@ trait SalesChannelTrait
 
         $entity = $repository->search(new Criteria([$salesChannelId]), $context)->first();
         $salesChannel = $entity instanceof SalesChannelEntity ? $entity : null;
-        assert($salesChannel instanceof SalesChannelEntity, sprintf('Sales channel %s not found', $salesChannelId));
-        assert($salesChannel->getActive(), sprintf('Sales channel %s is not active', $salesChannelId));
+        Assert::assertInstanceOf(SalesChannelEntity::class, $salesChannel, sprintf('Sales channel %s not found', $salesChannelId));
+        Assert::assertTrue($salesChannel->getActive(), sprintf('Sales channel %s is not active', $salesChannelId));
     }
 
     /**
@@ -38,7 +39,7 @@ trait SalesChannelTrait
     protected function assertContextCurrency(SalesChannelContext $context, string $currencyId): void
     {
         $actualCurrencyId = $context->getCurrency()->getId();
-        assert($actualCurrencyId === $currencyId, sprintf('Context currency is %s, expected %s', $actualCurrencyId, $currencyId));
+        Assert::assertSame($currencyId, $actualCurrencyId, sprintf('Context currency is %s, expected %s', $actualCurrencyId, $currencyId));
     }
 
     /**
@@ -47,6 +48,6 @@ trait SalesChannelTrait
     protected function assertContextLanguage(SalesChannelContext $context, string $languageId): void
     {
         $actualLanguageId = $context->getLanguageId();
-        assert($actualLanguageId === $languageId, sprintf('Context language is %s, expected %s', $actualLanguageId, $languageId));
+        Assert::assertSame($languageId, $actualLanguageId, sprintf('Context language is %s, expected %s', $actualLanguageId, $languageId));
     }
 }

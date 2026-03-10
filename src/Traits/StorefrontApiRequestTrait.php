@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Core\PlatformRequest;
 use Shopware\Core\System\SalesChannel\Context\AbstractSalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
@@ -93,7 +94,7 @@ trait StorefrontApiRequestTrait
         $container = $this->storefrontApiBrowser()->getContainer();
         $contextPersister = $container->get(SalesChannelContextPersister::class);
         $contextFactory = $container->get(SalesChannelContextFactory::class);
-        \assert($contextFactory instanceof AbstractSalesChannelContextFactory);
+        Assert::assertInstanceOf(AbstractSalesChannelContextFactory::class, $contextFactory);
 
         $salesChannelId = $this->storefrontApiContext()->getSalesChannelId();
         $contextAsArray = $contextPersister->load($contextToken, $salesChannelId);

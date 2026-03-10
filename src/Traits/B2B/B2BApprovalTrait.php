@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Traits\B2B;
 
 use Algoritma\ShopwareTestUtils\Factory\B2B\PendingOrderFactory;
+use PHPUnit\Framework\Assert;
 use Shopware\Commercial\B2B\OrderApproval\Domain\CartToPendingOrder\PendingOrderRequestedRoute;
 use Shopware\Commercial\B2B\OrderApproval\Domain\State\PendingOrderStates;
 use Shopware\Commercial\B2B\OrderApproval\Entity\PendingOrderCollection;
@@ -182,8 +183,9 @@ trait B2BApprovalTrait
     {
         $pendingOrder = $this->getPendingOrderByOrderId($orderId, $context);
 
-        assert(
-            $pendingOrder instanceof PendingOrderEntity,
+        Assert::assertInstanceOf(
+            PendingOrderEntity::class,
+            $pendingOrder,
             sprintf('Expected order "%s" to require approval, but no pending order found', $orderId)
         );
     }
@@ -192,8 +194,9 @@ trait B2BApprovalTrait
     {
         $pendingOrders = $this->getPendingOrdersByEmployee($employeeId, $context);
 
-        assert(
-            count($pendingOrders) > 0,
+        Assert::assertGreaterThan(
+            0,
+            count($pendingOrders),
             sprintf('Expected pending order to be created for employee "%s", but none found', $employeeId)
         );
     }
@@ -206,8 +209,9 @@ trait B2BApprovalTrait
         $pendingOrder = $this->getPendingOrderById($pendingOrderId, $context);
         $actualState = $pendingOrder->getStateMachineState()->getTechnicalName();
 
-        assert(
-            $actualState === $expectedState,
+        Assert::assertSame(
+            $expectedState,
+            $actualState,
             sprintf('Expected pending order to be in state "%s", but got "%s"', $expectedState, $actualState)
         );
     }
@@ -261,6 +265,7 @@ trait B2BApprovalTrait
         $criteria->addAssociation('employee');
         $criteria->addAssociation('customer');
         $criteria->addAssociation('order');
+        $criteria->addFilter(new EqualsFilter('stateMachineState.technicalName', PendingOrderStates::STATE_PENDING));
 
         $entity = $repository->search($criteria, $context)->first();
 
@@ -276,7 +281,9 @@ trait B2BApprovalTrait
         $context ??= Context::createCLIContext();
         $repository = $this->getPendingOrderRepository();
         $criteria = new Criteria();
+        $criteria->addAssociation('stateMachineState');
         $criteria->addFilter(new EqualsFilter('orderId', $orderId));
+        $criteria->addFilter(new EqualsFilter('stateMachineState.technicalName', PendingOrderStates::STATE_PENDING));
 
         $entity = $repository->search($criteria, $context)->first();
 
@@ -325,6 +332,8 @@ trait B2BApprovalTrait
         $criteria = new Criteria([$pendingOrder->getOrderId()]);
         $criteria->addAssociation('lineItems');
         $criteria->addAssociation('deliveries');
+        $criteria->addAssociation('transactions');
+        $criteria->addAssociation('stateMachineState');
 
         $order = $orderRepository->search($criteria, $context)->first();
 

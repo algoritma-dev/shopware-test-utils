@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressCollection;
 use Shopware\Core\Checkout\Customer\Aggregate\CustomerGroup\CustomerGroupEntity;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
@@ -15,19 +16,19 @@ trait CustomerTrait
     protected function customerAssertLoggedIn(SalesChannelContext $context): void
     {
         $customer = $context->getCustomer();
-        assert($customer instanceof CustomerEntity, 'No customer logged in (context has no customer)');
+        Assert::assertInstanceOf(CustomerEntity::class, $customer, 'No customer logged in (context has no customer)');
     }
 
     protected function customerAssertGuestSession(SalesChannelContext $context): void
     {
         $customer = $context->getCustomer();
-        assert(! $customer instanceof CustomerEntity, 'Customer is logged in but should be guest');
+        Assert::assertNotInstanceOf(CustomerEntity::class, $customer, 'Customer is logged in but should be guest');
     }
 
     protected function customerAssertHasAddress(CustomerEntity $customer, string $addressId): void
     {
         $addresses = $customer->getAddresses();
-        assert($addresses instanceof CustomerAddressCollection, 'Customer has no addresses');
+        Assert::assertInstanceOf(CustomerAddressCollection::class, $addresses, 'Customer has no addresses');
 
         $found = false;
         foreach ($addresses as $address) {
@@ -37,14 +38,14 @@ trait CustomerTrait
             }
         }
 
-        assert($found, sprintf('Customer does not have address %s', $addressId));
+        Assert::assertTrue($found, sprintf('Customer does not have address %s', $addressId));
     }
 
     protected function customerAssertBelongsToGroup(CustomerEntity $customer, string $groupId): void
     {
         $group = $customer->getGroup();
-        assert($group instanceof CustomerGroupEntity, 'Customer has no group');
-        assert($group->getId() === $groupId, sprintf('Customer is in group %s, expected %s', $group->getId(), $groupId));
+        Assert::assertInstanceOf(CustomerGroupEntity::class, $group, 'Customer has no group');
+        Assert::assertSame($groupId, $group->getId(), sprintf('Customer is in group %s, expected %s', $group->getId(), $groupId));
     }
 
     protected function customerAssertHasRole(CustomerEntity $customer, string $role): void
@@ -54,7 +55,7 @@ trait CustomerTrait
         // For standard Shopware, checking customer group name.
 
         $group = $customer->getGroup();
-        assert($group instanceof CustomerGroupEntity, 'Customer has no group assigned.');
-        assert($group->getName() === $role, sprintf('Customer is not in group/role %s', $role));
+        Assert::assertInstanceOf(CustomerGroupEntity::class, $group, 'Customer has no group assigned.');
+        Assert::assertSame($role, $group->getName(), sprintf('Customer is not in group/role %s', $role));
     }
 }

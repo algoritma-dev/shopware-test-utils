@@ -10,14 +10,14 @@ use Shopware\Core\Defaults;
  */
 trait TimeTrait
 {
-    private static ?\DateTimeImmutable $frozenTime = null;
+    private ?\DateTimeImmutable $frozenTime = null;
 
     /**
      * Freezes time at a specific point.
      */
     protected function freezeTime(\DateTimeInterface $at): void
     {
-        self::$frozenTime = \DateTimeImmutable::createFromInterface($at);
+        $this->frozenTime = \DateTimeImmutable::createFromInterface($at);
     }
 
     /**
@@ -53,7 +53,7 @@ trait TimeTrait
      */
     protected function travelBack(): void
     {
-        self::$frozenTime = null;
+        $this->frozenTime = null;
     }
 
     /**
@@ -61,7 +61,7 @@ trait TimeTrait
      */
     protected function getCurrentTime(): \DateTimeImmutable
     {
-        return self::$frozenTime ?? new \DateTimeImmutable();
+        return $this->frozenTime ?? new \DateTimeImmutable();
     }
 
     /**
@@ -103,12 +103,13 @@ trait TimeTrait
      */
     protected function withFrozenTime(\DateTimeInterface $at, callable $callback): mixed
     {
+        $previous = $this->frozenTime;
         $this->freezeTime($at);
 
         try {
             return $callback();
         } finally {
-            $this->travelBack();
+            $this->frozenTime = $previous;
         }
     }
 
@@ -135,7 +136,7 @@ trait TimeTrait
      */
     protected function assertTimestampIsRecent(int $timestamp, int $withinSeconds = 60): void
     {
-        $now = time();
+        $now = $this->getCurrentTimestamp();
         $diff = abs($now - $timestamp);
 
         Assert::assertLessThanOrEqual(
@@ -150,10 +151,10 @@ trait TimeTrait
      */
     protected function assertDateInFuture(\DateTimeInterface $date): void
     {
-        $now = new \DateTimeImmutable();
+        $now = $this->getCurrentTimestamp();
 
         Assert::assertGreaterThan(
-            $now->getTimestamp(),
+            $now,
             $date->getTimestamp(),
             'Date is not in the future'
         );
@@ -164,10 +165,10 @@ trait TimeTrait
      */
     protected function assertDateInPast(\DateTimeInterface $date): void
     {
-        $now = new \DateTimeImmutable();
+        $now = $this->getCurrentTimestamp();
 
         Assert::assertLessThan(
-            $now->getTimestamp(),
+            $now,
             $date->getTimestamp(),
             'Date is not in the past'
         );

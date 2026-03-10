@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Content\Product\ProductEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\DataAbstractionLayer\Pricing\Price;
@@ -17,7 +18,7 @@ trait ProductTrait
     protected function assertProductInStock(ProductEntity $product, int $minStock = 1): void
     {
         $stock = $product->getStock();
-        assert($stock >= $minStock, sprintf('Product has stock %d, expected at least %d', $stock, $minStock));
+        Assert::assertGreaterThanOrEqual($minStock, $stock, sprintf('Product has stock %d, expected at least %d', $stock, $minStock));
     }
 
     /**
@@ -26,7 +27,7 @@ trait ProductTrait
     protected function assertProductOutOfStock(ProductEntity $product): void
     {
         $stock = $product->getStock();
-        assert($stock === 0, sprintf('Product has stock %d, expected 0', $stock));
+        Assert::assertSame(0, $stock, sprintf('Product has stock %d, expected 0', $stock));
     }
 
     /**
@@ -34,7 +35,7 @@ trait ProductTrait
      */
     protected function assertProductActive(ProductEntity $product): void
     {
-        assert($product->getActive(), 'Product is not active');
+        Assert::assertTrue($product->getActive(), 'Product is not active');
     }
 
     /**
@@ -42,7 +43,7 @@ trait ProductTrait
      */
     protected function assertProductInactive(ProductEntity $product): void
     {
-        assert(! $product->getActive(), 'Product is active but should be inactive');
+        Assert::assertFalse($product->getActive(), 'Product is active but should be inactive');
     }
 
     /**
@@ -51,8 +52,8 @@ trait ProductTrait
     protected function assertProductHasCategory(ProductEntity $product, string $categoryId): void
     {
         $categories = $product->getCategoryTree();
-        assert($categories !== null, 'Product has no category tree');
-        assert(in_array($categoryId, $categories, true), sprintf('Product does not have category %s', $categoryId));
+        Assert::assertNotNull($categories, 'Product has no category tree');
+        Assert::assertContains($categoryId, $categories, sprintf('Product does not have category %s', $categoryId));
     }
 
     /**
@@ -61,11 +62,11 @@ trait ProductTrait
     protected function assertProductPriceInRange(ProductEntity $product, float $min, float $max): void
     {
         $price = $product->getCurrencyPrice(Defaults::CURRENCY);
-        assert($price instanceof Price, 'Product has no price for default currency');
+        Assert::assertInstanceOf(Price::class, $price, 'Product has no price for default currency');
 
         $gross = $price->getGross();
-        assert($gross >= $min, sprintf('Price %.2f is below minimum %.2f', $gross, $min));
-        assert($gross <= $max, sprintf('Price %.2f is above maximum %.2f', $gross, $max));
+        Assert::assertGreaterThanOrEqual($min, $gross, sprintf('Price %.2f is below minimum %.2f', $gross, $min));
+        Assert::assertLessThanOrEqual($max, $gross, sprintf('Price %.2f is above maximum %.2f', $gross, $max));
     }
 
     /**
@@ -74,7 +75,7 @@ trait ProductTrait
     protected function assertProductPriceEquals(float $expected, ProductEntity $product): void
     {
         $price = $product->getCurrencyPrice(Defaults::CURRENCY);
-        assert($price instanceof Price, 'Product has no price for default currency.');
-        assert(abs($price->getGross() - $expected) < 0.01, sprintf('Product price %.2f does not match expected value %.2f.', $price->getGross(), $expected));
+        Assert::assertInstanceOf(Price::class, $price, 'Product has no price for default currency.');
+        Assert::assertEqualsWithDelta($expected, $price->getGross(), 0.01, sprintf('Product price %.2f does not match expected value %.2f.', $price->getGross(), $expected));
     }
 }

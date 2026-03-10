@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
+use PHPUnit\Framework\Assert;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
@@ -83,46 +84,51 @@ trait StorefrontRequestTrait
 
     protected function storefrontAssertResponseOk(Response $response, string $message = ''): void
     {
-        \assert(
-            $response->getStatusCode() === Response::HTTP_OK,
+        Assert::assertSame(
+            Response::HTTP_OK,
+            $response->getStatusCode(),
             $message ?: \sprintf('Expected response status code 200, but got %d', $response->getStatusCode())
         );
     }
 
     protected function storefrontAssertResponseCreated(Response $response, string $message = ''): void
     {
-        \assert(
-            $response->getStatusCode() === Response::HTTP_CREATED,
+        Assert::assertSame(
+            Response::HTTP_CREATED,
+            $response->getStatusCode(),
             $message ?: \sprintf('Expected response status code 201, but got %d', $response->getStatusCode())
         );
     }
 
     protected function storefrontAssertResponseNotFound(Response $response, string $message = ''): void
     {
-        \assert(
-            $response->getStatusCode() === Response::HTTP_NOT_FOUND,
+        Assert::assertSame(
+            Response::HTTP_NOT_FOUND,
+            $response->getStatusCode(),
             $message ?: \sprintf('Expected response status code 404, but got %d', $response->getStatusCode())
         );
     }
 
     protected function storefrontAssertResponseForbidden(Response $response, string $message = ''): void
     {
-        \assert(
-            $response->getStatusCode() === Response::HTTP_FORBIDDEN,
+        Assert::assertSame(
+            Response::HTTP_FORBIDDEN,
+            $response->getStatusCode(),
             $message ?: \sprintf('Expected response status code 403, but got %d', $response->getStatusCode())
         );
     }
 
     protected function storefrontAssertResponseRedirects(Response $response, ?string $expectedUrl = null, string $message = ''): void
     {
-        \assert(
+        Assert::assertTrue(
             $response->isRedirection(),
             $message ?: \sprintf('Expected response to be a redirect, but got status code %d', $response->getStatusCode())
         );
 
         if ($expectedUrl !== null) {
-            \assert(
-                $response->headers->get('Location') === $expectedUrl,
+            Assert::assertSame(
+                $expectedUrl,
+                $response->headers->get('Location'),
                 $message ?: \sprintf('Expected redirect to "%s", but got "%s"', $expectedUrl, $response->headers->get('Location'))
             );
         }
@@ -131,8 +137,9 @@ trait StorefrontRequestTrait
     protected function storefrontAssertResponseBodyContains(Response $response, string $needle, string $message = ''): void
     {
         $content = (string) $response->getContent();
-        \assert(
-            str_contains($content, $needle),
+        Assert::assertStringContainsString(
+            $needle,
+            $content,
             $message ?: \sprintf('Expected response body to contain "%s"', $needle)
         );
     }
@@ -140,8 +147,9 @@ trait StorefrontRequestTrait
     protected function storefrontAssertResponseBodyNotContains(Response $response, string $needle, string $message = ''): void
     {
         $content = (string) $response->getContent();
-        \assert(
-            ! str_contains($content, $needle),
+        Assert::assertStringNotContainsString(
+            $needle,
+            $content,
             $message ?: \sprintf('Expected response body not to contain "%s"', $needle)
         );
     }
@@ -150,8 +158,9 @@ trait StorefrontRequestTrait
     {
         $content = (string) $response->getContent();
         \json_decode($content);
-        \assert(
-            \json_last_error() === JSON_ERROR_NONE,
+        Assert::assertSame(
+            JSON_ERROR_NONE,
+            \json_last_error(),
             $message ?: 'Expected response to be valid JSON'
         );
     }
@@ -165,8 +174,9 @@ trait StorefrontRequestTrait
         $content = (string) $response->getContent();
         $actualData = \json_decode($content, true);
 
-        \assert(
-            $actualData === $expectedData,
+        Assert::assertSame(
+            $expectedData,
+            $actualData,
             $message ?: 'Expected JSON response to match provided data'
         );
     }
@@ -177,13 +187,13 @@ trait StorefrontRequestTrait
         $content = (string) $response->getContent();
         $actualData = \json_decode($content, true);
 
-        \assert(\array_key_exists($key, $actualData), $message ?: \sprintf('Expected JSON response to contain key "%s"', $key));
-        \assert($actualData[$key] === $expectedValue, $message ?: \sprintf('Expected JSON key "%s" to be "%s"', $key, \print_r($expectedValue, true)));
+        Assert::assertArrayHasKey($key, $actualData, $message ?: \sprintf('Expected JSON response to contain key "%s"', $key));
+        Assert::assertSame($expectedValue, $actualData[$key], $message ?: \sprintf('Expected JSON key "%s" to be "%s"', $key, \print_r($expectedValue, true)));
     }
 
     protected function storefrontAssertResponseHasHeader(Response $response, string $header, string $message = ''): void
     {
-        \assert(
+        Assert::assertTrue(
             $response->headers->has($header),
             $message ?: \sprintf('Expected response to have header "%s"', $header)
         );
@@ -192,23 +202,25 @@ trait StorefrontRequestTrait
     protected function storefrontAssertResponseHeaderContains(Response $response, string $header, string $value, string $message = ''): void
     {
         $this->storefrontAssertResponseHasHeader($response, $header, $message);
-        \assert(
-            str_contains((string) $response->headers->get($header), $value),
+        Assert::assertStringContainsString(
+            $value,
+            (string) $response->headers->get($header),
             $message ?: \sprintf('Expected response header "%s" to contain "%s"', $header, $value)
         );
     }
 
     protected function storefrontAssertRequestMethod(Request $request, string $method, string $message = ''): void
     {
-        \assert(
-            $request->getMethod() === \strtoupper($method),
+        Assert::assertSame(
+            \strtoupper($method),
+            $request->getMethod(),
             $message ?: \sprintf('Expected request method "%s", but got "%s"', \strtoupper($method), $request->getMethod())
         );
     }
 
     protected function storefrontAssertRequestHasHeader(Request $request, string $header, string $message = ''): void
     {
-        \assert(
+        Assert::assertTrue(
             $request->headers->has($header),
             $message ?: \sprintf('Expected request to have header "%s"', $header)
         );
@@ -216,7 +228,7 @@ trait StorefrontRequestTrait
 
     protected function storefrontAssertRequestHasParameter(Request $request, string $key, string $message = ''): void
     {
-        \assert(
+        Assert::assertTrue(
             $request->query->has($key) || $request->request->has($key),
             $message ?: \sprintf('Expected request to have parameter "%s"', $key)
         );

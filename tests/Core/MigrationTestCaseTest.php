@@ -94,9 +94,13 @@ class MigrationTestCaseTest extends MigrationTestCase
             ->with('col_name')
             ->willReturn(true);
 
+        $methodToMock = method_exists(AbstractSchemaManager::class, 'introspectTableByUnquotedName')
+            ? 'introspectTableByUnquotedName'
+            : 'introspectTable';
+
         $schemaManager = $this->createMock(AbstractSchemaManager::class);
         $schemaManager->expects($this->once())
-            ->method('introspectTable')
+            ->method($methodToMock)
             ->with('test_table')
             ->willReturn($table);
 

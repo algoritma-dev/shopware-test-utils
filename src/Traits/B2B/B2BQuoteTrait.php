@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits\B2B;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Commercial\B2B\QuoteManagement\Domain\QuoteToCart\QuoteToCartConverter;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteCollection;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
@@ -51,8 +52,9 @@ trait B2BQuoteTrait
         $quote = $this->getQuoteEntityById($quoteId, $context);
         $actualState = $quote->getStateMachineState()->getTechnicalName();
 
-        assert(
-            $actualState === $expectedState,
+        Assert::assertSame(
+            $expectedState,
+            $actualState,
             sprintf('Expected quote to be in state "%s", but got "%s"', $expectedState, $actualState)
         );
     }
@@ -62,13 +64,15 @@ trait B2BQuoteTrait
         $comments = $this->getQuoteComments($quoteId, $context);
 
         if ($expectedCount !== null) {
-            assert(
-                count($comments) === $expectedCount,
+            Assert::assertCount(
+                $expectedCount,
+                $comments,
                 sprintf('Expected quote to have %d comments, but has %d', $expectedCount, count($comments))
             );
         } else {
-            assert(
-                count($comments) > 0,
+            Assert::assertGreaterThan(
+                0,
+                count($comments),
                 sprintf('Expected quote "%s" to have comments, but none found', $quoteId)
             );
         }
@@ -78,12 +82,13 @@ trait B2BQuoteTrait
     {
         $quote = $this->getQuoteEntityById($quoteId, $context);
 
-        assert($quote->getLineItems() instanceof QuoteLineItemCollection, 'Quote has no line items');
-        assert(count($quote->getLineItems()) > 0, 'Quote has empty line items');
+        Assert::assertInstanceOf(QuoteLineItemCollection::class, $quote->getLineItems(), 'Quote has no line items');
+        Assert::assertGreaterThan(0, count($quote->getLineItems()), 'Quote has empty line items');
 
         $state = $quote->getStateMachineState()->getTechnicalName();
-        assert(
-            $state === QuoteStates::STATE_ACCEPTED,
+        Assert::assertSame(
+            QuoteStates::STATE_ACCEPTED,
+            $state,
             sprintf('Quote must be in accepted state to be converted, but is in state "%s"', $state)
         );
     }

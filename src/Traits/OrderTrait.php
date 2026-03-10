@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\Aggregate\OrderDelivery\OrderDeliveryCollection;
@@ -66,11 +67,17 @@ trait OrderTrait
         }
 
         $order = $this->orderGet($orderId, $context);
-        $transaction = $order->getTransactions()->first();
-
-        if ($transaction) {
-            $this->transitionPaymentState($transaction->getId(), 'pay', $context);
+        if (! $order instanceof OrderEntity) {
+            throw new \RuntimeException(sprintf('Order "%s" not found', $orderId));
         }
+
+        $transactions = $order->getTransactions();
+        if (! $transactions instanceof OrderTransactionCollection || $transactions->count() === 0) {
+            throw new \RuntimeException(sprintf('Order "%s" has no transactions', $orderId));
+        }
+
+        $transaction = $transactions->first();
+        $this->transitionPaymentState($transaction->getId(), 'pay', $context);
     }
 
     protected function orderMarkAsShipped(string $orderId, ?Context $context = null): void
@@ -80,11 +87,18 @@ trait OrderTrait
         }
 
         $order = $this->orderGet($orderId, $context);
-        $delivery = $order->getDeliveries()->first();
 
-        if ($delivery) {
-            $this->transitionDeliveryState($delivery->getId(), 'ship', $context);
+        if (! $order instanceof OrderEntity) {
+            throw new \RuntimeException(sprintf('Order "%s" not found', $orderId));
         }
+
+        $deliveries = $order->getDeliveries();
+        if (! $deliveries instanceof OrderDeliveryCollection || $deliveries->count() === 0) {
+            throw new \RuntimeException(sprintf('Order "%s" has no deliveries', $orderId));
+        }
+
+        $delivery = $deliveries->first();
+        $this->transitionPaymentState($delivery->getId(), 'ship', $context);
     }
 
     protected function orderGetTotal(OrderEntity $order): float
@@ -112,32 +126,32 @@ trait OrderTrait
     protected function orderAssertState(OrderEntity $order, string $expectedState): void
     {
         $stateName = $order->getStateMachineState()?->getTechnicalName();
-        assert($stateName === $expectedState, sprintf('Order state is "%s", expected "%s"', $stateName, $expectedState));
+        Assert::assertSame($expectedState, $stateName, sprintf('Order state is "%s", expected "%s"', $stateName, $expectedState));
     }
 
     protected function orderAssertHasTransaction(OrderEntity $order): void
     {
         $transactions = $order->getTransactions();
-        assert($transactions instanceof OrderTransactionCollection, 'Order has no transactions collection');
-        assert($transactions->count() > 0, 'Order has no transactions');
+        Assert::assertInstanceOf(OrderTransactionCollection::class, $transactions, 'Order has no transactions collection');
+        Assert::assertGreaterThan(0, $transactions->count(), 'Order has no transactions');
     }
 
     protected function orderAssertHasDelivery(OrderEntity $order): void
     {
         $deliveries = $order->getDeliveries();
-        assert($deliveries instanceof OrderDeliveryCollection, 'Order has no deliveries collection');
-        assert($deliveries->count() > 0, 'Order has no deliveries');
+        Assert::assertInstanceOf(OrderDeliveryCollection::class, $deliveries, 'Order has no deliveries collection');
+        Assert::assertGreaterThan(0, $deliveries->count(), 'Order has no deliveries');
     }
 
     protected function orderAssertLineItemPrice(OrderEntity $order, string $lineItemId, float $expectedPrice): void
     {
         $lineItems = $order->getLineItems();
-        assert($lineItems instanceof OrderLineItemCollection, 'Order has no line items');
+        Assert::assertInstanceOf(OrderLineItemCollection::class, $lineItems, 'Order has no line items');
 
         $lineItem = $lineItems->get($lineItemId);
-        assert($lineItem !== null, sprintf('Line item %s not found in order', $lineItemId));
+        Assert::assertNotNull($lineItem, sprintf('Line item %s not found in order', $lineItemId));
 
         $actualPrice = $lineItem->getPrice()->getTotalPrice();
-        assert(abs($actualPrice - $expectedPrice) < 0.01, sprintf('Line item %s has price %.2f, expected %.2f', $lineItemId, $actualPrice, $expectedPrice));
+        Assert::assertEqualsWithDelta($expectedPrice, $actualPrice, 0.01, sprintf('Line item %s has price %.2f, expected %.2f', $lineItemId, $actualPrice, $expectedPrice));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits\B2B;
 
+use PHPUnit\Framework\Assert;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
@@ -306,8 +307,9 @@ trait B2BBudgetTrait
         $budget = $this->getBudgetById($budgetId, $context);
         $remaining = $budget->getAmount() - $budget->getUsedAmount();
 
-        assert(
-            $remaining < 0,
+        Assert::assertLessThan(
+            0,
+            $remaining,
             sprintf('Expected budget to be exceeded, but remaining budget is %.2f', $remaining)
         );
     }
@@ -317,8 +319,9 @@ trait B2BBudgetTrait
         $budget = $this->getBudgetById($budgetId, $context);
         $remaining = $budget->getAmount() - $budget->getUsedAmount();
 
-        assert(
-            $remaining >= 0,
+        Assert::assertGreaterThanOrEqual(
+            0,
+            $remaining,
             sprintf('Expected budget not to be exceeded, but it is over by %.2f', abs($remaining))
         );
     }
@@ -326,14 +329,14 @@ trait B2BBudgetTrait
     protected function assertBudgetNotificationTriggered(string $budgetId, ?Context $context = null): void
     {
         $budget = $this->getBudgetById($budgetId, $context);
-        assert($budget->isNotify(), 'Budget notification is not enabled');
+        Assert::assertTrue($budget->isNotify(), 'Budget notification is not enabled');
 
         $notificationConfig = $budget->getNotificationConfig();
         if (! $notificationConfig) {
             throw new \RuntimeException('Budget has no notification configuration');
         }
 
-        assert(
+        Assert::assertTrue(
             $this->shouldBudgetTriggerNotification($budgetId, $context),
             'Expected budget notification to be triggered'
         );
