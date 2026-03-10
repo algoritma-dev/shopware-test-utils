@@ -6,7 +6,6 @@ use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\Assert;
 use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
-use Shopware\Core\Framework\Test\TestCaseBase\MailTemplateTestBehaviour;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
 use Symfony\Component\Mailer\Event\SentMessageEvent;
 use Symfony\Component\Mime\Email;
@@ -15,7 +14,6 @@ trait MailTrait
 {
     use KernelTestBehaviour;
     use EventDispatcherBehaviour;
-    use MailTemplateTestBehaviour;
     use MailerAssertionsTrait;
 
     /**
