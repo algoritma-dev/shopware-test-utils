@@ -100,6 +100,8 @@ trait StorefrontApiRequestTrait
         $contextAsArray = $contextPersister->load($contextToken, $salesChannelId);
 
         if ($contextAsArray === []) {
+            $this->storefrontApiSalesChannelContext = null;
+
             return;
         }
 

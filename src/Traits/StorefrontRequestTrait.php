@@ -18,6 +18,11 @@ trait StorefrontRequestTrait
     abstract protected function createCustomSalesChannelBrowser(array $options = []): KernelBrowser;
 
     /**
+     * Get or create the storefront browser instance.
+     *
+     * Note: Options are only applied on the first call. Subsequent calls
+     * return the cached instance and ignore any provided options.
+     *
      * @param array<string, mixed> $options
      */
     protected function storefrontBrowser(array $options = []): KernelBrowser
@@ -39,6 +44,8 @@ trait StorefrontRequestTrait
                 'password' => $password,
             ]
         );
+
+        $this->assertStorefrontSuccessOrRedirect();
     }
 
     protected function storefrontAddToCart(string $productId, int $quantity = 1): void
@@ -237,8 +244,10 @@ trait StorefrontRequestTrait
     private function assertStorefrontSuccessOrRedirect(): void
     {
         $statusCode = $this->storefrontBrowser()->getResponse()->getStatusCode();
-        if ($statusCode >= 400) {
-            throw new \RuntimeException('Request failed with status code: ' . $statusCode);
-        }
+        Assert::assertLessThan(
+            400,
+            $statusCode,
+            \sprintf('Request failed with status code: %d', $statusCode)
+        );
     }
 }

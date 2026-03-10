@@ -8,6 +8,7 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
+use Shopware\Core\Framework\Uuid\Uuid;
 
 /**
  * Trait for performing actions on existing media entities.
@@ -24,17 +25,20 @@ trait MediaTrait
         $context ??= Context::createCLIContext();
         $productRepository = static::getContainer()->get('product.repository');
 
+        $productMediaId = Uuid::randomHex();
+
         $data = [
             'id' => $productId,
             'media' => [
                 [
+                    'id' => $productMediaId,
                     'mediaId' => $mediaId,
                 ],
             ],
         ];
 
         if ($setCover) {
-            $data['coverId'] = $mediaId;
+            $data['coverId'] = $productMediaId;
         }
 
         $productRepository->update([$data], $context);

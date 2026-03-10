@@ -265,7 +265,6 @@ trait B2BApprovalTrait
         $criteria->addAssociation('employee');
         $criteria->addAssociation('customer');
         $criteria->addAssociation('order');
-        $criteria->addFilter(new EqualsFilter('stateMachineState.technicalName', PendingOrderStates::STATE_PENDING));
 
         $entity = $repository->search($criteria, $context)->first();
 
@@ -283,7 +282,6 @@ trait B2BApprovalTrait
         $criteria = new Criteria();
         $criteria->addAssociation('stateMachineState');
         $criteria->addFilter(new EqualsFilter('orderId', $orderId));
-        $criteria->addFilter(new EqualsFilter('stateMachineState.technicalName', PendingOrderStates::STATE_PENDING));
 
         $entity = $repository->search($criteria, $context)->first();
 

@@ -10,14 +10,19 @@ use Shopware\Core\Defaults;
  */
 trait TimeTrait
 {
-    private ?\DateTimeImmutable $frozenTime = null;
+    private static ?\DateTimeImmutable $frozenTime = null;
+
+    /**
+     * @var array<\DateTimeImmutable|null>
+     */
+    private static array $timeStack = [];
 
     /**
      * Freezes time at a specific point.
      */
     protected function freezeTime(\DateTimeInterface $at): void
     {
-        $this->frozenTime = \DateTimeImmutable::createFromInterface($at);
+        self::$frozenTime = \DateTimeImmutable::createFromInterface($at);
     }
 
     /**
@@ -33,7 +38,7 @@ trait TimeTrait
      */
     protected function travelForward(string $interval): void
     {
-        $currentTime = $this->getCurrentTime();
+        $currentTime = self::getCurrentTime();
         $newTime = $currentTime->modify('+' . $interval);
         $this->travelTo($newTime);
     }
@@ -43,7 +48,7 @@ trait TimeTrait
      */
     protected function travelBackward(string $interval): void
     {
-        $currentTime = $this->getCurrentTime();
+        $currentTime = self::getCurrentTime();
         $newTime = $currentTime->modify('-' . $interval);
         $this->travelTo($newTime);
     }
@@ -53,15 +58,15 @@ trait TimeTrait
      */
     protected function travelBack(): void
     {
-        $this->frozenTime = null;
+        self::$frozenTime = array_pop(self::$timeStack);
     }
 
     /**
      * Gets the current time (frozen or real).
      */
-    protected function getCurrentTime(): \DateTimeImmutable
+    protected static function getCurrentTime(): \DateTimeImmutable
     {
-        return $this->frozenTime ?? new \DateTimeImmutable();
+        return self::$frozenTime ?? new \DateTimeImmutable();
     }
 
     /**
@@ -69,7 +74,7 @@ trait TimeTrait
      */
     protected function getCurrentTimestamp(): int
     {
-        return $this->getCurrentTime()->getTimestamp();
+        return self::getCurrentTime()->getTimestamp();
     }
 
     /**
@@ -77,7 +82,7 @@ trait TimeTrait
      */
     protected function dateInPast(string $interval): \DateTimeImmutable
     {
-        return $this->getCurrentTime()->modify('-' . $interval);
+        return self::getCurrentTime()->modify('-' . $interval);
     }
 
     /**
@@ -85,7 +90,7 @@ trait TimeTrait
      */
     protected function dateInFuture(string $interval): \DateTimeImmutable
     {
-        return $this->getCurrentTime()->modify('+' . $interval);
+        return self::getCurrentTime()->modify('+' . $interval);
     }
 
     /**
@@ -103,13 +108,14 @@ trait TimeTrait
      */
     protected function withFrozenTime(\DateTimeInterface $at, callable $callback): mixed
     {
-        $previous = $this->frozenTime;
-        $this->freezeTime($at);
+        $previous = self::$frozenTime;
+        self::$timeStack[] = $previous;
+        self::$frozenTime = \DateTimeImmutable::createFromInterface($at);
 
         try {
             return $callback();
         } finally {
-            $this->frozenTime = $previous;
+            self::$frozenTime = array_pop(self::$timeStack);
         }
     }
 
