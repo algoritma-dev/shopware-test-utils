@@ -2,7 +2,10 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
+use Algoritma\ShopwareTestUtils\Traits\ConfigTrait;
 use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
+use Algoritma\ShopwareTestUtils\Traits\LogTrait;
+use Algoritma\ShopwareTestUtils\Traits\MigrationTrait;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
@@ -16,6 +19,9 @@ abstract class MigrationTestCase extends TestCase
 {
     use KernelTestBehaviour;
     use DatabaseTrait;
+    use MigrationTrait;
+    use ConfigTrait;
+    use LogTrait;
 
     /**
      * @var array<string> List of tables to snapshot. If empty, full database snapshot is taken.

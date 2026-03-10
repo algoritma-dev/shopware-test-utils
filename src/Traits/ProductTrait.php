@@ -1,22 +1,20 @@
 <?php
 
-namespace Algoritma\ShopwareTestUtils\Helper;
+namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Shopware\Core\Content\Product\ProductEntity;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\DataAbstractionLayer\Pricing\Price;
 
 /**
- * Helper for product-related operations and assertions.
+ * Trait for product-related operations and assertions.
  */
-class ProductHelper
+trait ProductTrait
 {
-    // --- Product Assertions ---
-
     /**
      * Assert that a product is in stock.
      */
-    public function assertProductInStock(ProductEntity $product, int $minStock = 1): void
+    protected function assertProductInStock(ProductEntity $product, int $minStock = 1): void
     {
         $stock = $product->getStock();
         assert($stock >= $minStock, sprintf('Product has stock %d, expected at least %d', $stock, $minStock));
@@ -25,7 +23,7 @@ class ProductHelper
     /**
      * Assert that a product is out of stock.
      */
-    public function assertProductOutOfStock(ProductEntity $product): void
+    protected function assertProductOutOfStock(ProductEntity $product): void
     {
         $stock = $product->getStock();
         assert($stock === 0, sprintf('Product has stock %d, expected 0', $stock));
@@ -34,7 +32,7 @@ class ProductHelper
     /**
      * Assert that a product is active.
      */
-    public function assertProductActive(ProductEntity $product): void
+    protected function assertProductActive(ProductEntity $product): void
     {
         assert($product->getActive(), 'Product is not active');
     }
@@ -42,7 +40,7 @@ class ProductHelper
     /**
      * Assert that a product is inactive.
      */
-    public function assertProductInactive(ProductEntity $product): void
+    protected function assertProductInactive(ProductEntity $product): void
     {
         assert(! $product->getActive(), 'Product is active but should be inactive');
     }
@@ -50,7 +48,7 @@ class ProductHelper
     /**
      * Assert that a product has a specific category.
      */
-    public function assertProductHasCategory(ProductEntity $product, string $categoryId): void
+    protected function assertProductHasCategory(ProductEntity $product, string $categoryId): void
     {
         $categories = $product->getCategoryTree();
         assert($categories !== null, 'Product has no category tree');
@@ -60,7 +58,7 @@ class ProductHelper
     /**
      * Assert that a product price is within a specific range.
      */
-    public function assertPriceInRange(ProductEntity $product, float $min, float $max): void
+    protected function assertProductPriceInRange(ProductEntity $product, float $min, float $max): void
     {
         $price = $product->getCurrencyPrice(Defaults::CURRENCY);
         assert($price instanceof Price, 'Product has no price for default currency');
@@ -73,7 +71,7 @@ class ProductHelper
     /**
      * Assert that a product price equals expected value.
      */
-    public function assertPriceEquals(float $expected, ProductEntity $product): void
+    protected function assertProductPriceEquals(float $expected, ProductEntity $product): void
     {
         $price = $product->getCurrencyPrice(Defaults::CURRENCY);
         assert($price instanceof Price, 'Product has no price for default currency.');

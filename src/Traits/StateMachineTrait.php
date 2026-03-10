@@ -1,6 +1,6 @@
 <?php
 
-namespace Algoritma\ShopwareTestUtils\Helper;
+namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Context;
@@ -8,31 +8,27 @@ use Shopware\Core\Framework\DataAbstractionLayer\Entity;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachineStateEntity;
 use Shopware\Core\System\StateMachine\Aggregation\StateMachineTransition\StateMachineTransitionEntity;
 use Shopware\Core\System\StateMachine\StateMachineRegistry;
 use Shopware\Core\System\StateMachine\Transition;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class StateManager
+/**
+ * Trait for state machine operations in tests.
+ */
+trait StateMachineTrait
 {
-    private readonly StateMachineRegistry $stateMachineRegistry;
-
-    public function __construct(private readonly ContainerInterface $container)
-    {
-        $this->stateMachineRegistry = $this->container->get(StateMachineRegistry::class);
-    }
+    use KernelTestBehaviour;
 
     /**
      * Transitions an order to a specific state.
      */
-    public function transitionOrderState(string $orderId, string $toState, ?Context $context = null): void
+    protected function transitionOrderState(string $orderId, string $toState, ?Context $context = null): void
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
+        $context = $context ?? Context::createCLIContext();
 
-        $this->stateMachineRegistry->transition(
+        $this->getStateMachineRegistry()->transition(
             new Transition(
                 'order',
                 $orderId,
@@ -46,13 +42,11 @@ class StateManager
     /**
      * Transitions an order transaction to a specific state.
      */
-    public function transitionPaymentState(string $transactionId, string $toState, ?Context $context = null): void
+    protected function transitionPaymentState(string $transactionId, string $toState, ?Context $context = null): void
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
+        $context = $context ?? Context::createCLIContext();
 
-        $this->stateMachineRegistry->transition(
+        $this->getStateMachineRegistry()->transition(
             new Transition(
                 'order_transaction',
                 $transactionId,
@@ -66,13 +60,11 @@ class StateManager
     /**
      * Transitions an order delivery to a specific state.
      */
-    public function transitionDeliveryState(string $deliveryId, string $toState, ?Context $context = null): void
+    protected function transitionDeliveryState(string $deliveryId, string $toState, ?Context $context = null): void
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
+        $context = $context ?? Context::createCLIContext();
 
-        $this->stateMachineRegistry->transition(
+        $this->getStateMachineRegistry()->transition(
             new Transition(
                 'order_delivery',
                 $deliveryId,
@@ -88,13 +80,11 @@ class StateManager
      *
      * @return array<int, StateMachineTransitionEntity>
      */
-    public function getAvailableTransitions(string $entityId, string $stateMachineName, ?Context $context = null): array
+    protected function getAvailableTransitions(string $entityId, string $stateMachineName, ?Context $context = null): array
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
+        $context = $context ?? Context::createCLIContext();
 
-        return $this->stateMachineRegistry->getAvailableTransitions(
+        return $this->getStateMachineRegistry()->getAvailableTransitions(
             $stateMachineName,
             $entityId,
             'stateId',
@@ -105,14 +95,12 @@ class StateManager
     /**
      * Gets the current state of an entity.
      */
-    public function getCurrentState(string $entityName, string $entityId, ?Context $context = null): ?string
+    protected function getEntityState(string $entityName, string $entityId, ?Context $context = null): ?string
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
+        $context = $context ?? Context::createCLIContext();
 
         /** @var EntityRepository<EntityCollection<Entity>> $repository */
-        $repository = $this->container->get($entityName . '.repository');
+        $repository = static::getContainer()->get($entityName . '.repository');
         $criteria = new Criteria([$entityId]);
         $criteria->addAssociation('stateMachineState');
 
@@ -133,15 +121,12 @@ class StateManager
 
     /**
      * Forces an entity to a specific state (bypassing normal transitions).
-     * Useful for testing edge cases.
      */
-    public function forceState(string $entityName, string $entityId, string $stateId, ?Context $context = null): void
+    protected function forceEntityState(string $entityName, string $entityId, string $stateId, ?Context $context = null): void
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
+        $context = $context ?? Context::createCLIContext();
 
-        $repository = $this->container->get($entityName . '.repository');
+        $repository = static::getContainer()->get($entityName . '.repository');
         $repository->update([
             [
                 'id' => $entityId,
@@ -153,22 +138,16 @@ class StateManager
     /**
      * Gets the state ID for a given state machine and state name.
      */
-    public function getStateId(string $stateMachineName, string $stateName, ?Context $context = null): ?string
+    protected function getStateMachineStateId(string $stateMachineName, string $stateName, ?Context $context = null): ?string
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
-
-        $connection = $this->container->get(Connection::class);
+        $connection = static::getContainer()->get(Connection::class);
 
         $sql = <<<'EOD'
-
-                        SELECT LOWER(HEX(state_machine_state.id))
-                        FROM state_machine_state
-                        JOIN state_machine ON state_machine.id = state_machine_state.state_machine_id
-                        WHERE state_machine.technical_name = :machine AND state_machine_state.technical_name = :state
-                    
-            EOD;
+            SELECT LOWER(HEX(state_machine_state.id))
+            FROM state_machine_state
+            JOIN state_machine ON state_machine.id = state_machine_state.state_machine_id
+            WHERE state_machine.technical_name = :machine AND state_machine_state.technical_name = :state
+EOD;
 
         return $connection->fetchOne($sql, ['machine' => $stateMachineName, 'state' => $stateName]) ?: null;
     }
@@ -178,14 +157,17 @@ class StateManager
      *
      * @param array<int, string> $states
      */
-    public function transitionOrderThroughStates(string $orderId, array $states, ?Context $context = null): void
+    protected function transitionOrderThroughStates(string $orderId, array $states, ?Context $context = null): void
     {
-        if (! $context instanceof Context) {
-            $context = Context::createCLIContext();
-        }
+        $context = $context ?? Context::createCLIContext();
 
         foreach ($states as $state) {
             $this->transitionOrderState($orderId, $state, $context);
         }
+    }
+
+    private function getStateMachineRegistry(): StateMachineRegistry
+    {
+        return static::getContainer()->get(StateMachineRegistry::class);
     }
 }

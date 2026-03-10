@@ -2,38 +2,36 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits\B2B;
 
-use Algoritma\ShopwareTestUtils\Helper\B2B\EmployeeStorefrontHelper;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
+/**
+ * Trait for simulating employee actions on storefront.
+ */
 trait B2BStorefrontTrait
 {
     use KernelTestBehaviour;
+    use B2BContextTrait;
 
-    private ?EmployeeStorefrontHelper $b2bEmployeeStorefrontHelperInstance = null;
-
-    protected function getB2bEmployeeStorefrontHelper(): EmployeeStorefrontHelper
+    protected function loginEmployeeToStorefront(string $email, string $password): SalesChannelContext
     {
-        if (! $this->b2bEmployeeStorefrontHelperInstance instanceof EmployeeStorefrontHelper) {
-            $this->b2bEmployeeStorefrontHelperInstance = new EmployeeStorefrontHelper(static::getContainer());
+        return $this->loginEmployee($email, $password);
+    }
+
+    protected function switchEmployeeOrganization(SalesChannelContext $context, string $organizationId): SalesChannelContext
+    {
+        return $this->switchOrganizationContext($context, $organizationId);
+    }
+
+    protected function canEmployeePerformStorefrontAction(string $employeeId, string $permissionCode, ?Context $context = null): bool
+    {
+        try {
+            $this->assertEmployeeHasPermission($employeeId, $permissionCode, $context);
+
+            return true;
+        } catch (\Throwable) {
+            return false;
         }
-
-        return $this->b2bEmployeeStorefrontHelperInstance;
-    }
-
-    protected function b2bStorefrontLogin(string $email, string $password): SalesChannelContext
-    {
-        return $this->getB2bEmployeeStorefrontHelper()->login($email, $password);
-    }
-
-    protected function b2bStorefrontSwitchOrganization(SalesChannelContext $context, string $organizationId): SalesChannelContext
-    {
-        return $this->getB2bEmployeeStorefrontHelper()->switchOrganization($context, $organizationId);
-    }
-
-    protected function b2bStorefrontCanPerformAction(string $employeeId, string $permissionCode, ?Context $context = null): bool
-    {
-        return $this->getB2bEmployeeStorefrontHelper()->canPerformAction($employeeId, $permissionCode, $context);
     }
 }

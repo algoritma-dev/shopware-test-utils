@@ -2,6 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
+use Algoritma\ShopwareTestUtils\Traits\StorefrontApiRequestTrait;
+use Algoritma\ShopwareTestUtils\Traits\StorefrontRequestTrait;
+use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;

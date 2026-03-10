@@ -2,266 +2,367 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits\B2B;
 
-use Algoritma\ShopwareTestUtils\Helper\B2B\BudgetNotificationHelper;
-use Algoritma\ShopwareTestUtils\Helper\B2B\BudgetRenewHelper;
-use Algoritma\ShopwareTestUtils\Helper\B2B\BudgetUsageTracker;
-use Algoritma\ShopwareTestUtils\Helper\B2B\BudgetValidationHelper;
+use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
+use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 
+/**
+ * Trait for B2B budget management operations and assertions.
+ */
 trait B2BBudgetTrait
 {
     use KernelTestBehaviour;
 
-    private ?BudgetUsageTracker $b2bBudgetUsageTrackerInstance = null;
+    /**
+     * @var array<string, array<int, array<string, mixed>>>
+     */
+    private array $budgetUsageHistory = [];
 
-    private ?BudgetRenewHelper $b2bBudgetRenewHelperInstance = null;
-
-    private ?BudgetNotificationHelper $b2bBudgetNotificationHelperInstance = null;
-
-    private ?BudgetValidationHelper $b2bBudgetValidationHelperInstance = null;
-
-    protected function getB2bBudgetUsageTracker(): BudgetUsageTracker
+    protected function renewBudget(string $budgetId, ?Context $context = null): BudgetEntity
     {
-        if (! $this->b2bBudgetUsageTrackerInstance instanceof BudgetUsageTracker) {
-            $this->b2bBudgetUsageTrackerInstance = new BudgetUsageTracker(static::getContainer());
-        }
+        $context ??= Context::createCLIContext();
+        
+        $repository = $this->getBudgetRepository();
 
-        return $this->b2bBudgetUsageTrackerInstance;
+        $repository->update([
+            [
+                'id' => $budgetId,
+                'usedAmount' => 0.0,
+                'lastRenews' => new \DateTime(),
+            ],
+        ], $context);
+
+        return $this->getBudgetById($budgetId, $context);
     }
 
-    protected function getB2bBudgetRenewHelper(): BudgetRenewHelper
+    protected function shouldBudgetRenew(string $budgetId, ?Context $context = null): bool
     {
-        if (! $this->b2bBudgetRenewHelperInstance instanceof BudgetRenewHelper) {
-            $this->b2bBudgetRenewHelperInstance = new BudgetRenewHelper(static::getContainer());
+        $budget = $this->getBudgetById($budgetId, $context);
+        $renewsType = $budget->getRenewsType()->value;
+
+        if ($renewsType === 'none') {
+            return false;
         }
 
-        return $this->b2bBudgetRenewHelperInstance;
+        $lastRenews = $budget->getLastRenews();
+        $now = new \DateTime();
+
+        return match (strtolower($renewsType)) {
+            'daily' => $lastRenews->format('Y-m-d') !== $now->format('Y-m-d'),
+            'weekly' => $lastRenews->format('Y-W') !== $now->format('Y-W'),
+            'monthly' => $lastRenews->format('Y-m') !== $now->format('Y-m'),
+            'yearly' => $lastRenews->format('Y') !== $now->format('Y'),
+            default => false,
+        };
     }
 
-    protected function getB2bBudgetNotificationHelper(): BudgetNotificationHelper
+    protected function getNextBudgetRenewalDate(string $budgetId, ?Context $context = null): ?\DateTimeInterface
     {
-        if (! $this->b2bBudgetNotificationHelperInstance instanceof BudgetNotificationHelper) {
-            $this->b2bBudgetNotificationHelperInstance = new BudgetNotificationHelper(static::getContainer());
+        $budget = $this->getBudgetById($budgetId, $context);
+        $renewsType = $budget->getRenewsType()->value;
+
+        if ($renewsType === 'none') {
+            return null;
         }
 
-        return $this->b2bBudgetNotificationHelperInstance;
+        $lastRenews = $budget->getLastRenews();
+        $baseDate = \DateTimeImmutable::createFromInterface($lastRenews);
+
+        return match (strtolower($renewsType)) {
+            'daily' => $baseDate->modify('+1 day'),
+            'weekly' => $baseDate->modify('+1 week'),
+            'monthly' => $baseDate->modify('+1 month'),
+            'yearly' => $baseDate->modify('+1 year'),
+            default => null,
+        };
     }
 
-    protected function getB2bBudgetValidationHelper(): BudgetValidationHelper
+    protected function simulateBudgetUsage(string $budgetId, float $amount, string $description = '', ?Context $context = null): BudgetEntity
     {
-        if (! $this->b2bBudgetValidationHelperInstance instanceof BudgetValidationHelper) {
-            $this->b2bBudgetValidationHelperInstance = new BudgetValidationHelper(static::getContainer());
-        }
+        $context ??= Context::createCLIContext();
+        $budget = $this->getBudgetById($budgetId, $context);
 
-        return $this->b2bBudgetValidationHelperInstance;
-    }
+        $newUsedAmount = $budget->getUsedAmount() + $amount;
+        $repository = $this->getBudgetRepository();
 
-    protected function b2bBudgetTrackUsage(
-        string $budgetId,
-        float $amount,
-        string $description = '',
-        ?Context $context = null
-    ): BudgetEntity {
-        return $this->getB2bBudgetUsageTracker()->trackUsage($budgetId, $amount, $description, $context);
+        $repository->update([
+            [
+                'id' => $budgetId,
+                'usedAmount' => $newUsedAmount,
+            ],
+        ], $context);
+
+        // Track in history
+        $this->budgetUsageHistory[$budgetId][] = [
+            'amount' => $amount,
+            'description' => $description,
+            'timestamp' => new \DateTime(),
+            'totalUsed' => $newUsedAmount,
+        ];
+
+        return $this->getBudgetById($budgetId, $context);
     }
 
     /**
      * @param array<int, array<string, mixed>> $transactions
      */
-    protected function b2bBudgetSimulateUsage(
-        string $budgetId,
-        array $transactions,
-        ?Context $context = null
-    ): BudgetEntity {
-        return $this->getB2bBudgetUsageTracker()->simulateUsage($budgetId, $transactions, $context);
+    protected function simulateMultipleBudgetUsages(string $budgetId, array $transactions, ?Context $context = null): BudgetEntity
+    {
+        foreach ($transactions as $transaction) {
+            $amount = isset($transaction['amount']) ? (float) $transaction['amount'] : 0.0;
+            $description = isset($transaction['description']) ? (string) $transaction['description'] : '';
+            $this->simulateBudgetUsage($budgetId, $amount, $description, $context);
+        }
+
+        return $this->getBudgetById($budgetId, $context);
     }
 
     /**
      * @return array<int, array<string, mixed>>
      */
-    protected function b2bBudgetGetUsageHistory(string $budgetId): array
+    protected function getBudgetUsageHistory(string $budgetId): array
     {
-        return $this->getB2bBudgetUsageTracker()->getUsageHistory($budgetId);
+        return $this->budgetUsageHistory[$budgetId] ?? [];
     }
 
-    protected function b2bBudgetClearHistory(?string $budgetId = null): void
+    protected function clearBudgetUsageHistory(?string $budgetId = null): void
     {
-        $this->getB2bBudgetUsageTracker()->clearHistory($budgetId);
+        if ($budgetId) {
+            unset($this->budgetUsageHistory[$budgetId]);
+        } else {
+            $this->budgetUsageHistory = [];
+        }
     }
 
-    protected function b2bBudgetGetTotalTrackedUsage(string $budgetId): float
+    protected function fillBudgetToPercentage(string $budgetId, float $percentage, ?Context $context = null): BudgetEntity
     {
-        return $this->getB2bBudgetUsageTracker()->getTotalTrackedUsage($budgetId);
+        $budget = $this->getBudgetById($budgetId, $context);
+        $targetAmount = ($budget->getAmount() * $percentage) / 100;
+        $remainingToAdd = $targetAmount - $budget->getUsedAmount();
+
+        if ($remainingToAdd > 0) {
+            $this->simulateBudgetUsage($budgetId, $remainingToAdd, sprintf('Filled to %.2f%%', $percentage), $context);
+        }
+
+        return $this->getBudgetById($budgetId, $context);
     }
 
-    protected function b2bBudgetFillToPercentage(string $budgetId, float $percentage, ?Context $context = null): BudgetEntity
+    protected function exceedBudget(string $budgetId, float $excessAmount = 100.0, ?Context $context = null): BudgetEntity
     {
-        return $this->getB2bBudgetUsageTracker()->fillToPercentage($budgetId, $percentage, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+        $targetAmount = $budget->getAmount() + $excessAmount;
+        $remainingToAdd = $targetAmount - $budget->getUsedAmount();
+
+        if ($remainingToAdd > 0) {
+            $this->simulateBudgetUsage($budgetId, $remainingToAdd, sprintf('Exceeded by %.2f', $excessAmount), $context);
+        }
+
+        return $this->getBudgetById($budgetId, $context);
     }
 
-    protected function b2bBudgetExceed(string $budgetId, float $excessAmount = 100.0, ?Context $context = null): BudgetEntity
+    protected function budgetExceedsAmount(float $amount, string $budgetId, ?Context $context = null): bool
     {
-        return $this->getB2bBudgetUsageTracker()->exceedBudget($budgetId, $excessAmount, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+        $remainingBudget = $budget->getAmount() - $budget->getUsedAmount();
+
+        return $amount > $remainingBudget;
     }
 
-    protected function b2bBudgetRenew(string $budgetId, ?Context $context = null): BudgetEntity
+    protected function isBudgetActive(string $budgetId, ?Context $context = null): bool
     {
-        return $this->getB2bBudgetRenewHelper()->renewBudget($budgetId, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+
+        if (! $budget->getActive()) {
+            return false;
+        }
+
+        $now = new \DateTime();
+        $startDate = $budget->getStartDate();
+        $endDate = $budget->getEndDate();
+
+        if ($startDate > $now) {
+            return false;
+        }
+
+        return ! ($endDate instanceof \DateTimeInterface && $endDate < $now);
     }
 
-    protected function b2bBudgetShouldRenew(string $budgetId, ?Context $context = null): bool
+    protected function budgetRequiresApproval(float $amount, string $budgetId, ?Context $context = null): bool
     {
-        return $this->getB2bBudgetRenewHelper()->shouldRenew($budgetId, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+
+        if ($budget->getAllowApproval()) {
+            return $amount > ($budget->getAmount() - $budget->getUsedAmount());
+        }
+
+        return false;
     }
 
-    protected function b2bBudgetGetNextRenewalDate(string $budgetId, ?Context $context = null): ?\DateTimeInterface
+    protected function resetBudgetUsage(string $budgetId, ?Context $context = null): BudgetEntity
     {
-        return $this->getB2bBudgetRenewHelper()->getNextRenewalDate($budgetId, $context);
-    }
+        $context ??= Context::createCLIContext();
+        $repository = $this->getBudgetRepository();
 
-    protected function b2bBudgetSimulateTimePassage(
-        string $budgetId,
-        \DateTimeInterface $targetDate,
-        ?Context $context = null
-    ): BudgetEntity {
-        return $this->getB2bBudgetRenewHelper()->simulateTimePassage($budgetId, $targetDate, $context);
-    }
+        $repository->update([
+            [
+                'id' => $budgetId,
+                'usedAmount' => 0.0,
+            ],
+        ], $context);
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
-    protected function b2bBudgetTestRenewalCycle(
-        string $budgetId,
-        int $cycles,
-        ?Context $context = null
-    ): array {
-        return $this->getB2bBudgetRenewHelper()->testRenewalCycle($budgetId, $cycles, $context);
-    }
-
-    protected function b2bBudgetNotificationShouldNotify(string $budgetId, ?Context $context = null): bool
-    {
-        return $this->getB2bBudgetNotificationHelper()->shouldNotify($budgetId, $context);
-    }
-
-    protected function b2bBudgetNotificationHasReachedThreshold(BudgetEntity $budget): bool
-    {
-        return $this->getB2bBudgetNotificationHelper()->hasReachedThreshold($budget);
-    }
-
-    protected function b2bBudgetMarkNotificationSent(string $budgetId, ?Context $context = null): BudgetEntity
-    {
-        return $this->getB2bBudgetNotificationHelper()->markAsSent($budgetId, $context);
-    }
-
-    protected function b2bBudgetResetNotificationStatus(string $budgetId, ?Context $context = null): BudgetEntity
-    {
-        return $this->getB2bBudgetNotificationHelper()->resetNotificationStatus($budgetId, $context);
-    }
-
-    /**
-     * @return array<int, array<string, string>>
-     */
-    protected function b2bBudgetGetNotificationRecipients(string $budgetId, ?Context $context = null): array
-    {
-        return $this->getB2bBudgetNotificationHelper()->getRecipients($budgetId, $context);
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function b2bBudgetSimulateNotificationTrigger(string $budgetId, ?Context $context = null): array
-    {
-        return $this->getB2bBudgetNotificationHelper()->simulateNotificationTrigger($budgetId, $context);
-    }
-
-    /**
-     * @param array<int, float> $usageAmounts
-     *
-     * @return array<int, array<string, mixed>>
-     */
-    protected function b2bBudgetTestNotificationScenarios(
-        string $budgetId,
-        array $usageAmounts,
-        ?Context $context = null
-    ): array {
-        return $this->getB2bBudgetNotificationHelper()->testNotificationScenarios(
-            $budgetId,
-            $usageAmounts,
-            $context
-        );
-    }
-
-    protected function b2bBudgetExceedsCart(Cart $cart, string $budgetId, ?Context $context = null): bool
-    {
-        return $this->getB2bBudgetValidationHelper()->exceedsBudget($cart, $budgetId, $context);
-    }
-
-    protected function b2bBudgetExceedsAmount(float $amount, BudgetEntity $budget): bool
-    {
-        return $this->getB2bBudgetValidationHelper()->exceedsBudgetAmount($amount, $budget);
-    }
-
-    protected function b2bBudgetGetRemaining(BudgetEntity $budget): float
-    {
-        return $this->getB2bBudgetValidationHelper()->getRemainingBudget($budget);
-    }
-
-    protected function b2bBudgetIsActive(string $budgetId, ?Context $context = null): bool
-    {
-        return $this->getB2bBudgetValidationHelper()->isBudgetActive($budgetId, $context);
-    }
-
-    protected function b2bBudgetRequiresApproval(float $amount, string $budgetId, ?Context $context = null): bool
-    {
-        return $this->getB2bBudgetValidationHelper()->requiresApproval($amount, $budgetId, $context);
-    }
-
-    protected function b2bBudgetValidationSimulateUsage(
-        string $budgetId,
-        float $amount,
-        ?Context $context = null
-    ): BudgetEntity {
-        return $this->getB2bBudgetValidationHelper()->simulateBudgetUsage($budgetId, $amount, $context);
-    }
-
-    protected function b2bBudgetResetUsage(string $budgetId, ?Context $context = null): BudgetEntity
-    {
-        return $this->getB2bBudgetValidationHelper()->resetBudgetUsage($budgetId, $context);
+        return $this->getBudgetById($budgetId, $context);
     }
 
     /**
      * @return array<BudgetEntity>
      */
-    protected function b2bBudgetGetActiveBudgetsForOrganization(string $organizationId, ?Context $context = null): array
+    protected function getActiveBudgetsForOrganization(string $organizationId, ?Context $context = null): array
     {
-        return $this->getB2bBudgetValidationHelper()->getActiveBudgetsForOrganization($organizationId, $context);
+        $context ??= Context::createCLIContext();
+        $repository = $this->getBudgetRepository();
+
+        $criteria = new Criteria();
+        $criteria->addFilter(new EqualsFilter('active', true));
+        $criteria->addFilter(new EqualsFilter('organizations.id', $organizationId));
+        $criteria->addAssociation('organizations');
+
+        /** @var array<string, BudgetEntity> $elements */
+        $elements = $repository->search($criteria, $context)->getElements();
+
+        return array_values($elements);
     }
 
-    protected function b2bBudgetValidationShouldNotify(string $budgetId, ?Context $context = null): bool
+    protected function shouldBudgetTriggerNotification(string $budgetId, ?Context $context = null): bool
     {
-        return $this->getB2bBudgetValidationHelper()->shouldNotify($budgetId, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+
+        if (! $budget->isNotify() || $budget->isSent()) {
+            return false;
+        }
+
+        $notificationConfig = $budget->getNotificationConfig();
+        if (! $notificationConfig) {
+            return false;
+        }
+
+        $type = $notificationConfig['type'] ?? null;
+        $value = $notificationConfig['value'] ?? null;
+
+        if (! $type || $value === null) {
+            return false;
+        }
+
+        $usagePercentage = ($budget->getUsedAmount() / $budget->getAmount()) * 100;
+
+        if ($type === 'percentage') {
+            return $usagePercentage >= (float) $value;
+        }
+
+        if ($type === 'amount') {
+            return $budget->getUsedAmount() >= (float) $value;
+        }
+
+        return false;
     }
 
-    protected function b2bBudgetGetUsagePercentage(string $budgetId, ?Context $context = null): float
+    protected function getBudgetNotificationRecipients(string $budgetId, ?Context $context = null): array
     {
-        return $this->getB2bBudgetValidationHelper()->getUsagePercentage($budgetId, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+
+        if (! $budget->getNotificationRecipients() instanceof EmployeeCollection) {
+            return [];
+        }
+
+        $recipients = [];
+        foreach ($budget->getNotificationRecipients() as $recipient) {
+            $recipients[] = [
+                'type' => 'employee',
+                'id' => $recipient->getId(),
+                'email' => $recipient->getEmail(),
+            ];
+        }
+
+        return $recipients;
     }
 
-    protected function b2bBudgetAssertExceeded(string $budgetId, ?Context $context = null): void
+    protected function markBudgetNotificationAsSent(string $budgetId, ?Context $context = null): BudgetEntity
     {
-        $this->getB2bBudgetValidationHelper()->assertBudgetExceeded($budgetId, $context);
+        $context ??= Context::createCLIContext();
+        $this->getBudgetRepository()->update([['id' => $budgetId, 'sent' => true]], $context);
+
+        return $this->getBudgetById($budgetId, $context);
     }
 
-    protected function b2bBudgetAssertNotExceeded(string $budgetId, ?Context $context = null): void
+    protected function assertBudgetExceeded(string $budgetId, ?Context $context = null): void
     {
-        $this->getB2bBudgetValidationHelper()->assertBudgetNotExceeded($budgetId, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+        $remaining = $budget->getAmount() - $budget->getUsedAmount();
+
+        assert(
+            $remaining < 0,
+            sprintf('Expected budget to be exceeded, but remaining budget is %.2f', $remaining)
+        );
     }
 
-    protected function b2bBudgetAssertNotificationTriggered(string $budgetId, ?Context $context = null): void
+    protected function assertBudgetNotExceeded(string $budgetId, ?Context $context = null): void
     {
-        $this->getB2bBudgetValidationHelper()->assertBudgetNotificationTriggered($budgetId, $context);
+        $budget = $this->getBudgetById($budgetId, $context);
+        $remaining = $budget->getAmount() - $budget->getUsedAmount();
+
+        assert(
+            $remaining >= 0,
+            sprintf('Expected budget not to be exceeded, but it is over by %.2f', abs($remaining))
+        );
+    }
+
+    protected function assertBudgetNotificationTriggered(string $budgetId, ?Context $context = null): void
+    {
+        $budget = $this->getBudgetById($budgetId, $context);
+        assert($budget->isNotify(), 'Budget notification is not enabled');
+
+        $notificationConfig = $budget->getNotificationConfig();
+        if (! $notificationConfig) {
+            throw new \RuntimeException('Budget has no notification configuration');
+        }
+
+        assert(
+            $this->shouldBudgetTriggerNotification($budgetId, $context),
+            'Expected budget notification to be triggered'
+        );
+    }
+
+    private function getBudgetById(string $budgetId, ?Context $context = null): BudgetEntity
+    {
+        $context ??= Context::createCLIContext();
+        $repository = $this->getBudgetRepository();
+
+        $criteria = new Criteria([$budgetId]);
+        $criteria->addAssociation('organizations');
+        $criteria->addAssociation('employees');
+        $criteria->addAssociation('roles');
+        $criteria->addAssociation('notificationRecipients');
+        $criteria->addAssociation('notificationRecipients.employee');
+
+        $budget = $repository->search($criteria, $context)->first();
+
+        if (! $budget instanceof BudgetEntity) {
+            throw new \RuntimeException(sprintf('Budget with ID "%s" not found', $budgetId));
+        }
+
+        return $budget;
+    }
+
+    /**
+     * @return EntityRepository<BudgetCollection>
+     */
+    private function getBudgetRepository(): EntityRepository
+    {
+        return static::getContainer()->get('b2b_components_budget.repository');
     }
 }

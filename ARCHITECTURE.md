@@ -2,7 +2,7 @@
 
 ## 📐 Separation of Responsibilities Principles
 
-This test suite strictly follows the **Single Responsibility Principle (SRP)** and the **Factory/Helper/Trait** pattern:
+This test suite strictly follows the **Single Responsibility Principle (SRP)** and the **Factory/Trait** pattern:
 
 ### **Factory** = Creates entities/objects
 - **Responsibility**: Build and configure new entity instances
@@ -22,62 +22,28 @@ $product = (new ProductFactory($container))
 
 ---
 
-### **Helper** = Executes actions/operations
-- **Responsibility**: Operations, transformations, actions (on entities, system config, time, etc.)
-- **Can create** simple data structures or perform actions on entities
-- **Naming**: `*Helper` (e.g. `OrderHelper`, `ConfigHelper`, `TimeHelper`)
-- **Action examples**: cancel order, set config, time travel, send email
-- **Access**: Use `HelperAccessor` trait for convenient access
+### **Trait** = Actions, Assertions and test utilities
+- **Responsibility**: Provide methods for performing actions on entities AND verification (assertions)
+- **Naming**: `*Trait`, `*Helpers` or `*Assertions` (e.g. `OrderTrait`, `MailTrait`, `DatabaseHelpers`)
+- **Action examples**: cancel order, set config, time travel
+- **Assertion examples**: assertDatabaseHas, assertMailSent
 
 **Example:**
 
 ```php
-use Algoritma\ShopwareTestUtils\Traits\HelperAccessorTrait;
+use Algoritma\ShopwareTestUtils\Traits\OrderTrait;
+use Algoritma\ShopwareTestUtils\Traits\ConfigTrait;
 
 class MyTest extends AbstractIntegrationTestCase
 {
-    use HelperAccessorTrait;
-
     public function test(): void
     {
-        // Actions on entities
-        $this->orderHelper()->cancelOrder($orderId);
+        // Actions via traits
+        $this->cancelOrder($orderId);
+        $this->setSystemConfig('core.cart.maxQuantity', 100);
 
-        // Configuration management
-        $this->configHelper()->set('core.cart.maxQuantity', 100);
-
-        // Time manipulation
-        $this->timeHelper()->travelForward('30 days');
-    }
-}
-```
-
----
-
-### **Trait** = Assertions and test utilities
-- **Responsibility**: Provide assertion methods for test verification
-- **Does NOT perform** actions (actions are in Helpers)
-- **Naming**: `*Helpers` or `*Assertions` (e.g. `DatabaseHelpers`, `TimeHelpers`)
-- **Examples**: assertDatabaseHas, assertMailSent, assertDateInFuture
-
-**Example:**
-
-```php
-use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
-use Algoritma\ShopwareTestUtils\Traits\TimeTrait;
-
-class MyTest extends AbstractIntegrationTestCase
-{
-    use DatabaseTrait;
-    use TimeTrait;
-
-    public function test(): void
-    {
-        // Database assertions
-        $this->assertDatabaseHas('product', ['id' => $productId]);
-
-        // Time assertions
-        $this->assertDateInFuture($expirationDate);
+        // Assertions via traits
+        $this->assertOrderState($orderId, 'cancelled');
     }
 }
 ```
@@ -101,27 +67,22 @@ src/TestUtils/
 │   ├── OrderFactory.php                # Creates orders
 │   ├── MediaFactory.php                # Creates media
 │   └── ...
-├── Helper/                              # EXECUTES ACTIONS
-│   ├── CartHelper.php                  # Actions on carts (clear, remove, etc.)
-│   ├── OrderHelper.php                 # Actions on orders (place, cancel, etc.)
-│   ├── MediaHelper.php                 # Actions on media (assign, delete, etc.)
-│   ├── ConfigHelper.php                # Configuration management
-│   ├── TimeHelper.php                  # Time travel and date manipulation
-│   ├── ProductHelper.php               # Product creation and management
-│   ├── CustomerHelper.php              # Customer creation and management
-│   ├── StateManager.php                # State machine management
-│   └── MigrationDataTester.php         # Migration integrity testing
-└── Traits/                              # ASSERTIONS & TEST UTILITIES
-    ├── HelperAccessor.php              # Convenient access to all helpers
+└── Traits/                              # ACTIONS, ASSERTIONS & TEST UTILITIES
+    ├── CartTrait.php                   # Actions on carts (clear, remove, etc.)
+    ├── OrderTrait.php                  # Actions on orders (place, cancel, etc.)
+    ├── MediaTrait.php                  # Actions on media (assign, delete, etc.)
+    ├── ConfigTrait.php                 # Configuration management
+    ├── TimeTrait.php                   # Time travel and date manipulation
+    ├── ProductTrait.php                # Product management and assertions
+    ├── CustomerTrait.php               # Customer management and assertions
+    ├── StateMachineTrait.php           # State machine management
     ├── DatabaseHelpers.php             # DB assertions (table exists, row count)
     ├── CacheTrait.php                  # Cache assertions (key exists, cleared)
-    ├── ContextTrait.php                # Context management assertions
-    ├── TimeHelpers.php                 # Time assertions (date in future/past)
     ├── LogHelpers.php                  # Log assertions (error logged, contains)
-    ├── MailHelpers.php                 # Mail assertions (email sent, recipient)
-    ├── EventHelpers.php                # Event assertions (dispatched, payload)
-    ├── QueueHelpers.php                # Queue assertions (job queued, empty)
-    └── MigrationHelpers.php            # Migration assertions (idempotency, schema)
+    ├── MailTrait.php                   # Mail actions and assertions
+    ├── EventTrait.php                  # Event actions and assertions
+    ├── QueueTrait.php                  # Queue assertions
+    └── MigrationTrait.php              # Migration testing and assertions
 ```
 
 ---
@@ -145,77 +106,30 @@ $product = (new ProductFactory($container))
     ->create();
 ```
 
-### **2. Helper Pattern (Actions)**
+### **2. Trait Pattern (Actions and Assertions)**
 
 ```php
-// ✅ CORRECT - Helper executes actions
-class OrderHelper
+// ✅ CORRECT - Trait provides methods for actions and assertions
+trait OrderTrait
 {
-    public function cancelOrder(string $orderId): void { ... }
-    public function markAsPaid(string $orderId): void { ... }
-    public function getOrder(string $orderId): OrderEntity { ... }
-}
-
-class ConfigHelper
-{
-    public function set(string $key, $value): void { ... }
-    public function get(string $key) { ... }
-}
-
-class TimeHelper
-{
-    public function freezeTime(\DateTimeInterface $at): void { ... }
-    public function travelForward(string $interval): void { ... }
-}
-
-// Usage with HelperAccessorTrait:
-class MyTest extends AbstractIntegrationTestCase
-{
-    use HelperAccessor;
-
-    public function test(): void
-    {
-        $this->orderHelper()->cancelOrder($orderId);
-        $this->configHelper()->set('core.cart.maxQuantity', 100);
-        $this->timeHelper()->travelForward('30 days');
-    }
-}
-```
-
-### **3. Trait Pattern (Assertions)**
-
-```php
-// ✅ CORRECT - Trait provides assertion methods
-trait TimeHelpers
-{
-    protected function assertDateInFuture(\DateTimeInterface $date): void { ... }
-    protected function assertDateInPast(\DateTimeInterface $date): void { ... }
-}
-
-trait DatabaseHelpers
-{
-    protected function assertDatabaseHas(string $table, array $data): void { ... }
-    protected function assertTableExists(string $table): void { ... }
+    protected function cancelOrder(string $orderId): void { ... }
+    protected function assertOrderState(string $orderId, string $state): void { ... }
 }
 
 // Usage in test:
 class MyTest extends AbstractIntegrationTestCase
 {
-    use HelperAccessor;  // For actions
-    use TimeHelpers;     // For time assertions
-    use DatabaseHelpers; // For DB assertions
-
-    public function testExpiration(): void
+    public function testOrderCancellation(): void
     {
-        // Action via helper
-        $this->timeHelper()->freezeTime(new \DateTime('2025-01-01'));
+        // Action via trait
+        $this->cancelOrder($orderId);
 
         // Assertion via trait
-        $this->assertDateInFuture($expirationDate);
-        $this->assertDatabaseHas('product', ['id' => $productId]);
+        $this->assertOrderState($orderId, 'cancelled');
     }
 }
 ```
+
 
 ---
 
@@ -229,36 +143,25 @@ class OrderFactory
     public function cancelOrder(string $id): void { ... }  // NO!
 }
 
-// ✅ CORRECT - Use Helper
-class OrderHelper
+// ✅ CORRECT - Use Trait
+trait OrderTrait
 {
-    public function cancelOrder(string $id): void { ... }  // OK!
+    protected function cancelOrder(string $id): void { ... }  // OK!
 }
 ```
 
-### **2. Trait that performs actions**
+### **2. Trait that only provides raw data**
 ```php
-// ❌ WRONG - Trait should not perform actions (use Helper instead)
-trait ConfigHelpers
+// ❌ WRONG - Trait should provide high-level actions/assertions
+trait OrderTrait
 {
-    protected function setSystemConfig(string $key, $value): void { ... }  // NO!
+    protected function getOrderData(string $id): array { ... } // NO! Too low level
 }
 
-// ✅ CORRECT - Actions go in Helper, accessed via HelperAccessorTrait
-class ConfigHelper
+// ✅ CORRECT - Use high-level methods
+trait OrderTrait
 {
-    public function set(string $key, $value): void { ... }  // OK!
-}
-
-// Usage:
-class MyTest extends AbstractIntegrationTestCase
-{
-    use HelperAccessor;
-
-    public function test(): void
-    {
-        $this->configHelper()->set('key', 'value');  // OK!
-    }
+    protected function cancelOrder(string $id): void { ... } // OK!
 }
 ```
 
@@ -277,10 +180,10 @@ class CartFactory  // Creates carts
     public function create(): Cart { ... }
 }
 
-class CartHelper  // Actions on carts
+trait CartTrait  // Actions on carts
 {
-    public function clear(Cart $cart): Cart { ... }
-    public function removeItem(Cart $cart, string $id): Cart { ... }
+    protected function clearCart(Cart $cart): Cart { ... }
+    protected function removeItemFromCart(Cart $cart, string $id): Cart { ... }
 }
 ```
 
@@ -309,8 +212,8 @@ public function testOrderPlacement(): void
         ->withProduct($product->getId())
         ->create();
 
-    // Helper: executes action
-    $order = $this->placeOrder($cart, $context);
+    // Trait: executes action
+    $order = $this->orderPlace($cart, $context);
 
     // Assert
     $this->assertOrderState($order, 'open');
@@ -329,12 +232,11 @@ public function testProductWithMedia(): void
     $product = (new ProductFactory($this->getContainer()))
         ->create();
 
-    // Helper: executes action
-    $mediaHelper = new MediaHelper($this->getContainer());
-    $mediaHelper->assignToProduct($media->getId(), $product->getId(), true);
+    // Trait: executes action
+    $this->assignMediaToProduct($media->getId(), $product->getId(), true);
 
-    // Assert
-    $this->assertProductHasMedia($product->getId(), $media->getId());
+    // Assert (via trait)
+    $this->assertEntityExists('product_media', ['mediaId' => $media->getId(), 'productId' => $product->getId()]);
 }
 ```
 
@@ -348,12 +250,11 @@ public function testOrderStateMachine(): void
         ->withState('open')
         ->create();
 
-    // Helper: executes transition
-    $stateManager = new StateManager($this->getContainer());
-    $stateManager->transitionOrderState($order->getId(), 'process');
+    // Trait: executes transition
+    $this->transitionOrderState($order->getId(), 'process');
 
-    // Assert
-    $this->assertStateMachineState($order->getId(), 'in_progress');
+    // Assert (via trait)
+    $this->assertOrderState($order->getId(), 'in_progress');
 }
 ```
 
@@ -376,9 +277,8 @@ class MyMigrationTest extends MigrationTestCase
         // Verify table creation
         $this->assertMigrationAddsTable(MyMigration::class, 'my_new_table');
 
-        // Test data integrity
-        $tester = new MigrationDataTester($this->getConnection());
-        $tester->testDataIntegrity('old_table', 'new_table', function($oldRow) {
+        // Test data integrity (via trait)
+        $this->assertMigrationDataIntegrity('old_table', 'new_table', function($oldRow) {
             return ['new_col' => $oldRow['old_col']];
         });
     }
@@ -391,7 +291,7 @@ class MyMigrationTest extends MigrationTestCase
 
 When adding a new component, make sure:
 
-- [ ] **Correct name**: Factory to create, Helper for actions
+- [ ] **Correct name**: Factory to create, Trait for actions/assertions
 - [ ] **Single responsibility**: One component = one task
 - [ ] **Documentation**: Clear PHPDoc on what it does
 - [ ] **Testability**: The component is testable
@@ -401,6 +301,6 @@ When adding a new component, make sure:
 
 ## 🎯 Guiding Principle
 
-> **"Factory CREATES, Helper ACTS, Trait SHARES"**
+> **"Factory CREATES, Trait ACTS and SHARES"**
 
 If a component does more than one of these things, it needs to be refactored.

@@ -257,94 +257,55 @@ Example `composer.json` snippet:
 }
 ```
 
-### 🔧 Helpers (Execute Actions)
+### ✨ Traits (Actions & Assertions)
 
-Helpers perform operations on existing entities. Use the `HelperAccessor` trait for easy access in tests.
-
-| Helper | Description |
-|--------|-------------|
-| `OrderHelper` | Cancel orders, mark as paid/shipped, get order details |
-| `CartHelper` | Clear cart, remove items, recalculate |
-| `MediaHelper` | Assign media to products, delete media |
-| `StateManager` | Transition state machine states |
-| `CheckoutRunner` | Execute complete checkout flows |
-| `StorefrontRequestHelper` | Simulate storefront HTTP requests |
-| `MigrationDataTester` | Test data integrity in migrations |
-| `ConfigHelper` | Manage system configuration and feature flags |
-| `TimeHelper` | Time travel and date manipulation |
-| `ProductHelper` | Create and manage products |
-| `CustomerHelper` | Create and manage customers |
-| `SalesChannelHelper` | Create and manage sales channels |
-| `MailHelper` | Send and verify emails |
-
-**Example:**
-
-```php
-use Algoritma\ShopwareTestUtils\Traits\HelperAccessorTrait;
-
-class MyTest extends AbstractIntegrationTestCase
-{
-    use HelperAccessorTrait;
-
-    public function testOrderFlow(): void
-    {
-        // Access helpers easily via trait methods
-        $this->orderHelper()->markOrderAsPaid($orderId);
-        $this->orderHelper()->markOrderAsShipped($orderId);
-
-        // Set configuration
-        $this->configHelper()->set('core.cart.maxQuantity', 100);
-
-        // Time travel
-        $this->timeHelper()->travelForward('30 days');
-    }
-}
-```
-
-### ✨ Traits (Assertion Helpers)
-
-Traits provide assertion methods for test verification. **Note:** Actions have been moved to Helper classes.
+Traits provide methods for both performing actions on existing entities and verification (assertions).
 
 | Trait | Description |
 |-------|-------------|
-| `HelperAccessor` | **Provides easy access to all Helper classes** |
+| `CartTrait` | Actions on carts (clear, remove, etc.) and assertions |
+| `OrderTrait` | Actions on orders (place, cancel, etc.) and assertions |
+| `ConfigTrait` | Manage system configuration and feature flags |
+| `TimeTrait` | Time travel, date manipulation and assertions |
+| `MediaTrait` | Assign media to products, delete media, etc. |
+| `ProductTrait` | Product management and specific assertions |
+| `CustomerTrait` | Customer management and assertions |
+| `SalesChannelTrait` | Sales channel management and assertions |
+| `StateMachineTrait` | Transition state machine states |
 | `DatabaseHelpers` | Database assertions (table exists, row count, etc.) |
 | `CacheTrait` | Cache assertions (key exists, cache cleared) |
 | `ContextTrait` | Context management (create default context, sales channel context) |
-| `TimeHelpers` | Time-related assertions (date in future/past, timestamp validity) |
 | `LogHelpers` | Log assertions (error logged, warning count, log contains) |
-| `MailHelpers` | Mail assertions (email sent, recipient correct) |
-| `EventHelpers` | Event assertions (event dispatched, payload validation) |
-| `QueueHelpers` | Queue assertions (job queued, queue empty) |
-| `MigrationHelpers` | Migration assertions (idempotency, schema changes) |
+| `MailTrait` | Mail actions and assertions (send, verify correct) |
+| `EventTrait` | Event capturing and assertions (event dispatched, payload validation) |
+| `QueueTrait` | Queue assertions (job queued, queue empty) |
+| `MigrationTrait` | Migration testing, data integrity and assertions |
 
 **Example:**
 
 ```php
-use Algoritma\ShopwareTestUtils\Traits\HelperAccessorTrait;
 use Algoritma\ShopwareTestUtils\Traits\TimeTrait;
 use Algoritma\ShopwareTestUtils\Traits\MailTrait;
 
 class SubscriptionTest extends AbstractIntegrationTestCase
 {
-    use HelperAccessorTrait;  // Access to all helpers
-    use TimeTrait;     // Time assertions
-    use MailTrait;     // Mail assertions
+    use TimeTrait;     // Actions and assertions
+    use MailTrait;     // Actions and assertions
 
     public function testSubscriptionRenewal(): void
     {
-        // Use TimeHelper for actions
-        $this->timeHelper()->freezeTime(new \DateTime('2025-01-01 00:00:00'));
+        // Use trait method for actions
+        $this->freezeTime(new \DateTime('2025-01-01 00:00:00'));
 
         // ... create subscription ...
 
         // Travel forward 30 days
-        $this->timeHelper()->travelForward('30 days');
+        $this->travelForward('30 days');
 
         // Run renewal process
         $this->runScheduledTask(RenewalTask::class);
 
-        // Use MailTrait trait for assertions
+        // Use trait for assertions
         $this->assertMailSent(1);
         $this->assertMailWasSent();
     }
@@ -456,19 +417,14 @@ src/
 │   ├── Subscription/                   # Subscription factories
 │   ├── MultiWarehouse/                 # Multi-warehouse factories
 │   └── ReturnManagement/               # Return management factories
-├── Helper/                              # Action helpers
-│   ├── OrderHelper.php
-│   ├── CartHelper.php
-│   ├── MediaHelper.php
-│   ├── StateManager.php
-│   └── ...
 ├── Traits/                              # Reusable behaviors
-│   ├── HelperAccessor.php              # Access all helpers
 │   ├── DatabaseHelpers.php
 │   ├── CacheTrait.php
 │   ├── ContextTrait.php
-│   ├── TimeHelpers.php
-│   ├── EventHelpers.php
+│   ├── TimeTrait.php
+│   ├── EventTrait.php
+│   ├── MailTrait.php
+│   ├── ConfigTrait.php
 │   └── ...
 └── Fixture/
     ├── FixtureInterface.php
@@ -782,9 +738,8 @@ Run `composer generate-stubs` after:
 Contributions are welcome! Please follow these guidelines:
 
 1. **Factories** should only create entities
-2. **Helpers** should only perform actions
-3. **Traits** should provide reusable behaviors
-4. All code must follow PSR-12 coding standards
+2. **Traits** should perform actions and provide reusable behaviors/assertions
+3. All code must follow PSR-12 coding standards
 5. Add tests for new features
 
 ### Code Quality Tools

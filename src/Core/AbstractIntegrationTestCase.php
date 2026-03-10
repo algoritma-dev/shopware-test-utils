@@ -5,16 +5,24 @@ namespace Algoritma\ShopwareTestUtils\Core;
 use Algoritma\ShopwareTestUtils\Factory\CartFactory;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
-use Algoritma\ShopwareTestUtils\Traits\B2B\B2BHelpersTrait;
 use Algoritma\ShopwareTestUtils\Traits\CacheTrait;
 use Algoritma\ShopwareTestUtils\Traits\CartTrait;
 use Algoritma\ShopwareTestUtils\Traits\CheckoutTrait;
+use Algoritma\ShopwareTestUtils\Traits\ConfigTrait;
 use Algoritma\ShopwareTestUtils\Traits\ContextTrait;
 use Algoritma\ShopwareTestUtils\Traits\CustomerTrait;
+use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
 use Algoritma\ShopwareTestUtils\Traits\EventTrait;
+use Algoritma\ShopwareTestUtils\Traits\LogTrait;
 use Algoritma\ShopwareTestUtils\Traits\MailTrait;
+use Algoritma\ShopwareTestUtils\Traits\MediaTrait;
+use Algoritma\ShopwareTestUtils\Traits\MigrationTrait;
 use Algoritma\ShopwareTestUtils\Traits\OrderTrait;
+use Algoritma\ShopwareTestUtils\Traits\ProductTrait;
 use Algoritma\ShopwareTestUtils\Traits\QueueTrait;
+use Algoritma\ShopwareTestUtils\Traits\SalesChannelTrait;
+use Algoritma\ShopwareTestUtils\Traits\StateMachineTrait;
+use Algoritma\ShopwareTestUtils\Traits\TimeTrait;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Cart\Cart;
@@ -29,12 +37,24 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
+if (class_exists(\Shopware\Commercial\SwagCommercial::class)) {
+    trait B2BTraits
+    {
+        use \Algoritma\ShopwareTestUtils\Traits\B2B\B2BHelpersTrait;
+    }
+} else {
+    trait B2BTraits
+    {
+    }
+}
+
 abstract class AbstractIntegrationTestCase extends TestCase
 {
     use IntegrationTestBehaviour;
     use DatabaseTransactionBehaviour;
     use QueueTestBehaviour;
     use EventDispatcherBehaviour;
+    use DatabaseTrait;
     use EventTrait;
     use MailTrait;
     use QueueTrait;
@@ -43,8 +63,16 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use CheckoutTrait;
     use OrderTrait;
     use CustomerTrait;
-    use B2BHelpersTrait;
+    use B2BTraits;
     use CacheTrait;
+    use ConfigTrait;
+    use MediaTrait;
+    use ProductTrait;
+    use SalesChannelTrait;
+    use StateMachineTrait;
+    use MigrationTrait;
+    use LogTrait;
+    use TimeTrait;
 
     private ?FixtureManager $fixtureManager = null;
 

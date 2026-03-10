@@ -1,31 +1,29 @@
 <?php
 
-namespace Algoritma\ShopwareTestUtils\Helper;
+namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\System\SalesChannel\SalesChannelCollection;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Shopware\Core\System\SalesChannel\SalesChannelEntity;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
- * Helper for sales channel-related operations and assertions.
+ * Trait for sales channel-related operations and assertions.
  */
-class SalesChannelHelper
+trait SalesChannelTrait
 {
-    public function __construct(private readonly ContainerInterface $container) {}
-
-    // --- Sales Channel Assertions ---
+    use KernelTestBehaviour;
 
     /**
      * Assert that a sales channel is active.
      */
-    public function assertSalesChannelActive(string $salesChannelId): void
+    protected function assertSalesChannelActive(string $salesChannelId): void
     {
         /** @var EntityRepository<SalesChannelCollection> $repository */
-        $repository = $this->container->get('sales_channel.repository');
+        $repository = static::getContainer()->get('sales_channel.repository');
         $context = Context::createCLIContext();
 
         $entity = $repository->search(new Criteria([$salesChannelId]), $context)->first();
@@ -37,7 +35,7 @@ class SalesChannelHelper
     /**
      * Assert that the context uses a specific currency.
      */
-    public function assertContextCurrency(SalesChannelContext $context, string $currencyId): void
+    protected function assertContextCurrency(SalesChannelContext $context, string $currencyId): void
     {
         $actualCurrencyId = $context->getCurrency()->getId();
         assert($actualCurrencyId === $currencyId, sprintf('Context currency is %s, expected %s', $actualCurrencyId, $currencyId));
@@ -46,7 +44,7 @@ class SalesChannelHelper
     /**
      * Assert that the context uses a specific language.
      */
-    public function assertContextLanguage(SalesChannelContext $context, string $languageId): void
+    protected function assertContextLanguage(SalesChannelContext $context, string $languageId): void
     {
         $actualLanguageId = $context->getLanguageId();
         assert($actualLanguageId === $languageId, sprintf('Context language is %s, expected %s', $actualLanguageId, $languageId));
