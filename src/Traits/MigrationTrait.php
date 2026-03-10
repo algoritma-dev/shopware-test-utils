@@ -132,11 +132,10 @@ trait MigrationTrait
         // Check if column was removed
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $columns = $schemaManager->listTableColumns($table);
+        $tableSchema = $schemaManager->introspectTable($table);
 
-        Assert::assertArrayNotHasKey(
-            $column,
-            $columns,
+        Assert::assertFalse(
+            $tableSchema->hasColumn($column),
             sprintf('Column "%s" still exists in table "%s" after destructive migration', $column, $table)
         );
     }
@@ -312,11 +311,11 @@ trait MigrationTrait
     protected function assertMigrationColumnType(string $table, string $column, string $expectedType): void
     {
         $schemaManager = $this->getConnection()->createSchemaManager();
-        $columns = $schemaManager->listTableColumns($table);
+        $tableSchema = $schemaManager->introspectTable($table);
 
-        Assert::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s"', $column, $table));
+        Assert::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s"', $column, $table));
 
-        $type = $columns[$column]->getType();
+        $type = $tableSchema->getColumn($column)->getType();
         $className = (new \ReflectionClass($type))->getShortName();
         $actualType = strtolower(str_replace('Type', '', $className));
 

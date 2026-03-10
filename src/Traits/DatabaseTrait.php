@@ -318,8 +318,8 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $columns = $schemaManager->listTableColumns($table);
-        static::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s".', $column, $table));
+        $tableSchema = $schemaManager->introspectTable($table);
+        static::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s".', $column, $table));
     }
 
     /**
@@ -329,10 +329,10 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $columns = $schemaManager->listTableColumns($table);
-        static::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s".', $column, $table));
+        $tableSchema = $schemaManager->introspectTable($table);
+        static::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s".', $column, $table));
 
-        $actualType = Type::getTypeRegistry()->lookupName($columns[$column]->getType());
+        $actualType = Type::getTypeRegistry()->lookupName($tableSchema->getColumn($column)->getType());
         static::assertEquals($expectedType, $actualType, sprintf('Column "%s.%s" has type "%s", expected "%s".', $table, $column, $actualType, $expectedType));
     }
 
@@ -343,8 +343,8 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $indexes = $schemaManager->listTableIndexes($table);
-        static::assertArrayHasKey($index, $indexes, sprintf('Index "%s" does not exist on table "%s".', $index, $table));
+        $tableSchema = $schemaManager->introspectTable($table);
+        static::assertTrue($tableSchema->hasIndex($index), sprintf('Index "%s" does not exist on table "%s".', $index, $table));
     }
 
     /**
@@ -354,17 +354,9 @@ trait DatabaseTrait
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $foreignKeys = $schemaManager->listTableForeignKeys($table);
+        $tableSchema = $schemaManager->introspectTable($table);
 
-        $found = false;
-        foreach ($foreignKeys as $fk) {
-            if ($fk->getName() === $foreignKey) {
-                $found = true;
-                break;
-            }
-        }
-
-        static::assertTrue($found, sprintf('Foreign key "%s" does not exist on table "%s".', $foreignKey, $table));
+        static::assertTrue($tableSchema->hasForeignKey($foreignKey), sprintf('Foreign key "%s" does not exist on table "%s".', $foreignKey, $table));
     }
 
     /**
