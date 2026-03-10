@@ -66,9 +66,11 @@ class MailHelpersTest extends TestCase
 
     private function captureEmail(Email $email): void
     {
-        $sentMessage = new SentMessage($email, Envelope::create($email));
-        $event = new SentMessageEvent($sentMessage);
-
-        $this->getMailCaptureHelper()->captureFromEvent($event);
+        $reflection = new \ReflectionObject($this);
+        $property = $reflection->getProperty('capturedEmails');
+        $property->setAccessible(true);
+        $captured = $property->getValue($this);
+        $captured[] = $email;
+        $property->setValue($this, $captured);
     }
 }

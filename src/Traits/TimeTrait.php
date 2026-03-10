@@ -3,12 +3,115 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use PHPUnit\Framework\Assert;
+use Shopware\Core\Defaults;
 
 /**
- * Trait for time-related assertions in tests.
+ * Trait for time-related assertions and manipulation in tests.
  */
 trait TimeTrait
 {
+    private static ?\DateTimeImmutable $frozenTime = null;
+
+    /**
+     * Freezes time at a specific point.
+     */
+    protected function freezeTime(\DateTimeInterface $at): void
+    {
+        self::$frozenTime = \DateTimeImmutable::createFromInterface($at);
+    }
+
+    /**
+     * Travels to a specific point in time.
+     */
+    protected function travelTo(\DateTimeInterface $to): void
+    {
+        $this->freezeTime($to);
+    }
+
+    /**
+     * Travels forward in time by a specific interval.
+     */
+    protected function travelForward(string $interval): void
+    {
+        $currentTime = $this->getCurrentTime();
+        $newTime = $currentTime->modify('+' . $interval);
+        $this->travelTo($newTime);
+    }
+
+    /**
+     * Travels backward in time by a specific interval.
+     */
+    protected function travelBackward(string $interval): void
+    {
+        $currentTime = $this->getCurrentTime();
+        $newTime = $currentTime->modify('-' . $interval);
+        $this->travelTo($newTime);
+    }
+
+    /**
+     * Unfreezes time and returns to real time.
+     */
+    protected function travelBack(): void
+    {
+        self::$frozenTime = null;
+    }
+
+    /**
+     * Gets the current time (frozen or real).
+     */
+    protected function getCurrentTime(): \DateTimeImmutable
+    {
+        return self::$frozenTime ?? new \DateTimeImmutable();
+    }
+
+    /**
+     * Gets current timestamp.
+     */
+    protected function getCurrentTimestamp(): int
+    {
+        return $this->getCurrentTime()->getTimestamp();
+    }
+
+    /**
+     * Creates a date in the past.
+     */
+    protected function dateInPast(string $interval): \DateTimeImmutable
+    {
+        return $this->getCurrentTime()->modify('-' . $interval);
+    }
+
+    /**
+     * Creates a date in the future.
+     */
+    protected function dateInFuture(string $interval): \DateTimeImmutable
+    {
+        return $this->getCurrentTime()->modify('+' . $interval);
+    }
+
+    /**
+     * Formats a date for Shopware storage.
+     */
+    protected function formatForStorage(\DateTimeInterface $date): string
+    {
+        return $date->format(Defaults::STORAGE_DATE_TIME_FORMAT);
+    }
+
+    /**
+     * Executes a callback with frozen time, then restores.
+     *
+     * @param callable(): mixed $callback
+     */
+    protected function withFrozenTime(\DateTimeInterface $at, callable $callback): mixed
+    {
+        $this->freezeTime($at);
+
+        try {
+            return $callback();
+        } finally {
+            $this->travelBack();
+        }
+    }
+
     /**
      * Asserts that a timestamp is within a specific range.
      */

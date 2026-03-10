@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
-use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,96 +9,151 @@ use Symfony\Component\HttpFoundation\Response;
 
 trait StorefrontRequestTrait
 {
-    private ?StorefrontRequestHelper $storefrontRequestHelper = null;
+    private ?KernelBrowser $storefrontBrowserInstance = null;
 
     /**
      * @param array<string, mixed> $options
      */
-    abstract protected function createStorefrontHelper(array $options = []): StorefrontRequestHelper;
-
-    /**
-     * @param array<string, mixed> $options
-     */
-    protected function storefrontHelper(array $options = []): StorefrontRequestHelper
-    {
-        if (! $this->storefrontRequestHelper instanceof StorefrontRequestHelper) {
-            $this->storefrontRequestHelper = $this->createStorefrontHelper($options);
-        }
-
-        return $this->storefrontRequestHelper;
-    }
+    abstract protected function createCustomSalesChannelBrowser(array $options = []): KernelBrowser;
 
     /**
      * @param array<string, mixed> $options
      */
     protected function storefrontBrowser(array $options = []): KernelBrowser
     {
-        return $this->storefrontHelper($options)->getBrowser();
+        if (! $this->storefrontBrowserInstance instanceof KernelBrowser) {
+            $this->storefrontBrowserInstance = $this->createCustomSalesChannelBrowser($options);
+        }
+
+        return $this->storefrontBrowserInstance;
     }
 
     protected function storefrontLogin(string $email, string $password = 'shopware'): void
     {
-        $this->storefrontHelper()->login($email, $password);
+        $this->storefrontBrowser()->request(
+            'POST',
+            '/account/login',
+            [
+                'email' => $email,
+                'password' => $password,
+            ]
+        );
     }
 
     protected function storefrontAddToCart(string $productId, int $quantity = 1): void
     {
-        $this->storefrontHelper()->addToCart($productId, $quantity);
+        $this->storefrontBrowser()->request(
+            'POST',
+            '/checkout/line-item/add',
+            [
+                'lineItems' => [
+                    $productId => [
+                        'id' => $productId,
+                        'referencedId' => $productId,
+                        'type' => 'product',
+                        'quantity' => $quantity,
+                        'stackable' => true,
+                        'removable' => true,
+                    ],
+                ],
+            ]
+        );
+
+        $this->assertStorefrontSuccessOrRedirect();
     }
 
     protected function storefrontVisitProductPage(string $productId): Crawler
     {
-        return $this->storefrontHelper()->visitProductPage($productId);
+        return $this->storefrontBrowser()->request('GET', '/detail/' . $productId);
     }
 
     protected function storefrontProceedToCheckout(): Crawler
     {
-        return $this->storefrontHelper()->proceedToCheckout();
+        return $this->storefrontBrowser()->request('GET', '/checkout/confirm');
     }
 
     protected function storefrontSubmitOrder(): void
     {
-        $this->storefrontHelper()->submitOrder();
+        $crawler = $this->storefrontBrowser()->request('GET', '/checkout/confirm');
+        $form = $crawler->filter('#confirmOrderForm')->form();
+
+        $this->storefrontBrowser()->submit($form);
+        $this->assertStorefrontSuccessOrRedirect();
     }
 
     protected function storefrontAssertResponseOk(Response $response, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseOk($response, $message);
+        \assert(
+            $response->getStatusCode() === Response::HTTP_OK,
+            $message ?: \sprintf('Expected response status code 200, but got %d', $response->getStatusCode())
+        );
     }
 
     protected function storefrontAssertResponseCreated(Response $response, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseCreated($response, $message);
+        \assert(
+            $response->getStatusCode() === Response::HTTP_CREATED,
+            $message ?: \sprintf('Expected response status code 201, but got %d', $response->getStatusCode())
+        );
     }
 
     protected function storefrontAssertResponseNotFound(Response $response, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseNotFound($response, $message);
+        \assert(
+            $response->getStatusCode() === Response::HTTP_NOT_FOUND,
+            $message ?: \sprintf('Expected response status code 404, but got %d', $response->getStatusCode())
+        );
     }
 
     protected function storefrontAssertResponseForbidden(Response $response, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseForbidden($response, $message);
+        \assert(
+            $response->getStatusCode() === Response::HTTP_FORBIDDEN,
+            $message ?: \sprintf('Expected response status code 403, but got %d', $response->getStatusCode())
+        );
     }
 
     protected function storefrontAssertResponseRedirects(Response $response, ?string $expectedUrl = null, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseRedirects($response, $expectedUrl, $message);
+        \assert(
+            $response->isRedirection(),
+            $message ?: \sprintf('Expected response to be a redirect, but got status code %d', $response->getStatusCode())
+        );
+
+        if ($expectedUrl !== null) {
+            \assert(
+                $response->headers->get('Location') === $expectedUrl,
+                $message ?: \sprintf('Expected redirect to "%s", but got "%s"', $expectedUrl, $response->headers->get('Location'))
+            );
+        }
     }
 
     protected function storefrontAssertResponseBodyContains(Response $response, string $needle, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseBodyContains($response, $needle, $message);
+        $content = (string) $response->getContent();
+        \assert(
+            str_contains($content, $needle),
+            $message ?: \sprintf('Expected response body to contain "%s"', $needle)
+        );
     }
 
     protected function storefrontAssertResponseBodyNotContains(Response $response, string $needle, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseBodyNotContains($response, $needle, $message);
+        $content = (string) $response->getContent();
+        \assert(
+            ! str_contains($content, $needle),
+            $message ?: \sprintf('Expected response body not to contain "%s"', $needle)
+        );
     }
 
     protected function storefrontAssertResponseIsJson(Response $response, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseIsJson($response, $message);
+        $content = (string) $response->getContent();
+        \json_decode($content);
+        \assert(
+            \json_last_error() === JSON_ERROR_NONE,
+            $message ?: 'Expected response to be valid JSON'
+        );
     }
 
     /**
@@ -107,36 +161,72 @@ trait StorefrontRequestTrait
      */
     protected function storefrontAssertResponseJsonEquals(Response $response, array $expectedData, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseJsonEquals($response, $expectedData, $message);
+        $this->storefrontAssertResponseIsJson($response, $message);
+        $content = (string) $response->getContent();
+        $actualData = \json_decode($content, true);
+
+        \assert(
+            $actualData === $expectedData,
+            $message ?: 'Expected JSON response to match provided data'
+        );
     }
 
     protected function storefrontAssertResponseJsonContains(Response $response, string $key, string $expectedValue, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseJsonContains($response, $key, $expectedValue, $message);
+        $this->storefrontAssertResponseIsJson($response, $message);
+        $content = (string) $response->getContent();
+        $actualData = \json_decode($content, true);
+
+        \assert(\array_key_exists($key, $actualData), $message ?: \sprintf('Expected JSON response to contain key "%s"', $key));
+        \assert($actualData[$key] === $expectedValue, $message ?: \sprintf('Expected JSON key "%s" to be "%s"', $key, \print_r($expectedValue, true)));
     }
 
     protected function storefrontAssertResponseHasHeader(Response $response, string $header, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseHasHeader($response, $header, $message);
+        \assert(
+            $response->headers->has($header),
+            $message ?: \sprintf('Expected response to have header "%s"', $header)
+        );
     }
 
     protected function storefrontAssertResponseHeaderContains(Response $response, string $header, string $value, string $message = ''): void
     {
-        $this->storefrontHelper()->assertResponseHeaderContains($response, $header, $value, $message);
+        $this->storefrontAssertResponseHasHeader($response, $header, $message);
+        \assert(
+            str_contains((string) $response->headers->get($header), $value),
+            $message ?: \sprintf('Expected response header "%s" to contain "%s"', $header, $value)
+        );
     }
 
     protected function storefrontAssertRequestMethod(Request $request, string $method, string $message = ''): void
     {
-        $this->storefrontHelper()->assertRequestMethod($request, $method, $message);
+        \assert(
+            $request->getMethod() === \strtoupper($method),
+            $message ?: \sprintf('Expected request method "%s", but got "%s"', \strtoupper($method), $request->getMethod())
+        );
     }
 
     protected function storefrontAssertRequestHasHeader(Request $request, string $header, string $message = ''): void
     {
-        $this->storefrontHelper()->assertRequestHasHeader($request, $header, $message);
+        \assert(
+            $request->headers->has($header),
+            $message ?: \sprintf('Expected request to have header "%s"', $header)
+        );
     }
 
     protected function storefrontAssertRequestHasParameter(Request $request, string $key, string $message = ''): void
     {
-        $this->storefrontHelper()->assertRequestHasParameter($request, $key, $message);
+        \assert(
+            $request->query->has($key) || $request->request->has($key),
+            $message ?: \sprintf('Expected request to have parameter "%s"', $key)
+        );
+    }
+
+    private function assertStorefrontSuccessOrRedirect(): void
+    {
+        $statusCode = $this->storefrontBrowser()->getResponse()->getStatusCode();
+        if ($statusCode >= 400) {
+            throw new \RuntimeException('Request failed with status code: ' . $statusCode);
+        }
     }
 }

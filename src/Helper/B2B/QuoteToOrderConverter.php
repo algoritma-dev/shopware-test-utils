@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Helper\B2B;
 
-use Algoritma\ShopwareTestUtils\Helper\CheckoutHelper;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteCollection;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\Quote\QuoteStates;
@@ -12,10 +11,12 @@ use Shopware\Core\Checkout\Cart\LineItem\LineItem;
 use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
 use Shopware\Core\Checkout\Cart\Price\Struct\QuantityPriceDefinition;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
+use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Order\OrderEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -27,12 +28,9 @@ class QuoteToOrderConverter
 {
     private readonly CartService $cartService;
 
-    private readonly CheckoutHelper $checkoutRunner;
-
     public function __construct(private readonly ContainerInterface $container)
     {
         $this->cartService = $this->container->get(CartService::class);
-        $this->checkoutRunner = new CheckoutHelper($this->container);
     }
 
     /**
@@ -46,7 +44,28 @@ class QuoteToOrderConverter
         $cart = $this->createCartFromQuote($quote, $context);
 
         // Place order
-        return $this->checkoutRunner->placeOrder($cart, $context);
+        $orderId = $this->cartService->order($cart, $context, new RequestDataBag());
+
+        return $this->loadOrder($orderId, $context->getContext());
+    }
+
+    private function loadOrder(string $orderId, Context $context): OrderEntity
+    {
+        /** @var EntityRepository<OrderCollection> $repository */
+        $repository = $this->container->get('order.repository');
+
+        $criteria = new Criteria([$orderId]);
+        $criteria->addAssociation('lineItems');
+        $criteria->addAssociation('transactions');
+        $criteria->addAssociation('deliveries');
+
+        $order = $repository->search($criteria, $context)->first();
+
+        if (! $order instanceof OrderEntity) {
+            throw new \RuntimeException(sprintf('Order with ID "%s" not found', $orderId));
+        }
+
+        return $order;
     }
 
     /**

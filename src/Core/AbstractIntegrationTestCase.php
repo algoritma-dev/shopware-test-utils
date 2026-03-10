@@ -5,7 +5,6 @@ namespace Algoritma\ShopwareTestUtils\Core;
 use Algoritma\ShopwareTestUtils\Factory\CartFactory;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
-use Algoritma\ShopwareTestUtils\Helper\OrderHelper;
 use Algoritma\ShopwareTestUtils\Traits\B2B\B2BHelpersTrait;
 use Algoritma\ShopwareTestUtils\Traits\CacheTrait;
 use Algoritma\ShopwareTestUtils\Traits\CartTrait;
@@ -91,7 +90,7 @@ abstract class AbstractIntegrationTestCase extends TestCase
      */
     protected function placeOrder(Cart $cart, SalesChannelContext $context): OrderEntity
     {
-        return (new OrderHelper($this->getContainer()))->placeOrder($cart, $context);
+        return $this->orderPlace($cart, $context);
     }
 
     /**

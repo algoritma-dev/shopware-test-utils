@@ -2,13 +2,9 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
-use Algoritma\ShopwareTestUtils\Helper\StorefrontApiRequestHelper;
-use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
-use Algoritma\ShopwareTestUtils\Traits\StorefrontApiRequestTrait;
-use Algoritma\ShopwareTestUtils\Traits\StorefrontRequestTrait;
-use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
@@ -20,23 +16,11 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     /**
      * @param array<string, mixed> $options
      */
-    protected function createStorefrontHelper(array $options = []): StorefrontRequestHelper
+    protected function createSalesChannelContext(array $options = []): SalesChannelContext
     {
-        $browser = $this->createCustomSalesChannelBrowser($options);
+        $salesChannelId = $options['salesChannelId'] ?? $this->getSalesChannelId();
 
-        return new StorefrontRequestHelper($browser);
-    }
-
-    /**
-     * @param array<string, mixed> $options
-     */
-    protected function createStorefrontApiHelper(array $options = []): StorefrontApiRequestHelper
-    {
-        $browser = $this->createCustomSalesChannelBrowser($options);
-
-        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), $options['id'], $options);
-
-        return new StorefrontApiRequestHelper($browser, $salesChannelContext);
+        return $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), $salesChannelId, $options);
     }
 
     /**

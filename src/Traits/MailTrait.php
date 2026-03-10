@@ -2,7 +2,8 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
-use Algoritma\ShopwareTestUtils\Helper\MailCaptureHelper;
+use Doctrine\DBAL\Connection;
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Framework\Test\TestCaseBase\EventDispatcherBehaviour;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Symfony\Component\Mailer\Event\SentMessageEvent;
@@ -13,29 +14,26 @@ trait MailTrait
     use KernelTestBehaviour;
     use EventDispatcherBehaviour;
 
-    private ?MailCaptureHelper $mailCaptureHelper = null;
-
-    protected function getMailCaptureHelper(): MailCaptureHelper
-    {
-        if (! $this->mailCaptureHelper instanceof MailCaptureHelper) {
-            $this->mailCaptureHelper = new MailCaptureHelper();
-        }
-
-        return $this->mailCaptureHelper;
-    }
+    /**
+     * @var array<int, Email>
+     */
+    private array $capturedEmails = [];
 
     /**
      * Starts capturing sent emails.
      */
     protected function captureEmails(): void
     {
-        $this->getMailCaptureHelper()->clearCapturedEmails();
+        $this->clearCapturedEmails();
 
         // Subscribe to SentMessageEvent to capture sent emails
         $dispatcher = self::getContainer()->get('event_dispatcher');
-        $helper = $this->getMailCaptureHelper();
-        $callback = static function (SentMessageEvent $event) use ($helper): void {
-            $helper->captureFromEvent($event);
+        $callback = function (SentMessageEvent $event): void {
+            $message = $event->getMessage()->getOriginalMessage();
+
+            if ($message instanceof Email) {
+                $this->capturedEmails[] = $message;
+            }
         };
 
         $this->addEventListener($dispatcher, SentMessageEvent::class, $callback);
@@ -46,7 +44,13 @@ trait MailTrait
      */
     protected function assertMailSent(int $count = 1): void
     {
-        $this->getMailCaptureHelper()->assertMailSent($count);
+        $actualCount = count($this->capturedEmails);
+
+        Assert::assertEquals(
+            $count,
+            $actualCount,
+            sprintf('Expected %d emails to be sent, but %d were sent', $count, $actualCount)
+        );
     }
 
     /**
@@ -54,7 +58,11 @@ trait MailTrait
      */
     protected function assertMailWasSent(): void
     {
-        $this->getMailCaptureHelper()->assertMailWasSent();
+        Assert::assertGreaterThan(
+            0,
+            count($this->capturedEmails),
+            'Expected at least one email to be sent, but none were sent'
+        );
     }
 
     /**
@@ -62,7 +70,10 @@ trait MailTrait
      */
     protected function assertNoMailSent(): void
     {
-        $this->getMailCaptureHelper()->assertNoMailSent();
+        Assert::assertEmpty(
+            $this->capturedEmails,
+            sprintf('Expected no emails to be sent, but %d were sent', count($this->capturedEmails))
+        );
     }
 
     /**
@@ -70,7 +81,22 @@ trait MailTrait
      */
     protected function assertMailSentTo(string $email): void
     {
-        $this->getMailCaptureHelper()->assertMailSentTo($email);
+        $found = false;
+
+        foreach ($this->capturedEmails as $message) {
+            $recipients = $message->getTo();
+            foreach ($recipients as $recipient) {
+                if ($recipient->getAddress() === $email) {
+                    $found = true;
+                    break 2;
+                }
+            }
+        }
+
+        Assert::assertTrue(
+            $found,
+            sprintf('No email was sent to "%s"', $email)
+        );
     }
 
     /**
@@ -78,7 +104,19 @@ trait MailTrait
      */
     protected function assertMailWithSubject(string $subject): void
     {
-        $this->getMailCaptureHelper()->assertMailWithSubject($subject);
+        $found = false;
+
+        foreach ($this->capturedEmails as $message) {
+            if ($message->getSubject() === $subject) {
+                $found = true;
+                break;
+            }
+        }
+
+        Assert::assertTrue(
+            $found,
+            sprintf('No email with subject "%s" was sent', $subject)
+        );
     }
 
     /**
@@ -86,7 +124,21 @@ trait MailTrait
      */
     protected function assertMailContains(string $text): void
     {
-        $this->getMailCaptureHelper()->assertMailContains($text);
+        $found = false;
+
+        foreach ($this->capturedEmails as $message) {
+            $body = $message->getHtmlBody() ?? $message->getTextBody() ?? '';
+
+            if (str_contains($body, $text)) {
+                $found = true;
+                break;
+            }
+        }
+
+        Assert::assertTrue(
+            $found,
+            sprintf('No email contains the text "%s"', $text)
+        );
     }
 
     /**
@@ -96,7 +148,7 @@ trait MailTrait
      */
     protected function getCapturedEmails(): array
     {
-        return $this->getMailCaptureHelper()->getCapturedEmails();
+        return $this->capturedEmails;
     }
 
     /**
@@ -104,7 +156,13 @@ trait MailTrait
      */
     protected function getLastEmail(): ?Email
     {
-        return $this->getMailCaptureHelper()->getLastEmail();
+        if ($this->capturedEmails === []) {
+            return null;
+        }
+
+        $lastMessage = end($this->capturedEmails);
+
+        return $lastMessage instanceof Email ? $lastMessage : null;
     }
 
     /**
@@ -112,7 +170,7 @@ trait MailTrait
      */
     protected function clearCapturedEmails(): void
     {
-        $this->getMailCaptureHelper()->clearCapturedEmails();
+        $this->capturedEmails = [];
     }
 
     /**
@@ -120,7 +178,22 @@ trait MailTrait
      */
     protected function assertMailSentFrom(string $email): void
     {
-        $this->getMailCaptureHelper()->assertMailSentFrom($email);
+        $found = false;
+
+        foreach ($this->capturedEmails as $message) {
+            $from = $message->getFrom();
+            foreach ($from as $sender) {
+                if ($sender->getAddress() === $email) {
+                    $found = true;
+                    break 2;
+                }
+            }
+        }
+
+        Assert::assertTrue(
+            $found,
+            sprintf('No email was sent from "%s"', $email)
+        );
     }
 
     /**
@@ -128,7 +201,21 @@ trait MailTrait
      */
     protected function assertMailHasAttachment(string $filename): void
     {
-        $this->getMailCaptureHelper()->assertMailHasAttachment($filename);
+        $found = false;
+
+        foreach ($this->capturedEmails as $message) {
+            foreach ($message->getAttachments() as $attachment) {
+                if ($attachment->getFilename() === $filename) {
+                    $found = true;
+                    break 2;
+                }
+            }
+        }
+
+        Assert::assertTrue(
+            $found,
+            sprintf('No email has attachment "%s"', $filename)
+        );
     }
 
     /**
@@ -136,6 +223,111 @@ trait MailTrait
      */
     protected function findEmailByRecipient(string $email): ?Email
     {
-        return $this->getMailCaptureHelper()->findEmailByRecipient($email);
+        foreach ($this->capturedEmails as $message) {
+            $recipients = $message->getTo();
+            foreach ($recipients as $recipient) {
+                if ($recipient->getAddress() === $email) {
+                    return $message;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Assert that a mail template exists for a specific type.
+     */
+    protected function assertMailTemplateExists(string $typeTechnicalName): void
+    {
+        /** @var Connection $connection */
+        $connection = self::getContainer()->get(Connection::class);
+
+        $sql = <<<'SQL'
+                SELECT COUNT(*)
+                FROM mail_template t
+                INNER JOIN mail_template_type type ON t.mail_template_type_id = type.id
+                WHERE type.technical_name = :technicalName
+            SQL;
+
+        $count = (int) $connection->fetchOne($sql, ['technicalName' => $typeTechnicalName]);
+
+        Assert::assertGreaterThan(0, $count, sprintf('Mail template for type "%s" does not exist.', $typeTechnicalName));
+    }
+
+    /**
+     * Assert that a mail template subject contains a specific string.
+     */
+    protected function assertMailTemplateSubjectContains(string $typeTechnicalName, string $locale, string $expectedSubjectPart): void
+    {
+        /** @var Connection $connection */
+        $connection = self::getContainer()->get(Connection::class);
+
+        $languageExists = $connection->fetchOne(
+            'SELECT 1 FROM language l INNER JOIN locale loc ON l.locale_id = loc.id WHERE loc.code = :locale',
+            ['locale' => $locale]
+        );
+
+        if (! $languageExists) {
+            throw new \RuntimeException(sprintf('Language for locale "%s" does not exist in the database.', $locale));
+        }
+
+        $sql = <<<'SQL'
+                SELECT trans.subject
+                FROM mail_template_translation trans
+                INNER JOIN mail_template t ON trans.mail_template_id = t.id
+                INNER JOIN mail_template_type type ON t.mail_template_type_id = type.id
+                INNER JOIN language l ON trans.language_id = l.id
+                INNER JOIN locale loc ON l.locale_id = loc.id
+                WHERE type.technical_name = :technicalName
+                AND loc.code = :locale
+            SQL;
+
+        $subject = $connection->fetchOne($sql, [
+            'technicalName' => $typeTechnicalName,
+            'locale' => $locale,
+        ]);
+
+        Assert::assertNotFalse($subject, sprintf('No translation found for mail template "%s" in locale "%s".', $typeTechnicalName, $locale));
+        Assert::assertStringContainsString($expectedSubjectPart, (string) $subject, sprintf('Mail template subject for "%s" (%s) does not contain "%s". Actual: "%s"', $typeTechnicalName, $locale, $expectedSubjectPart, $subject));
+    }
+
+    /**
+     * Assert that a mail template content contains a specific string.
+     */
+    protected function assertMailTemplateContentContains(string $typeTechnicalName, string $locale, string $expectedContentPart, bool $html = true): void
+    {
+        /** @var Connection $connection */
+        $connection = self::getContainer()->get(Connection::class);
+
+        $languageExists = $connection->fetchOne(
+            'SELECT 1 FROM language l INNER JOIN locale loc ON l.locale_id = loc.id WHERE loc.code = :locale',
+            ['locale' => $locale]
+        );
+
+        if (! $languageExists) {
+            throw new \RuntimeException(sprintf('Language for locale "%s" does not exist in the database.', $locale));
+        }
+
+        $column = $html ? 'content_html' : 'content_plain';
+
+        $sql = <<<SQL
+                SELECT trans.{$column}
+                FROM mail_template_translation trans
+                INNER JOIN mail_template t ON trans.mail_template_id = t.id
+                INNER JOIN mail_template_type type ON t.mail_template_type_id = type.id
+                INNER JOIN language l ON trans.language_id = l.id
+                INNER JOIN locale loc ON l.locale_id = loc.id
+                WHERE type.technical_name = :technicalName
+                AND loc.code = :locale
+            SQL;
+
+        $content = $connection->fetchOne($sql, [
+            'technicalName' => $typeTechnicalName,
+            'locale' => $locale,
+        ]);
+
+        Assert::assertNotFalse($content, sprintf('No translation found for mail template "%s" in locale "%s".', $typeTechnicalName, $locale));
+        Assert::assertStringContainsString($expectedContentPart, (string) $content, sprintf('Mail template content (%s) for "%s" (%s) does not contain "%s".', $html ? 'HTML' : 'Plain', $typeTechnicalName, $locale, $expectedContentPart));
     }
 }
