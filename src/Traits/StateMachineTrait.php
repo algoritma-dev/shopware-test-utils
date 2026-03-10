@@ -26,7 +26,7 @@ trait StateMachineTrait
      */
     protected function transitionOrderState(string $orderId, string $toState, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
 
         $this->getStateMachineRegistry()->transition(
             new Transition(
@@ -44,7 +44,7 @@ trait StateMachineTrait
      */
     protected function transitionPaymentState(string $transactionId, string $toState, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
 
         $this->getStateMachineRegistry()->transition(
             new Transition(
@@ -62,7 +62,7 @@ trait StateMachineTrait
      */
     protected function transitionDeliveryState(string $deliveryId, string $toState, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
 
         $this->getStateMachineRegistry()->transition(
             new Transition(
@@ -82,7 +82,7 @@ trait StateMachineTrait
      */
     protected function getAvailableTransitions(string $entityId, string $stateMachineName, ?Context $context = null): array
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
 
         return $this->getStateMachineRegistry()->getAvailableTransitions(
             $stateMachineName,
@@ -97,7 +97,7 @@ trait StateMachineTrait
      */
     protected function getEntityState(string $entityName, string $entityId, ?Context $context = null): ?string
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
 
         /** @var EntityRepository<EntityCollection<Entity>> $repository */
         $repository = static::getContainer()->get($entityName . '.repository');
@@ -124,7 +124,7 @@ trait StateMachineTrait
      */
     protected function forceEntityState(string $entityName, string $entityId, string $stateId, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
 
         $repository = static::getContainer()->get($entityName . '.repository');
         $repository->update([
@@ -143,11 +143,11 @@ trait StateMachineTrait
         $connection = static::getContainer()->get(Connection::class);
 
         $sql = <<<'EOD'
-            SELECT LOWER(HEX(state_machine_state.id))
-            FROM state_machine_state
-            JOIN state_machine ON state_machine.id = state_machine_state.state_machine_id
-            WHERE state_machine.technical_name = :machine AND state_machine_state.technical_name = :state
-EOD;
+                        SELECT LOWER(HEX(state_machine_state.id))
+                        FROM state_machine_state
+                        JOIN state_machine ON state_machine.id = state_machine_state.state_machine_id
+                        WHERE state_machine.technical_name = :machine AND state_machine_state.technical_name = :state
+            EOD;
 
         return $connection->fetchOne($sql, ['machine' => $stateMachineName, 'state' => $stateName]) ?: null;
     }
@@ -159,7 +159,7 @@ EOD;
      */
     protected function transitionOrderThroughStates(string $orderId, array $states, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
 
         foreach ($states as $state) {
             $this->transitionOrderState($orderId, $state, $context);

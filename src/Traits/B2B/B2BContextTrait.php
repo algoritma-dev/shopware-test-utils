@@ -150,7 +150,7 @@ trait B2BContextTrait
         SalesChannelContext $currentContext,
         string $newOrganizationId
     ): SalesChannelContext {
-        $organization = $this->getOrganizationById($newOrganizationId);
+        $this->getOrganizationById($newOrganizationId);
 
         $factory = new B2BContextFactory(static::getContainer());
         $factory->withOrganization($newOrganizationId);
@@ -243,7 +243,7 @@ trait B2BContextTrait
         $context ??= Context::createCLIContext();
         /** @var EntityRepository<EmployeeCollection> $repository */
         $repository = static::getContainer()->get('b2b_employee.repository');
-        
+
         $criteria = new Criteria([$employeeId]);
         $criteria->addAssociation('role');
         $criteria->addAssociation('role.permissions');

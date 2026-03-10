@@ -8,9 +8,6 @@ use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Mailer\Envelope;
-use Symfony\Component\Mailer\Event\SentMessageEvent;
-use Symfony\Component\Mailer\SentMessage;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 
@@ -68,7 +65,6 @@ class MailHelpersTest extends TestCase
     {
         $reflection = new \ReflectionObject($this);
         $property = $reflection->getProperty('capturedEmails');
-        $property->setAccessible(true);
         $captured = $property->getValue($this);
         $captured[] = $email;
         $property->setValue($this, $captured);

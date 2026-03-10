@@ -2,7 +2,6 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
-use Algoritma\ShopwareTestUtils\Helper\StateManager;
 use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\Aggregate\OrderDelivery\OrderDeliveryCollection;
@@ -18,6 +17,7 @@ use Shopware\Core\System\SalesChannel\SalesChannelContext;
 trait OrderTrait
 {
     use KernelTestBehaviour;
+    use StateMachineTrait;
 
     protected function orderPlace(Cart $cart, SalesChannelContext $context): OrderEntity
     {
@@ -56,8 +56,7 @@ trait OrderTrait
             $context = Context::createCLIContext();
         }
 
-        $stateManager = new StateManager(static::getContainer());
-        $stateManager->transitionOrderState($orderId, 'cancel', $context);
+        $this->transitionOrderState($orderId, 'cancel', $context);
     }
 
     protected function orderMarkAsPaid(string $orderId, ?Context $context = null): void
@@ -70,8 +69,7 @@ trait OrderTrait
         $transaction = $order->getTransactions()->first();
 
         if ($transaction) {
-            $stateManager = new StateManager(static::getContainer());
-            $stateManager->transitionPaymentState($transaction->getId(), 'pay', $context);
+            $this->transitionPaymentState($transaction->getId(), 'pay', $context);
         }
     }
 
@@ -85,8 +83,7 @@ trait OrderTrait
         $delivery = $order->getDeliveries()->first();
 
         if ($delivery) {
-            $stateManager = new StateManager(static::getContainer());
-            $stateManager->transitionDeliveryState($delivery->getId(), 'ship', $context);
+            $this->transitionDeliveryState($delivery->getId(), 'ship', $context);
         }
     }
 

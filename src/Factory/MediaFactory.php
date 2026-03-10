@@ -5,6 +5,10 @@ namespace Algoritma\ShopwareTestUtils\Factory;
 use Shopware\Core\Content\Media\MediaDefinition;
 use Shopware\Core\Framework\Uuid\Uuid;
 
+/**
+ * @method self withTitle(string $title)
+ * @method self withAlt(string $alt)
+ */
 class MediaFactory extends AbstractFactory
 {
     protected function getRepositoryName(): string

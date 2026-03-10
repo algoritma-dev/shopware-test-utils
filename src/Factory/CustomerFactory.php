@@ -13,6 +13,11 @@ use Shopware\Core\System\Country\CountryCollection;
 use Shopware\Core\System\Salutation\SalutationCollection;
 use Shopware\Core\Test\TestDefaults;
 
+/**
+ * @method self withFirstName(string $firstName)
+ * @method self withLastName(string $lastName)
+ * @method self withEmail(string $email)
+ */
 class CustomerFactory extends AbstractFactory
 {
     protected function getRepositoryName(): string

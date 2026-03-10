@@ -13,8 +13,14 @@ trait LogTrait
 {
     use KernelTestBehaviour;
 
+    /**
+     * @var array<string, array<int, array<string, mixed>>>
+     */
     private array $capturedLogs = [];
 
+    /**
+     * @var array<string, TestHandler>
+     */
     private array $logHandlers = [];
 
     /**
@@ -128,6 +134,9 @@ trait LogTrait
     /**
      * Gets all captured log messages.
      */
+    /**
+     * @return array<int, mixed>
+     */
     protected function getCapturedLogs(string $channel = 'app'): array
     {
         if (! isset($this->logHandlers[$channel])) {
@@ -142,6 +151,9 @@ trait LogTrait
 
     /**
      * Gets logged messages (without context).
+     */
+    /**
+     * @return array<int, mixed>
      */
     protected function getLoggedMessages(string $channel = 'app', ?string $level = null): array
     {
@@ -193,7 +205,7 @@ trait LogTrait
     /**
      * Asserts that context contains specific data.
      */
-    protected function assertLogContextContains(string $key, $expectedValue, string $channel = 'app'): void
+    protected function assertLogContextContains(string $key, mixed $expectedValue, string $channel = 'app'): void
     {
         $logs = $this->getCapturedLogs($channel);
         $found = false;

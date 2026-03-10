@@ -94,6 +94,9 @@ trait B2BCustomerFeatureTrait
         ];
     }
 
+    /**
+     * @param array<string, bool> $features
+     */
     private function updateCustomerFeatures(string $customerId, array $features, Context $context): void
     {
         $repository = $this->getB2bCustomerSpecificFeaturesRepository();

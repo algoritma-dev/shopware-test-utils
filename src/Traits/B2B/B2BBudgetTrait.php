@@ -5,7 +5,6 @@ namespace Algoritma\ShopwareTestUtils\Traits\B2B;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
-use Shopware\Core\Checkout\Cart\Cart;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
@@ -27,7 +26,7 @@ trait B2BBudgetTrait
     protected function renewBudget(string $budgetId, ?Context $context = null): BudgetEntity
     {
         $context ??= Context::createCLIContext();
-        
+
         $repository = $this->getBudgetRepository();
 
         $repository->update([
@@ -53,7 +52,7 @@ trait B2BBudgetTrait
         $lastRenews = $budget->getLastRenews();
         $now = new \DateTime();
 
-        return match (strtolower($renewsType)) {
+        return match (strtolower((string) $renewsType)) {
             'daily' => $lastRenews->format('Y-m-d') !== $now->format('Y-m-d'),
             'weekly' => $lastRenews->format('Y-W') !== $now->format('Y-W'),
             'monthly' => $lastRenews->format('Y-m') !== $now->format('Y-m'),
@@ -74,7 +73,7 @@ trait B2BBudgetTrait
         $lastRenews = $budget->getLastRenews();
         $baseDate = \DateTimeImmutable::createFromInterface($lastRenews);
 
-        return match (strtolower($renewsType)) {
+        return match (strtolower((string) $renewsType)) {
             'daily' => $baseDate->modify('+1 day'),
             'weekly' => $baseDate->modify('+1 week'),
             'monthly' => $baseDate->modify('+1 month'),
@@ -271,6 +270,9 @@ trait B2BBudgetTrait
         return false;
     }
 
+    /**
+     * @return array<int, array<string, mixed>>
+     */
     protected function getBudgetNotificationRecipients(string $budgetId, ?Context $context = null): array
     {
         $budget = $this->getBudgetById($budgetId, $context);

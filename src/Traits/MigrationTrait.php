@@ -30,6 +30,9 @@ trait MigrationTrait
 
     /**
      * Asserts that schema changed after migration.
+     *
+     * @param array<string, mixed> $before
+     * @param array<string, mixed> $after
      */
     protected function assertSchemaChanged(array $before, array $after): void
     {
@@ -42,6 +45,9 @@ trait MigrationTrait
 
     /**
      * Asserts that schema did not change after migration.
+     *
+     * @param array<string, mixed> $before
+     * @param array<string, mixed> $after
      */
     protected function assertSchemaUnchanged(array $before, array $after): void
     {
@@ -137,6 +143,8 @@ trait MigrationTrait
 
     /**
      * Measures migration performance.
+     *
+     * @return array<string, mixed>
      */
     protected function measureMigrationPerformance(string $migrationClass): array
     {
@@ -331,11 +339,11 @@ trait MigrationTrait
     protected function assertMigrationRelationalIntegrity(string $parentTable, string $childTable, string $foreignKeyColumn): void
     {
         $orphanedRows = $this->getConnection()->fetchAllAssociative(<<<EOD
-            SELECT c.*
-            FROM `{$childTable}` c
-            LEFT JOIN `{$parentTable}` p ON c.`{$foreignKeyColumn}` = p.id
-            WHERE p.id IS NULL AND c.`{$foreignKeyColumn}` IS NOT NULL
-EOD);
+                        SELECT c.*
+                        FROM `{$childTable}` c
+                        LEFT JOIN `{$parentTable}` p ON c.`{$foreignKeyColumn}` = p.id
+                        WHERE p.id IS NULL AND c.`{$foreignKeyColumn}` IS NOT NULL
+            EOD);
 
         Assert::assertEmpty(
             $orphanedRows,
@@ -350,6 +358,8 @@ EOD);
 
     /**
      * Benchmarks a migration.
+     *
+     * @return array<string, mixed>
      */
     protected function benchmarkMigration(callable $migrationCallback, int $expectedRowCount): array
     {
@@ -401,6 +411,9 @@ EOD);
     /**
      * Override this method to generate test rows specific to your migration.
      */
+    /**
+     * @return array<string, mixed>
+     */
     protected function generateTestRow(int $index): array
     {
         return [
@@ -417,6 +430,9 @@ EOD);
 
     abstract protected function executeMigrationDestructive(string $migrationClass): void;
 
+    /**
+     * @return array<string, mixed>
+     */
     abstract protected function getSchemaSnapshot(): array;
 
     abstract protected function assertTableExists(string $table): void;
@@ -427,5 +443,8 @@ EOD);
 
     abstract protected function getConnection(): Connection;
 
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     */
     abstract protected function seedTable(string $table, array $rows): void;
 }

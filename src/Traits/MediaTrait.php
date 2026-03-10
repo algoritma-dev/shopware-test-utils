@@ -21,7 +21,7 @@ trait MediaTrait
      */
     protected function assignMediaToProduct(string $mediaId, string $productId, bool $setCover = false, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
         $productRepository = static::getContainer()->get('product.repository');
 
         $data = [
@@ -45,7 +45,7 @@ trait MediaTrait
      */
     protected function deleteMedia(string $mediaId, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
         $this->getMediaRepository()->delete([['id' => $mediaId]], $context);
     }
 
@@ -54,7 +54,7 @@ trait MediaTrait
      */
     protected function getMedia(string $mediaId, ?Context $context = null): ?MediaEntity
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
         $entity = $this->getMediaRepository()->search(new Criteria([$mediaId]), $context)->first();
 
         return $entity instanceof MediaEntity ? $entity : null;
@@ -67,7 +67,7 @@ trait MediaTrait
      */
     protected function updateMediaMetadata(string $mediaId, array $metadata, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
         $data = array_merge(['id' => $mediaId], $metadata);
         $this->getMediaRepository()->update([$data], $context);
     }
@@ -77,7 +77,7 @@ trait MediaTrait
      */
     protected function moveMediaToFolder(string $mediaId, string $folderId, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
         $this->getMediaRepository()->update([
             [
                 'id' => $mediaId,
@@ -101,7 +101,7 @@ trait MediaTrait
      */
     protected function bulkDeleteMedia(array $mediaIds, ?Context $context = null): void
     {
-        $context = $context ?? Context::createCLIContext();
+        $context ??= Context::createCLIContext();
         $deleteData = array_map(fn (string $id): array => ['id' => $id], $mediaIds);
         $this->getMediaRepository()->delete($deleteData, $context);
     }

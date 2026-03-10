@@ -37,17 +37,6 @@ use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextService;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
-if (class_exists(\Shopware\Commercial\SwagCommercial::class)) {
-    trait B2BTraits
-    {
-        use \Algoritma\ShopwareTestUtils\Traits\B2B\B2BHelpersTrait;
-    }
-} else {
-    trait B2BTraits
-    {
-    }
-}
-
 abstract class AbstractIntegrationTestCase extends TestCase
 {
     use IntegrationTestBehaviour;

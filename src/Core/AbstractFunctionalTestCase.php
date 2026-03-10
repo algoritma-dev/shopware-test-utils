@@ -16,6 +16,8 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     use StorefrontRequestTrait;
     use StorefrontApiRequestTrait;
 
+    abstract protected function getSalesChannelId(): string;
+
     /**
      * @param array<string, mixed> $options
      */
