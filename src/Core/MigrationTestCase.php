@@ -2,10 +2,12 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
+use Algoritma\ShopwareTestUtils\Traits\ConfigTrait;
 use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
+use Algoritma\ShopwareTestUtils\Traits\LogTrait;
+use Algoritma\ShopwareTestUtils\Traits\MigrationTrait;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Column;
-use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\Assert;
 use PHPUnit\Framework\TestCase;
@@ -16,6 +18,9 @@ abstract class MigrationTestCase extends TestCase
 {
     use KernelTestBehaviour;
     use DatabaseTrait;
+    use MigrationTrait;
+    use ConfigTrait;
+    use LogTrait;
 
     /**
      * @var array<string> List of tables to snapshot. If empty, full database snapshot is taken.
@@ -131,11 +136,10 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $columns = $schemaManager->listTableColumns($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
-        Assert::assertArrayHasKey(
-            $column,
-            $columns,
+        Assert::assertTrue(
+            $tableSchema->hasColumn($column),
             sprintf('Column "%s" does not exist in table "%s"', $column, $table)
         );
     }
@@ -147,12 +151,11 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        /** @var Column[] $columns */
-        $columns = $schemaManager->listTableColumns($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
-        Assert::assertArrayHasKey($column, $columns, sprintf('Column "%s" does not exist in table "%s"', $column, $table));
+        Assert::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s"', $column, $table));
 
-        $type = $columns[$column]->getType();
+        $type = $tableSchema->getColumn($column)->getType();
 
         $actualType = method_exists($type, 'getName') ? $type->getName() : Type::lookupName($type);
 
@@ -170,11 +173,10 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $indexes = $schemaManager->listTableIndexes($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
-        Assert::assertArrayHasKey(
-            $index,
-            $indexes,
+        Assert::assertTrue(
+            $tableSchema->hasIndex($index),
             sprintf('Index "%s" does not exist on table "%s"', $index, $table)
         );
     }
@@ -186,18 +188,12 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        /** @var ForeignKeyConstraint[] $foreignKeys */
-        $foreignKeys = $schemaManager->listTableForeignKeys($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
-        $found = false;
-        foreach ($foreignKeys as $fk) {
-            if ($fk->getName() === $foreignKey) {
-                $found = true;
-                break;
-            }
-        }
-
-        Assert::assertTrue($found, sprintf('Foreign key "%s" does not exist on table "%s"', $foreignKey, $table));
+        Assert::assertTrue(
+            $tableSchema->hasForeignKey($foreignKey),
+            sprintf('Foreign key "%s" does not exist on table "%s"', $foreignKey, $table)
+        );
     }
 
     /**
@@ -297,11 +293,12 @@ abstract class MigrationTestCase extends TestCase
     {
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
         return [
-            'columns' => $schemaManager->listTableColumns($table),
-            'indexes' => $schemaManager->listTableIndexes($table),
-            'foreignKeys' => $schemaManager->listTableForeignKeys($table),
+            'columns' => $tableSchema->getColumns(),
+            'indexes' => $tableSchema->getIndexes(),
+            'foreignKeys' => $tableSchema->getForeignKeys(),
         ];
     }
 

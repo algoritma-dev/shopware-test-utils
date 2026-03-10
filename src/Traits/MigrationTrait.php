@@ -3,6 +3,7 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use PHPUnit\Framework\Assert;
 
 trait MigrationTrait
@@ -30,6 +31,9 @@ trait MigrationTrait
 
     /**
      * Asserts that schema changed after migration.
+     *
+     * @param array<string, mixed> $before
+     * @param array<string, mixed> $after
      */
     protected function assertSchemaChanged(array $before, array $after): void
     {
@@ -42,6 +46,9 @@ trait MigrationTrait
 
     /**
      * Asserts that schema did not change after migration.
+     *
+     * @param array<string, mixed> $before
+     * @param array<string, mixed> $after
      */
     protected function assertSchemaUnchanged(array $before, array $after): void
     {
@@ -126,17 +133,18 @@ trait MigrationTrait
         // Check if column was removed
         $connection = $this->getConnection();
         $schemaManager = $connection->createSchemaManager();
-        $columns = $schemaManager->listTableColumns($table);
+        $tableSchema = $this->introspectTable($schemaManager, $table);
 
-        Assert::assertArrayNotHasKey(
-            $column,
-            $columns,
+        Assert::assertFalse(
+            $tableSchema->hasColumn($column),
             sprintf('Column "%s" still exists in table "%s" after destructive migration', $column, $table)
         );
     }
 
     /**
      * Measures migration performance.
+     *
+     * @return array<string, mixed>
      */
     protected function measureMigrationPerformance(string $migrationClass): array
     {
@@ -152,6 +160,230 @@ trait MigrationTrait
             'duration' => $duration,
             'memory_used' => $memoryAfter - $memoryBefore,
             'memory_peak' => memory_get_peak_usage(true),
+        ];
+    }
+
+    /**
+     * Tests data integrity after migration from old to new schema.
+     *
+     * @param string $oldTable The source table
+     * @param string $newTable The destination table
+     * @param callable $mappingCallback Function that maps old row to expected new row: fn($oldRow) => $newRow
+     */
+    protected function assertMigrationDataIntegrity(string $oldTable, string $newTable, callable $mappingCallback): void
+    {
+        $oldRows = $this->getConnection()->fetchAllAssociative("SELECT * FROM `{$oldTable}`");
+
+        foreach ($oldRows as $oldRow) {
+            $expectedNewRow = $mappingCallback($oldRow);
+            $where = [];
+            $params = [];
+
+            foreach ($expectedNewRow as $column => $value) {
+                $where[] = "`{$column}` = ?";
+                $params[] = $value;
+            }
+
+            $sql = sprintf('SELECT COUNT(*) FROM `%s` WHERE %s', $newTable, implode(' AND ', $where));
+            $count = (int) $this->getConnection()->fetchOne($sql, $params);
+
+            Assert::assertGreaterThan(
+                0,
+                $count,
+                sprintf(
+                    'Data migration failed: Expected row not found in table "%s": %s (mapped from old row: %s)',
+                    $newTable,
+                    json_encode($expectedNewRow),
+                    json_encode($oldRow)
+                )
+            );
+        }
+    }
+
+    /**
+     * Tests chunked migration (useful for large datasets).
+     *
+     * @param callable $migrationCallback Function that performs the migration: fn($offset, $limit)
+     * @param int $chunkSize Number of rows per chunk
+     * @param int $totalRows Total number of rows to migrate
+     */
+    protected function testChunkedMigration(callable $migrationCallback, int $chunkSize, int $totalRows): void
+    {
+        Assert::assertGreaterThan(0, $chunkSize, 'Chunk size must be greater than 0');
+        Assert::assertGreaterThanOrEqual(0, $totalRows, 'Total rows must be non-negative');
+
+        $processedRows = 0;
+        $chunks = (int) ceil($totalRows / $chunkSize);
+
+        for ($i = 0; $i < $chunks; ++$i) {
+            $offset = $i * $chunkSize;
+            $limit = min($chunkSize, $totalRows - $offset);
+
+            try {
+                $migrationCallback($offset, $limit);
+                $processedRows += $limit;
+            } catch (\Throwable $e) {
+                Assert::fail(sprintf(
+                    'Chunked migration failed at chunk %d (offset: %d, limit: %d): %s',
+                    $i + 1,
+                    $offset,
+                    $limit,
+                    $e->getMessage()
+                ));
+            }
+        }
+
+        Assert::assertEquals(
+            $totalRows,
+            $processedRows,
+            sprintf('Expected to process %d rows, but processed %d', $totalRows, $processedRows)
+        );
+    }
+
+    /**
+     * Verifies that data transformation was applied correctly.
+     */
+    protected function assertDataTransformation(string $table, callable $validationCallback): void
+    {
+        $rows = $this->getConnection()->fetchAllAssociative("SELECT * FROM `{$table}`");
+        $invalidRows = [];
+
+        foreach ($rows as $row) {
+            if (! $validationCallback($row)) {
+                $invalidRows[] = $row;
+            }
+        }
+
+        Assert::assertEmpty(
+            $invalidRows,
+            sprintf(
+                'Data transformation validation failed for %d rows in table "%s": %s',
+                count($invalidRows),
+                $table,
+                json_encode($invalidRows)
+            )
+        );
+    }
+
+    /**
+     * Compares row counts before and after migration.
+     */
+    protected function assertMigrationRowCountsMatch(string $sourceTable, string $destinationTable): void
+    {
+        $sourceCount = (int) $this->getConnection()->fetchOne("SELECT COUNT(*) FROM `{$sourceTable}`");
+        $destCount = (int) $this->getConnection()->fetchOne("SELECT COUNT(*) FROM `{$destinationTable}`");
+
+        Assert::assertEquals(
+            $sourceCount,
+            $destCount,
+            sprintf(
+                'Row count mismatch: source table "%s" has %d rows, destination table "%s" has %d rows',
+                $sourceTable,
+                $sourceCount,
+                $destinationTable,
+                $destCount
+            )
+        );
+    }
+
+    /**
+     * Tests that no data was lost during migration.
+     */
+    protected function assertMigrationNoDataLoss(string $oldTable, string $newTable, string $uniqueColumn): void
+    {
+        $oldValues = $this->getConnection()->fetchFirstColumn("SELECT `{$uniqueColumn}` FROM `{$oldTable}`");
+        $newValues = $this->getConnection()->fetchFirstColumn("SELECT `{$uniqueColumn}` FROM `{$newTable}`");
+
+        $missing = array_diff($oldValues, $newValues);
+
+        Assert::assertEmpty(
+            $missing,
+            sprintf(
+                'Data loss detected: %d values from column "%s" in table "%s" are missing in table "%s": %s',
+                count($missing),
+                $uniqueColumn,
+                $oldTable,
+                $newTable,
+                json_encode(array_slice($missing, 0, 10))
+            )
+        );
+    }
+
+    /**
+     * Tests migration with data type conversions.
+     */
+    protected function assertMigrationColumnType(string $table, string $column, string $expectedType): void
+    {
+        $schemaManager = $this->getConnection()->createSchemaManager();
+        $tableSchema = $this->introspectTable($schemaManager, $table);
+
+        Assert::assertTrue($tableSchema->hasColumn($column), sprintf('Column "%s" does not exist in table "%s"', $column, $table));
+
+        $type = $tableSchema->getColumn($column)->getType();
+        $actualType = method_exists($type, 'getName')
+            ? $type->getName()
+            : Type::lookupName($type);
+
+        Assert::assertEquals(
+            $expectedType,
+            $actualType,
+            sprintf(
+                'Data type conversion failed: column "%s.%s" has type "%s", expected "%s"',
+                $table,
+                $column,
+                $actualType,
+                $expectedType
+            )
+        );
+    }
+
+    /**
+     * Validates data consistency between related tables.
+     */
+    protected function assertMigrationRelationalIntegrity(string $parentTable, string $childTable, string $foreignKeyColumn): void
+    {
+        $orphanedRows = $this->getConnection()->fetchAllAssociative(<<<EOD
+                        SELECT c.*
+                        FROM `{$childTable}` c
+                        LEFT JOIN `{$parentTable}` p ON c.`{$foreignKeyColumn}` = p.id
+                        WHERE p.id IS NULL AND c.`{$foreignKeyColumn}` IS NOT NULL
+            EOD);
+
+        Assert::assertEmpty(
+            $orphanedRows,
+            sprintf(
+                'Relational integrity violation: %d orphaned rows found in table "%s" (foreign key: %s)',
+                count($orphanedRows),
+                $childTable,
+                $foreignKeyColumn
+            )
+        );
+    }
+
+    /**
+     * Benchmarks a migration.
+     *
+     * @return array<string, mixed>
+     */
+    protected function benchmarkMigration(callable $migrationCallback, int $expectedRowCount): array
+    {
+        $start = microtime(true);
+        $memoryBefore = memory_get_usage(true);
+
+        $migrationCallback();
+
+        $duration = microtime(true) - $start;
+        $memoryUsed = memory_get_usage(true) - $memoryBefore;
+        $peakMemory = memory_get_peak_usage(true);
+
+        $throughput = ($expectedRowCount > 0 && $duration > 0) ? $expectedRowCount / $duration : 0;
+
+        return [
+            'duration_seconds' => $duration,
+            'memory_used_mb' => $memoryUsed / 1024 / 1024,
+            'peak_memory_mb' => $peakMemory / 1024 / 1024,
+            'throughput_rows_per_second' => $throughput,
+            'processed_rows' => $expectedRowCount,
         ];
     }
 
@@ -183,6 +415,9 @@ trait MigrationTrait
     /**
      * Override this method to generate test rows specific to your migration.
      */
+    /**
+     * @return array<string, mixed>
+     */
     protected function generateTestRow(int $index): array
     {
         return [
@@ -199,6 +434,9 @@ trait MigrationTrait
 
     abstract protected function executeMigrationDestructive(string $migrationClass): void;
 
+    /**
+     * @return array<string, mixed>
+     */
     abstract protected function getSchemaSnapshot(): array;
 
     abstract protected function assertTableExists(string $table): void;
@@ -209,5 +447,8 @@ trait MigrationTrait
 
     abstract protected function getConnection(): Connection;
 
+    /**
+     * @param array<int, array<string, mixed>> $rows
+     */
     abstract protected function seedTable(string $table, array $rows): void;
 }

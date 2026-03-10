@@ -2,13 +2,13 @@
 
 namespace Algoritma\ShopwareTestUtils\Core;
 
-use Algoritma\ShopwareTestUtils\Helper\StorefrontApiRequestHelper;
-use Algoritma\ShopwareTestUtils\Helper\StorefrontRequestHelper;
 use Algoritma\ShopwareTestUtils\Traits\StorefrontApiRequestTrait;
 use Algoritma\ShopwareTestUtils\Traits\StorefrontRequestTrait;
+use PHPUnit\Framework\Assert;
 use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviour;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
+use Shopware\Core\System\SalesChannel\SalesChannelContext;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
@@ -17,26 +17,16 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     use StorefrontRequestTrait;
     use StorefrontApiRequestTrait;
 
-    /**
-     * @param array<string, mixed> $options
-     */
-    protected function createStorefrontHelper(array $options = []): StorefrontRequestHelper
-    {
-        $browser = $this->createCustomSalesChannelBrowser($options);
-
-        return new StorefrontRequestHelper($browser);
-    }
+    abstract protected function getSalesChannelId(): string;
 
     /**
      * @param array<string, mixed> $options
      */
-    protected function createStorefrontApiHelper(array $options = []): StorefrontApiRequestHelper
+    protected function createSalesChannelContext(array $options = []): SalesChannelContext
     {
-        $browser = $this->createCustomSalesChannelBrowser($options);
+        $salesChannelId = $options['salesChannelId'] ?? $this->getSalesChannelId();
 
-        $salesChannelContext = $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), $options['id'], $options);
-
-        return new StorefrontApiRequestHelper($browser, $salesChannelContext);
+        return $this->getContainer()->get(SalesChannelContextFactory::class)->create(Uuid::randomHex(), $salesChannelId, $options);
     }
 
     /**
@@ -47,7 +37,7 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     protected function getUrl(string $routeName, array $params = []): string
     {
         $router = $this->getContainer()->get('router');
-        \assert($router instanceof UrlGeneratorInterface);
+        Assert::assertInstanceOf(UrlGeneratorInterface::class, $router);
 
         return $router->generate($routeName, $params);
     }

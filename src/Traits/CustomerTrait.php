@@ -2,8 +2,13 @@
 
 namespace Algoritma\ShopwareTestUtils\Traits;
 
-use Algoritma\ShopwareTestUtils\Helper\CustomerHelper;
+use PHPUnit\Framework\Assert;
+use Shopware\Core\Checkout\Customer\Aggregate\CustomerAddress\CustomerAddressCollection;
+use Shopware\Core\Checkout\Customer\CustomerCollection;
 use Shopware\Core\Checkout\Customer\CustomerEntity;
+use Shopware\Core\Framework\Context;
+use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
 
@@ -11,39 +16,53 @@ trait CustomerTrait
 {
     use KernelTestBehaviour;
 
-    private ?CustomerHelper $customerHelperInstance = null;
-
-    protected function getCustomerHelper(): CustomerHelper
-    {
-        if (! $this->customerHelperInstance instanceof CustomerHelper) {
-            $this->customerHelperInstance = new CustomerHelper();
-        }
-
-        return $this->customerHelperInstance;
-    }
-
     protected function customerAssertLoggedIn(SalesChannelContext $context): void
     {
-        $this->getCustomerHelper()->assertCustomerLoggedIn($context);
+        $customer = $context->getCustomer();
+        Assert::assertInstanceOf(CustomerEntity::class, $customer, 'No customer logged in (context has no customer)');
     }
 
     protected function customerAssertGuestSession(SalesChannelContext $context): void
     {
-        $this->getCustomerHelper()->assertGuestSession($context);
+        $customer = $context->getCustomer();
+        Assert::assertNotInstanceOf(CustomerEntity::class, $customer, 'Customer is logged in but should be guest');
     }
 
     protected function customerAssertHasAddress(CustomerEntity $customer, string $addressId): void
     {
-        $this->getCustomerHelper()->assertCustomerHasAddress($customer, $addressId);
+        $addresses = $customer->getAddresses();
+
+        if (! $addresses instanceof CustomerAddressCollection) {
+            /** @var EntityRepository<CustomerCollection> $repository */
+            $repository = $this->getContainer()->get('customer.repository');
+
+            $criteria = new Criteria([$customer->getId()]);
+            $criteria->addAssociation('addresses');
+
+            $reloadedCustomer = $repository->search($criteria, Context::createCLIContext())->get($customer->getId());
+
+            if ($reloadedCustomer instanceof CustomerEntity) {
+                $addresses = $reloadedCustomer->getAddresses();
+            }
+        }
+
+        Assert::assertInstanceOf(CustomerAddressCollection::class, $addresses, 'Customer has no addresses. Forgot Criteria::addAssociation(\'addresses\')?');
+
+        $found = false;
+        foreach ($addresses as $address) {
+            if ($address->getId() === $addressId) {
+                $found = true;
+                break;
+            }
+        }
+
+        Assert::assertTrue($found, sprintf('Customer does not have address %s', $addressId));
     }
 
     protected function customerAssertBelongsToGroup(CustomerEntity $customer, string $groupId): void
     {
-        $this->getCustomerHelper()->assertCustomerBelongsToGroup($customer, $groupId);
-    }
-
-    protected function customerAssertHasRole(CustomerEntity $customer, string $role): void
-    {
-        $this->getCustomerHelper()->assertCustomerHasRole($customer, $role);
+        $actualGroupId = $customer->getGroupId();
+        Assert::assertNotNull($actualGroupId, 'Customer has no group');
+        Assert::assertSame($groupId, $actualGroupId, sprintf('Customer is in group %s, expected %s', $actualGroupId, $groupId));
     }
 }

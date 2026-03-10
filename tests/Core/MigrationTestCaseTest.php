@@ -5,6 +5,7 @@ namespace Algoritma\ShopwareTestUtils\Tests\Core;
 use Algoritma\ShopwareTestUtils\Core\MigrationTestCase;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
+use Doctrine\DBAL\Schema\Table;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use Shopware\Core\Framework\Migration\MigrationStep;
@@ -87,11 +88,21 @@ class MigrationTestCaseTest extends MigrationTestCase
 
     public function testAssertColumnExists(): void
     {
+        $table = $this->createMock(Table::class);
+        $table->expects($this->once())
+            ->method('hasColumn')
+            ->with('col_name')
+            ->willReturn(true);
+
+        $methodToMock = method_exists(AbstractSchemaManager::class, 'introspectTableByUnquotedName')
+            ? 'introspectTableByUnquotedName'
+            : 'introspectTable';
+
         $schemaManager = $this->createMock(AbstractSchemaManager::class);
         $schemaManager->expects($this->once())
-            ->method('listTableColumns')
+            ->method($methodToMock)
             ->with('test_table')
-            ->willReturn(['col_name' => 'dummy']);
+            ->willReturn($table);
 
         $this->connection->expects($this->once())
             ->method('createSchemaManager')

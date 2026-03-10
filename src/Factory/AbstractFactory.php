@@ -13,6 +13,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
  * Base factory class with common functionality for all entity factories.
+ *
+ * @method self withName(string $name)
+ * @method self setActive(bool $active)
+ * @method self withActive(bool $active)
  */
 abstract class AbstractFactory
 {

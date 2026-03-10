@@ -3,10 +3,13 @@
 namespace Algoritma\ShopwareTestUtils\Traits;
 
 use PHPUnit\Framework\Assert;
+use Shopware\Core\Framework\Test\TestCaseBase\QueueTestBehaviour;
 use Symfony\Component\Messenger\TraceableMessageBus;
 
 trait QueueTrait
 {
+    use QueueTestBehaviour;
+
     protected function getTraceableBus(): TraceableMessageBus
     {
         $bus = $this->getContainer()->get('messenger.bus.test_shopware');

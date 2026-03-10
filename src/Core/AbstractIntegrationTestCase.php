@@ -5,17 +5,24 @@ namespace Algoritma\ShopwareTestUtils\Core;
 use Algoritma\ShopwareTestUtils\Factory\CartFactory;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureInterface;
 use Algoritma\ShopwareTestUtils\Fixture\FixtureManager;
-use Algoritma\ShopwareTestUtils\Helper\OrderHelper;
-use Algoritma\ShopwareTestUtils\Traits\B2B\B2BHelpersTrait;
 use Algoritma\ShopwareTestUtils\Traits\CacheTrait;
 use Algoritma\ShopwareTestUtils\Traits\CartTrait;
 use Algoritma\ShopwareTestUtils\Traits\CheckoutTrait;
+use Algoritma\ShopwareTestUtils\Traits\ConfigTrait;
 use Algoritma\ShopwareTestUtils\Traits\ContextTrait;
 use Algoritma\ShopwareTestUtils\Traits\CustomerTrait;
+use Algoritma\ShopwareTestUtils\Traits\DatabaseTrait;
 use Algoritma\ShopwareTestUtils\Traits\EventTrait;
+use Algoritma\ShopwareTestUtils\Traits\LogTrait;
 use Algoritma\ShopwareTestUtils\Traits\MailTrait;
+use Algoritma\ShopwareTestUtils\Traits\MediaTrait;
+use Algoritma\ShopwareTestUtils\Traits\MigrationTrait;
 use Algoritma\ShopwareTestUtils\Traits\OrderTrait;
+use Algoritma\ShopwareTestUtils\Traits\ProductTrait;
 use Algoritma\ShopwareTestUtils\Traits\QueueTrait;
+use Algoritma\ShopwareTestUtils\Traits\SalesChannelTrait;
+use Algoritma\ShopwareTestUtils\Traits\StateMachineTrait;
+use Algoritma\ShopwareTestUtils\Traits\TimeTrait;
 use Doctrine\DBAL\Connection;
 use PHPUnit\Framework\TestCase;
 use Shopware\Core\Checkout\Cart\Cart;
@@ -36,6 +43,7 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use DatabaseTransactionBehaviour;
     use QueueTestBehaviour;
     use EventDispatcherBehaviour;
+    use DatabaseTrait;
     use EventTrait;
     use MailTrait;
     use QueueTrait;
@@ -44,8 +52,16 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use CheckoutTrait;
     use OrderTrait;
     use CustomerTrait;
-    use B2BHelpersTrait;
+    use B2BTraits;
     use CacheTrait;
+    use ConfigTrait;
+    use MediaTrait;
+    use ProductTrait;
+    use SalesChannelTrait;
+    use StateMachineTrait;
+    use MigrationTrait;
+    use LogTrait;
+    use TimeTrait;
 
     private ?FixtureManager $fixtureManager = null;
 
@@ -91,7 +107,7 @@ abstract class AbstractIntegrationTestCase extends TestCase
      */
     protected function placeOrder(Cart $cart, SalesChannelContext $context): OrderEntity
     {
-        return (new OrderHelper($this->getContainer()))->placeOrder($cart, $context);
+        return $this->orderPlace($cart, $context);
     }
 
     /**

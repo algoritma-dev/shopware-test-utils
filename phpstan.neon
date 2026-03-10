@@ -1,5 +1,4 @@
 includes:
-    - phpstan-baseline.neon
     - phpstan-algoritma-config.php
 
 parameters:
@@ -11,8 +10,9 @@ parameters:
 	type_coverage:
 	    constant: 0
 	ignoreErrors:
-	    - '#is used zero times and is not analysed.$#'
 	    - '# will always evaluate to true.$#'
 	    -
 	        message: '#Multiple class/interface/trait is not allowed in single file#'
-	        path: tests/
+	        paths:
+	            - tests/
+	            - src/Core/B2BTraits.php

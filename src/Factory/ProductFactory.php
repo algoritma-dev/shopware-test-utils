@@ -6,6 +6,12 @@ use Shopware\Core\Content\Product\ProductDefinition;
 use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Uuid\Uuid;
 
+/**
+ * @method self withName(string $name)
+ * @method self withDescription(string $description)
+ * @method self withProductNumber(string $productNumber)
+ * @method self withStock(int $stock)
+ */
 class ProductFactory extends AbstractFactory
 {
     public function withPrice(float $gross, ?float $net = null): self
