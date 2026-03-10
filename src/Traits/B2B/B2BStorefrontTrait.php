@@ -19,11 +19,6 @@ trait B2BStorefrontTrait
         return $this->loginEmployee($email, $password);
     }
 
-    protected function switchEmployeeOrganization(SalesChannelContext $context, string $organizationId): SalesChannelContext
-    {
-        return $this->switchOrganizationContext($context, $organizationId);
-    }
-
     protected function canEmployeePerformStorefrontAction(string $employeeId, string $permissionCode, ?Context $context = null): bool
     {
         try {

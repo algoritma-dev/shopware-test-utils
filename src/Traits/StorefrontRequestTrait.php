@@ -18,20 +18,39 @@ trait StorefrontRequestTrait
     abstract protected function createCustomSalesChannelBrowser(array $options = []): KernelBrowser;
 
     /**
-     * Get or create the storefront browser instance.
+     * Get the storefront browser instance.
      *
-     * Note: Options are only applied on the first call. Subsequent calls
-     * return the cached instance and ignore any provided options.
-     *
-     * @param array<string, mixed> $options
+     * Note: This method returns a cached browser instance created with default options.
+     * To create a browser with custom options, use createStorefrontBrowser().
+     * To reset the browser instance, use resetStorefrontBrowser().
      */
-    protected function storefrontBrowser(array $options = []): KernelBrowser
+    protected function storefrontBrowser(): KernelBrowser
     {
         if (! $this->storefrontBrowserInstance instanceof KernelBrowser) {
-            $this->storefrontBrowserInstance = $this->createCustomSalesChannelBrowser($options);
+            $this->storefrontBrowserInstance = $this->createCustomSalesChannelBrowser([]);
         }
 
         return $this->storefrontBrowserInstance;
+    }
+
+    /**
+     * Create a new storefront browser instance with custom options.
+     * This will overwrite the existing cached instance.
+     *
+     * @param array<string, mixed> $options
+     */
+    protected function createStorefrontBrowser(array $options = []): KernelBrowser
+    {
+        return $this->storefrontBrowserInstance = $this->createCustomSalesChannelBrowser($options);
+    }
+
+    /**
+     * Reset the storefront browser instance.
+     * Use this to force the creation of a new browser with different options.
+     */
+    protected function resetStorefrontBrowser(): void
+    {
+        $this->storefrontBrowserInstance = null;
     }
 
     protected function storefrontLogin(string $email, string $password = 'shopware'): void

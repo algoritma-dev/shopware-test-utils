@@ -13,9 +13,6 @@ use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteDocument\QuoteDocumentCo
 use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteDocument\QuoteDocumentEntity;
 use Shopware\Commercial\B2B\QuoteManagement\Entity\QuoteLineItem\QuoteLineItemCollection;
 use Shopware\Core\Checkout\Cart\Cart;
-use Shopware\Core\Checkout\Cart\LineItem\LineItem;
-use Shopware\Core\Checkout\Cart\Price\Struct\CalculatedPrice;
-use Shopware\Core\Checkout\Cart\Price\Struct\QuantityPriceDefinition;
 use Shopware\Core\Checkout\Cart\SalesChannel\CartService;
 use Shopware\Core\Checkout\Order\OrderCollection;
 use Shopware\Core\Checkout\Order\OrderEntity;
@@ -445,6 +442,7 @@ trait B2BQuoteTrait
 
     protected function convertQuoteToOrder(string $quoteId, SalesChannelContext $context): OrderEntity
     {
+        $this->assertQuoteCanBeConverted($quoteId, $context->getContext());
         $quote = $this->getQuoteEntityById($quoteId, $context->getContext());
 
         // Create cart from quote
@@ -458,35 +456,7 @@ trait B2BQuoteTrait
 
     protected function createCartFromQuote(QuoteEntity $quote, SalesChannelContext $context): Cart
     {
-        $cart = $this->getB2bCartService()->createNew($context->getToken());
-
-        if (! $quote->getLineItems() instanceof QuoteLineItemCollection) {
-            throw new \RuntimeException('Quote has no line items');
-        }
-
-        foreach ($quote->getLineItems() as $quoteLineItem) {
-            $lineItem = new LineItem(
-                $quoteLineItem->getId(),
-                LineItem::PRODUCT_LINE_ITEM_TYPE,
-                $quoteLineItem->getProductId(),
-                $quoteLineItem->getQuantity()
-            );
-
-            // Set price from quote
-            if ($quoteLineItem->getPrice() instanceof CalculatedPrice) {
-                $lineItem->setPriceDefinition(
-                    new QuantityPriceDefinition(
-                        $quoteLineItem->getPrice()->getUnitPrice(),
-                        $quoteLineItem->getPrice()->getTaxRules(),
-                        $quoteLineItem->getQuantity()
-                    )
-                );
-            }
-
-            $cart->add($lineItem);
-        }
-
-        return $this->getB2bCartService()->recalculate($cart, $context);
+        return $this->convertQuoteToCart($quote, $context);
     }
 
     protected function acceptQuoteAndConvertToOrder(

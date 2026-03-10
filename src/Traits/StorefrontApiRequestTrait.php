@@ -27,27 +27,75 @@ trait StorefrontApiRequestTrait
     abstract protected function createSalesChannelContext(array $options = []): SalesChannelContext;
 
     /**
-     * @param array<string, mixed> $options
+     * Get the storefront API browser instance.
+     *
+     * Note: This method returns a cached browser instance created with default options.
+     * To create a browser with custom options, use createStorefrontApiBrowser().
+     * To reset the browser instance, use resetStorefrontApiBrowser().
      */
-    protected function storefrontApiBrowser(array $options = []): KernelBrowser
+    protected function storefrontApiBrowser(): KernelBrowser
     {
         if (! $this->storefrontApiBrowserInstance instanceof KernelBrowser) {
-            $this->storefrontApiBrowserInstance = $this->createCustomSalesChannelBrowser($options);
+            $this->storefrontApiBrowserInstance = $this->createCustomSalesChannelBrowser([]);
         }
 
         return $this->storefrontApiBrowserInstance;
     }
 
     /**
+     * Create a new storefront API browser instance with custom options.
+     * This will overwrite the existing cached instance.
+     *
      * @param array<string, mixed> $options
      */
-    protected function storefrontApiContext(array $options = []): SalesChannelContext
+    protected function createStorefrontApiBrowser(array $options = []): KernelBrowser
+    {
+        return $this->storefrontApiBrowserInstance = $this->createCustomSalesChannelBrowser($options);
+    }
+
+    /**
+     * Reset the storefront API browser instance.
+     * Use this to force the creation of a new browser with different options.
+     */
+    protected function resetStorefrontApiBrowser(): void
+    {
+        $this->storefrontApiBrowserInstance = null;
+    }
+
+    /**
+     * Get the storefront API context instance.
+     *
+     * Note: This method returns a cached context instance created with default options.
+     * To create a context with custom options, use createStorefrontApiContext().
+     * To reset the context instance, use resetStorefrontApiContext().
+     */
+    protected function storefrontApiContext(): SalesChannelContext
     {
         if (! $this->storefrontApiSalesChannelContext instanceof SalesChannelContext) {
-            $this->storefrontApiSalesChannelContext = $this->createSalesChannelContext($options);
+            $this->storefrontApiSalesChannelContext = $this->createSalesChannelContext([]);
         }
 
         return $this->storefrontApiSalesChannelContext;
+    }
+
+    /**
+     * Create a new storefront API context instance with custom options.
+     * This will overwrite the existing cached instance.
+     *
+     * @param array<string, mixed> $options
+     */
+    protected function createStorefrontApiContext(array $options = []): SalesChannelContext
+    {
+        return $this->storefrontApiSalesChannelContext = $this->createSalesChannelContext($options);
+    }
+
+    /**
+     * Reset the storefront API context instance.
+     * Use this to force the creation of a new context with different options.
+     */
+    protected function resetStorefrontApiContext(): void
+    {
+        $this->storefrontApiSalesChannelContext = null;
     }
 
     protected function storefrontApiLogin(string $email, string $password = 'shopware'): void

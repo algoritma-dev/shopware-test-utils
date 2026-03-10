@@ -14,6 +14,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 use Shopware\Core\Framework\Validation\DataBag\RequestDataBag;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\System\StateMachine\Aggregation\StateMachineState\StateMachineStateEntity;
 
 trait OrderTrait
 {
@@ -98,7 +99,7 @@ trait OrderTrait
         }
 
         $delivery = $deliveries->first();
-        $this->transitionPaymentState($delivery->getId(), 'ship', $context);
+        $this->transitionDeliveryState($delivery->getId(), 'ship', $context);
     }
 
     protected function orderGetTotal(OrderEntity $order): float
@@ -109,6 +110,11 @@ trait OrderTrait
     protected function orderHasLineItem(OrderEntity $order, string $productId): bool
     {
         $lineItems = $order->getLineItems();
+
+        if (! $lineItems instanceof OrderLineItemCollection) {
+            $order = $this->orderGet($order->getId()) ?? $order;
+            $lineItems = $order->getLineItems();
+        }
 
         if (! $lineItems instanceof OrderLineItemCollection) {
             return false;
@@ -125,6 +131,10 @@ trait OrderTrait
 
     protected function orderAssertState(OrderEntity $order, string $expectedState): void
     {
+        if (! $order->getStateMachineState() instanceof StateMachineStateEntity) {
+            $order = $this->orderGet($order->getId()) ?? $order;
+        }
+
         $stateName = $order->getStateMachineState()?->getTechnicalName();
         Assert::assertSame($expectedState, $stateName, sprintf('Order state is "%s", expected "%s"', $stateName, $expectedState));
     }
@@ -132,6 +142,12 @@ trait OrderTrait
     protected function orderAssertHasTransaction(OrderEntity $order): void
     {
         $transactions = $order->getTransactions();
+
+        if (! $transactions instanceof OrderTransactionCollection) {
+            $order = $this->orderGet($order->getId()) ?? $order;
+            $transactions = $order->getTransactions();
+        }
+
         Assert::assertInstanceOf(OrderTransactionCollection::class, $transactions, 'Order has no transactions collection');
         Assert::assertGreaterThan(0, $transactions->count(), 'Order has no transactions');
     }
@@ -139,6 +155,12 @@ trait OrderTrait
     protected function orderAssertHasDelivery(OrderEntity $order): void
     {
         $deliveries = $order->getDeliveries();
+
+        if (! $deliveries instanceof OrderDeliveryCollection) {
+            $order = $this->orderGet($order->getId()) ?? $order;
+            $deliveries = $order->getDeliveries();
+        }
+
         Assert::assertInstanceOf(OrderDeliveryCollection::class, $deliveries, 'Order has no deliveries collection');
         Assert::assertGreaterThan(0, $deliveries->count(), 'Order has no deliveries');
     }
@@ -146,6 +168,12 @@ trait OrderTrait
     protected function orderAssertLineItemPrice(OrderEntity $order, string $lineItemId, float $expectedPrice): void
     {
         $lineItems = $order->getLineItems();
+
+        if (! $lineItems instanceof OrderLineItemCollection) {
+            $order = $this->orderGet($order->getId()) ?? $order;
+            $lineItems = $order->getLineItems();
+        }
+
         Assert::assertInstanceOf(OrderLineItemCollection::class, $lineItems, 'Order has no line items');
 
         $lineItem = $lineItems->get($lineItemId);

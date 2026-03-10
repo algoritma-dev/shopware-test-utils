@@ -8,7 +8,6 @@ use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollectio
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Role\RoleEntity;
 use Shopware\Commercial\B2B\OrganizationUnit\Entity\OrganizationEntity;
-use Shopware\Core\Checkout\Customer\CustomerEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityCollection;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
@@ -147,29 +146,6 @@ trait B2BContextTrait
         }
 
         return $this->createContextForOrganization($organizations[0]->id, null, $salesChannelId);
-    }
-
-    protected function switchOrganizationContext(
-        SalesChannelContext $currentContext,
-        string $newOrganizationId
-    ): SalesChannelContext {
-        $this->getOrganizationById($newOrganizationId);
-
-        $factory = new B2BContextFactory(static::getContainer());
-        $factory->withOrganization($newOrganizationId);
-        $factory->withSalesChannel($currentContext->getSalesChannelId());
-
-        /** @var EmployeeEntity|null $employee */
-        $employee = $currentContext->getCustomer()?->getExtension('employee');
-        if ($employee) {
-            $factory->withEmployee($employee->getId());
-        }
-
-        if ($currentContext->getCustomer() instanceof CustomerEntity) {
-            $factory->withCustomer($currentContext->getCustomer()->getId());
-        }
-
-        return $factory->create();
     }
 
     /**

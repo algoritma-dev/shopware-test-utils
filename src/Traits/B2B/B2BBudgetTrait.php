@@ -6,10 +6,13 @@ use PHPUnit\Framework\Assert;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetCollection;
 use Shopware\Commercial\B2B\BudgetManagement\Entity\Budget\BudgetEntity;
 use Shopware\Commercial\B2B\EmployeeManagement\Entity\Employee\EmployeeCollection;
+use Shopware\Core\Defaults;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\RangeFilter;
 use Shopware\Core\Framework\Test\TestCaseBase\KernelTestBehaviour;
 
 /**
@@ -226,9 +229,15 @@ trait B2BBudgetTrait
     {
         $context ??= Context::createCLIContext();
         $repository = $this->getBudgetRepository();
+        $now = new \DateTime();
 
         $criteria = new Criteria();
         $criteria->addFilter(new EqualsFilter('active', true));
+        $criteria->addFilter(new RangeFilter('startDate', [RangeFilter::LTE => $now->format(Defaults::STORAGE_DATE_TIME_FORMAT)]));
+        $criteria->addFilter(new MultiFilter(MultiFilter::CONNECTION_OR, [
+            new EqualsFilter('endDate', null),
+            new RangeFilter('endDate', [RangeFilter::GTE => $now->format(Defaults::STORAGE_DATE_TIME_FORMAT)]),
+        ]));
         $criteria->addFilter(new EqualsFilter('organizations.id', $organizationId));
         $criteria->addAssociation('organizations');
 
@@ -349,10 +358,8 @@ trait B2BBudgetTrait
 
         $criteria = new Criteria([$budgetId]);
         $criteria->addAssociation('organizations');
-        $criteria->addAssociation('employees');
         $criteria->addAssociation('roles');
         $criteria->addAssociation('notificationRecipients');
-        $criteria->addAssociation('notificationRecipients.employee');
 
         $budget = $repository->search($criteria, $context)->first();
 

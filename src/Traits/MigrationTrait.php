@@ -209,6 +209,9 @@ trait MigrationTrait
      */
     protected function testChunkedMigration(callable $migrationCallback, int $chunkSize, int $totalRows): void
     {
+        Assert::assertGreaterThan(0, $chunkSize, 'Chunk size must be greater than 0');
+        Assert::assertGreaterThanOrEqual(0, $totalRows, 'Total rows must be non-negative');
+
         $processedRows = 0;
         $chunks = (int) ceil($totalRows / $chunkSize);
 

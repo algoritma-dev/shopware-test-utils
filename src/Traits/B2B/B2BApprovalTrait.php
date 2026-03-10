@@ -73,7 +73,13 @@ trait B2BApprovalTrait
         $context ??= Context::createCLIContext();
 
         $pendingOrder = $this->getPendingOrderById($pendingOrderId, $context);
-        $state = $pendingOrder->getStateMachineState()->getTechnicalName();
+        $stateMachineState = $pendingOrder->getStateMachineState();
+
+        if (! $stateMachineState) {
+            throw new \RuntimeException(sprintf('PendingOrder "%s" has no state machine state', $pendingOrderId));
+        }
+
+        $state = $stateMachineState->getTechnicalName();
 
         if ($state !== PendingOrderStates::STATE_APPROVED) {
             throw new \RuntimeException(sprintf('Pending order must be approved before conversion. Current state: %s', $state));
