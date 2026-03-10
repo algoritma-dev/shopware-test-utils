@@ -133,8 +133,7 @@ trait LogTrait
 
     /**
      * Gets all captured log messages.
-     */
-    /**
+     *
      * @return array<int, mixed>
      */
     protected function getCapturedLogs(string $channel = 'app'): array
@@ -151,8 +150,7 @@ trait LogTrait
 
     /**
      * Gets logged messages (without context).
-     */
-    /**
+     *
      * @return array<int, mixed>
      */
     protected function getLoggedMessages(string $channel = 'app', ?string $level = null): array

@@ -32,7 +32,12 @@ trait OrderTrait
         $orderId = $cartService->order($cart, $context, new RequestDataBag());
 
         // Fetch and return the created OrderEntity
-        return $this->orderGet($orderId, $context->getContext());
+        $order = $this->orderGet($orderId, $context->getContext());
+        if (! $order instanceof OrderEntity) {
+            throw new \RuntimeException(sprintf('Failed to fetch created order "%s"', $orderId));
+        }
+
+        return $order;
     }
 
     protected function orderGet(string $orderId, ?Context $context = null): ?OrderEntity
@@ -179,7 +184,10 @@ trait OrderTrait
         $lineItem = $lineItems->get($lineItemId);
         Assert::assertNotNull($lineItem, sprintf('Line item %s not found in order', $lineItemId));
 
-        $actualPrice = $lineItem->getPrice()->getTotalPrice();
+        $price = $lineItem->getPrice();
+        Assert::assertNotNull($price, sprintf('Line item %s has no price', $lineItemId));
+
+        $actualPrice = $price->getTotalPrice();
         Assert::assertEqualsWithDelta($expectedPrice, $actualPrice, 0.01, sprintf('Line item %s has price %.2f, expected %.2f', $lineItemId, $actualPrice, $expectedPrice));
     }
 }

@@ -183,10 +183,9 @@ trait StorefrontRequestTrait
     protected function storefrontAssertResponseIsJson(Response $response, string $message = ''): void
     {
         $content = (string) $response->getContent();
-        \json_decode($content);
-        Assert::assertSame(
-            JSON_ERROR_NONE,
-            \json_last_error(),
+
+        Assert::assertTrue(
+            \json_validate($content),
             $message ?: 'Expected response to be valid JSON'
         );
     }

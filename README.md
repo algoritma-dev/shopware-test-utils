@@ -272,10 +272,10 @@ Traits provide methods for both performing actions on existing entities and veri
 | `CustomerTrait` | Customer management and assertions |
 | `SalesChannelTrait` | Sales channel management and assertions |
 | `StateMachineTrait` | Transition state machine states |
-| `DatabaseHelpers` | Database assertions (table exists, row count, etc.) |
+| `DatabaseTrait` | Database assertions (table exists, row count, etc.) |
 | `CacheTrait` | Cache assertions (key exists, cache cleared) |
 | `ContextTrait` | Context management (create default context, sales channel context) |
-| `LogHelpers` | Log assertions (error logged, warning count, log contains) |
+| `LogTrait` | Log assertions (error logged, warning count, log contains) |
 | `MailTrait` | Mail actions and assertions (send, verify correct) |
 | `EventTrait` | Event capturing and assertions (event dispatched, payload validation) |
 | `QueueTrait` | Queue assertions (job queued, queue empty) |

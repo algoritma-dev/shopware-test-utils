@@ -24,4 +24,4 @@ rector-fix:
 cs-fix:
 	$(DOCKER) vendor/bin/php-cs-fixer fix
 
-phony: qa qa-fix phpstan rector-check cs-check phpunit rector-fix cs-fix
+.PHONY: qa qa-fix phpstan rector-check cs-check phpunit rector-fix cs-fix
