@@ -59,7 +59,6 @@ abstract class AbstractIntegrationTestCase extends TestCase
     use ProductTrait;
     use SalesChannelTrait;
     use StateMachineTrait;
-    use MigrationTrait;
     use LogTrait;
     use TimeTrait;
 
