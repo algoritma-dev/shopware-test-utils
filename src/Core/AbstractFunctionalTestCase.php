@@ -9,6 +9,7 @@ use Shopware\Core\Framework\Test\TestCaseBase\SalesChannelFunctionalTestBehaviou
 use Shopware\Core\Framework\Uuid\Uuid;
 use Shopware\Core\System\SalesChannel\Context\SalesChannelContextFactory;
 use Shopware\Core\System\SalesChannel\SalesChannelContext;
+use Shopware\Core\Test\TestDefaults;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
@@ -17,7 +18,10 @@ abstract class AbstractFunctionalTestCase extends AbstractIntegrationTestCase
     use StorefrontRequestTrait;
     use StorefrontApiRequestTrait;
 
-    abstract protected function getSalesChannelId(): string;
+    protected function getSalesChannelId(): string
+    {
+        return TestDefaults::SALES_CHANNEL;
+    }
 
     /**
      * @param array<string, mixed> $options
