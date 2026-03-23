@@ -16,7 +16,6 @@ use Algoritma\ShopwareTestUtils\Traits\EventTrait;
 use Algoritma\ShopwareTestUtils\Traits\LogTrait;
 use Algoritma\ShopwareTestUtils\Traits\MailTrait;
 use Algoritma\ShopwareTestUtils\Traits\MediaTrait;
-use Algoritma\ShopwareTestUtils\Traits\MigrationTrait;
 use Algoritma\ShopwareTestUtils\Traits\OrderTrait;
 use Algoritma\ShopwareTestUtils\Traits\ProductTrait;
 use Algoritma\ShopwareTestUtils\Traits\QueueTrait;
